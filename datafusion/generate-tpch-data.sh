@@ -142,8 +142,9 @@ cd "${OUTPUT_DIR}"
 # Using all available CPU cores for parallel generation
 CORES=$(nproc)
 echo ">>> Using ${CORES} CPU cores for parallel generation"
+echo ">>> Generating Parquet files..."
 
-tpchgen-cli --scale-factor "${SCALE_FACTOR}" --num-threads "${CORES}"
+tpchgen-cli --scale-factor "${SCALE_FACTOR}" --num-threads "${CORES}" --format parquet
 
 echo
 echo ">>> TPC-H data generation complete!"
