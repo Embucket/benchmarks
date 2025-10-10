@@ -16,9 +16,10 @@ OWNER_GROUP="$(id -gn "${OWNER_USER}")"
 echo ">>> Detecting instance-store NVMe devices (excluding root/EBS and any mounted devices)..."
 
 # List bare NVMe *disk* devices that are Instance Store and not mounted
+# Note: We match on the full line because MODEL field contains spaces
 mapfile -t INST_DISKS < <(
   lsblk -ndo NAME,TYPE,MODEL,MOUNTPOINT | awk '
-    $2=="disk" && $3 ~ /Amazon EC2 NVMe Instance Storage/ && ($4=="" || $4=="-") { print $1 }'
+    $2=="disk" && $0 ~ /Amazon EC2 NVMe Instance Storage/ && !($0 ~ /\//) { print $1 }'
 )
 
 if (( ${#INST_DISKS[@]} == 0 )); then
