@@ -50,25 +50,43 @@ echo
 # Check if tpchgen-cli is installed
 install_tpchgen() {
   echo ">>> Checking for tpchgen-cli installation..."
-  
+
   if command -v tpchgen &> /dev/null; then
     echo ">>> tpchgen-cli is already installed"
     tpchgen --version || true
     return 0
   fi
-  
+
   echo ">>> tpchgen-cli not found. Installing..."
-  
+
+  # Install build essentials (C compiler and other build tools)
+  echo ">>> Installing build dependencies..."
+  if command -v apt-get &> /dev/null; then
+    # Debian/Ubuntu
+    sudo apt-get update
+    sudo apt-get install -y build-essential pkg-config libssl-dev
+  elif command -v yum &> /dev/null; then
+    # Amazon Linux/RHEL/CentOS
+    sudo yum groupinstall -y "Development Tools"
+    sudo yum install -y openssl-devel pkg-config
+  elif command -v dnf &> /dev/null; then
+    # Fedora
+    sudo dnf groupinstall -y "Development Tools"
+    sudo dnf install -y openssl-devel pkg-config
+  else
+    echo "Warning: Could not detect package manager. Please install build-essential/gcc manually."
+  fi
+
   # Check if cargo is installed
   if ! command -v cargo &> /dev/null; then
     echo ">>> Cargo (Rust) is not installed. Installing Rust..."
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
     source "$HOME/.cargo/env"
   fi
-  
+
   echo ">>> Installing tpchgen-cli via cargo..."
   cargo install tpchgen-cli
-  
+
   # Verify installation
   if command -v tpchgen &> /dev/null; then
     echo ">>> tpchgen-cli successfully installed"
