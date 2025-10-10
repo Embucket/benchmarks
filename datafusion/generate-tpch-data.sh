@@ -143,7 +143,7 @@ cd "${OUTPUT_DIR}"
 CORES=$(nproc)
 echo ">>> Using ${CORES} CPU cores for parallel generation"
 
-tpchgen-cli --scale-factor "${SCALE_FACTOR}" --num-chunks "${CORES}"
+tpchgen-cli --scale-factor "${SCALE_FACTOR}" --num-threads "${CORES}"
 
 echo
 echo ">>> TPC-H data generation complete!"
