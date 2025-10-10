@@ -5,6 +5,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../env.sh"
 
+# Ensure cargo bin directory is in PATH
+export PATH="$HOME/.cargo/bin:$PATH"
+
 # Usage function
 usage() {
   cat <<EOF
@@ -51,9 +54,9 @@ echo
 install_tpchgen() {
   echo ">>> Checking for tpchgen-cli installation..."
 
-  if command -v tpchgen &> /dev/null; then
+  if command -v tpchgen-cli &> /dev/null; then
     echo ">>> tpchgen-cli is already installed"
-    tpchgen --version || true
+    tpchgen-cli --version || true
     return 0
   fi
 
@@ -81,18 +84,22 @@ install_tpchgen() {
   if ! command -v cargo &> /dev/null; then
     echo ">>> Cargo (Rust) is not installed. Installing Rust..."
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    # Source cargo environment to make it available in this script
     source "$HOME/.cargo/env"
+    export PATH="$HOME/.cargo/bin:$PATH"
   fi
 
   echo ">>> Installing tpchgen-cli via cargo..."
   cargo install tpchgen-cli
 
   # Verify installation
-  if command -v tpchgen &> /dev/null; then
+  if command -v tpchgen-cli &> /dev/null; then
     echo ">>> tpchgen-cli successfully installed"
-    tpchgen --version || true
+    tpchgen-cli --version || true
   else
     echo "Error: Failed to install tpchgen-cli"
+    echo "Note: You may need to add ~/.cargo/bin to your PATH"
+    echo "Run: export PATH=\"\$HOME/.cargo/bin:\$PATH\""
     exit 1
   fi
 }
@@ -131,12 +138,12 @@ echo
 # The tpchgen command generates data in the current directory, so we need to cd there
 cd "${OUTPUT_DIR}"
 
-# Run tpchgen with the specified scale factor
+# Run tpchgen-cli with the specified scale factor
 # Using all available CPU cores for parallel generation
 CORES=$(nproc)
 echo ">>> Using ${CORES} CPU cores for parallel generation"
 
-tpchgen --scale-factor "${SCALE_FACTOR}" --num-chunks "${CORES}"
+tpchgen-cli --scale-factor "${SCALE_FACTOR}" --num-chunks "${CORES}"
 
 echo
 echo ">>> TPC-H data generation complete!"
