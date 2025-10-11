@@ -22,6 +22,7 @@ import argparse
 import os
 import glob
 import shutil
+import tempfile
 
 import datafusion
 from datafusion import SessionContext
@@ -47,6 +48,14 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
     # Create SessionContext with custom temp directory for spill
     print(f"Configuring DataFusion to use temp directory: {temp_dir}")
+
+    # Set Python's temp directory to use the same location
+    # This prevents Python/Arrow from filling up the root filesystem
+    os.environ['TMPDIR'] = temp_dir
+    os.environ['TEMP'] = temp_dir
+    os.environ['TMP'] = temp_dir
+    tempfile.tempdir = temp_dir
+    print(f"✓ Set Python temp directory to: {temp_dir}")
 
     # Clean temp directory before starting
     if os.path.exists(temp_dir):
