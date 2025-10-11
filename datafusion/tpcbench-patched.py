@@ -64,52 +64,21 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     # Create RuntimeConfig with temp directory and optional memory limit
     # SessionContext(config, runtime) - runtime is the second parameter
 
-    # First, configure the temp directory for spilling
-    runtime_config = RuntimeConfig().with_disk_manager_specified(temp_dir)
+    # Configure the temp directory for spilling
+    runtime_config = RuntimeConfig().with_temp_file_path(temp_dir)
 
     # Set memory pool with limit if specified
     if memory_limit_mb:
         memory_limit_bytes = memory_limit_mb * 1024 * 1024
         print(f"Setting memory limit: {memory_limit_mb} MB ({memory_limit_bytes:,} bytes)")
-        # Use fair spill pool which is better for forcing spills
+        # Use fair spill pool - works best for queries with multiple spillable operators
         runtime_config = runtime_config.with_fair_spill_pool(memory_limit_bytes)
     else:
         print("Using unbounded memory pool (no memory limit)")
 
     ctx = SessionContext(runtime=runtime_config)
 
-    # Also configure via SQL for additional settings
-    print("Configuring DataFusion settings via SQL...")
-
-    # Set the temp directory - this is the key setting for spilling
-    try:
-        ctx.sql(f"SET datafusion.runtime.temp_dir = '{temp_dir}'")
-        print(f"  ✓ Set datafusion.runtime.temp_dir = '{temp_dir}'")
-    except Exception as e:
-        print(f"  ✗ Could not set datafusion.runtime.temp_dir: {e}")
-
-    try:
-        # Enable spilling
-        ctx.sql("SET datafusion.execution.memory_pool_type = 'Fair'")
-        print("  ✓ Set memory pool type to Fair")
-    except Exception as e:
-        print(f"  ✗ Could not set memory pool type: {e}")
-
-    try:
-        # Set batch size smaller to encourage more operations
-        ctx.sql("SET datafusion.execution.batch_size = 8192")
-        print("  ✓ Set batch size to 8192")
-    except Exception as e:
-        print(f"  ✗ Could not set batch size: {e}")
-
-    try:
-        # Enable sort spill
-        ctx.sql("SET datafusion.execution.sort_spill_reservation_bytes = 1048576")
-        print("  ✓ Set sort spill reservation")
-    except Exception as e:
-        print(f"  ✗ Could not set sort spill reservation: {e}")
-
-    print(f"Temp directory configured at: {temp_dir}")
+    print(f"✓ Temp directory configured at: {temp_dir}")
     print()
 
     for table in table_names:
