@@ -110,7 +110,7 @@ echo "Output File: ${OUTPUT_FILE}"
 echo
 
 # Set paths
-DATA_DIR="${MOUNT_POINT}/datafusion/tpch-sf${SCALE_FACTOR}"
+DATA_DIR="${MOUNT_POINT}/tpch-data/sf${SCALE_FACTOR}"
 BENCHMARK_REPO_DIR="${MOUNT_POINT}/datafusion/datafusion-benchmarks"
 TEMP_DIR="${MOUNT_POINT}/datafusion/temp"
 

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Source shared environment variables
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../env.sh"
+source "${SCRIPT_DIR}/env.sh"
 
 # Ensure cargo bin directory is in PATH
 export PATH="$HOME/.cargo/bin:$PATH"
@@ -24,7 +24,8 @@ Examples:
   $0 10     # Generate ~10GB of TPC-H data
   $0 100    # Generate ~100GB of TPC-H data
 
-The data will be generated under: ${MOUNT_POINT}/datafusion/tpch-sf<scale_factor>/
+The data will be generated under: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
+This data can be used by DataFusion, DuckDB, and other benchmark systems.
 EOF
   exit 1
 }
@@ -107,8 +108,8 @@ install_tpchgen() {
 # Install tpchgen-cli if needed
 install_tpchgen
 
-# Create output directory under datafusion subdirectory
-OUTPUT_DIR="${MOUNT_POINT}/datafusion/tpch-sf${SCALE_FACTOR}"
+# Create output directory under shared tpch-data directory
+OUTPUT_DIR="${MOUNT_POINT}/tpch-data/sf${SCALE_FACTOR}"
 
 echo
 echo ">>> Output directory: ${OUTPUT_DIR}"
