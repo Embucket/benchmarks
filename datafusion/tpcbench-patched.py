@@ -50,25 +50,59 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     # Create temp directory if it doesn't exist
     os.makedirs(temp_dir, exist_ok=True)
 
+    # Verify temp directory is writable
+    test_file = os.path.join(temp_dir, ".test_write")
+    try:
+        with open(test_file, 'w') as f:
+            f.write("test")
+        os.remove(test_file)
+        print(f"✓ Temp directory is writable: {temp_dir}")
+    except Exception as e:
+        print(f"✗ WARNING: Temp directory is not writable: {e}")
+        raise
+
     # Create RuntimeConfig with temp directory and optional memory limit
     # SessionContext(config, runtime) - runtime is the second parameter
-    runtime_config = RuntimeConfig().with_temp_file_path(temp_dir)
+
+    # First, configure the temp directory for spilling
+    runtime_config = RuntimeConfig().with_disk_manager_specified(temp_dir)
 
     # Set memory pool with limit if specified
     if memory_limit_mb:
         memory_limit_bytes = memory_limit_mb * 1024 * 1024
         print(f"Setting memory limit: {memory_limit_mb} MB ({memory_limit_bytes:,} bytes)")
-        runtime_config = runtime_config.with_greedy_memory_pool(memory_limit_bytes)
+        # Use fair spill pool which is better for forcing spills
+        runtime_config = runtime_config.with_fair_spill_pool(memory_limit_bytes)
     else:
         print("Using unbounded memory pool (no memory limit)")
 
     ctx = SessionContext(runtime=runtime_config)
 
-    # Also set via SQL for additional configuration options
+    # Also configure via SQL for additional settings
+    print("Configuring DataFusion settings via SQL...")
     try:
-        ctx.sql(f"SET datafusion.execution.temp_file_path = '{temp_dir}'")
+        # Enable spilling
+        ctx.sql("SET datafusion.execution.memory_pool_type = 'Fair'")
+        print("  ✓ Set memory pool type to Fair")
     except Exception as e:
-        print(f"Note: Could not set temp path via SQL (this is okay): {e}")
+        print(f"  ✗ Could not set memory pool type: {e}")
+
+    try:
+        # Set batch size smaller to encourage more operations
+        ctx.sql("SET datafusion.execution.batch_size = 8192")
+        print("  ✓ Set batch size to 8192")
+    except Exception as e:
+        print(f"  ✗ Could not set batch size: {e}")
+
+    try:
+        # Enable sort spill
+        ctx.sql("SET datafusion.execution.sort_spill_reservation_bytes = 1048576")
+        print("  ✓ Set sort spill reservation")
+    except Exception as e:
+        print(f"  ✗ Could not set sort spill reservation: {e}")
+
+    print(f"Temp directory configured at: {temp_dir}")
+    print()
 
     for table in table_names:
         # Try different possible file patterns
@@ -133,35 +167,61 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                 queries = text.split(";")
 
                 # Check temp directory before query
-                temp_files_before = len(glob.glob(f"{temp_dir}/**/*", recursive=True))
+                temp_files_before = []
+                for root, dirs, files in os.walk(temp_dir):
+                    for f in files:
+                        temp_files_before.append(os.path.join(root, f))
+
+                print(f"Temp files before query: {len(temp_files_before)}")
 
                 start_time = time.time()
+                max_temp_size = 0
+
                 for sql in queries:
                     sql = sql.strip()
                     if len(sql) > 0:
                         print(f"Executing: {sql[:100]}...")  # Print first 100 chars
                         df = ctx.sql(sql)
-                        rows = df.collect()
 
+                        # Check temp directory during execution (before collect)
+                        temp_size_during = sum(
+                            os.path.getsize(os.path.join(root, f))
+                            for root, dirs, files in os.walk(temp_dir)
+                            for f in files
+                            if os.path.exists(os.path.join(root, f))
+                        )
+                        max_temp_size = max(max_temp_size, temp_size_during)
+
+                        rows = df.collect()
                         print(f"Query {query} returned {len(rows)} rows")
+
                 end_time = time.time()
                 elapsed = end_time - start_time
 
                 # Check temp directory after query
-                temp_files_after = len(glob.glob(f"{temp_dir}/**/*", recursive=True))
-                temp_files_created = temp_files_after - temp_files_before
-
-                # Get temp directory size
+                temp_files_after = []
                 total_size = 0
-                for dirpath, dirnames, filenames in os.walk(temp_dir):
-                    for f in filenames:
-                        fp = os.path.join(dirpath, f)
+                for root, dirs, files in os.walk(temp_dir):
+                    for f in files:
+                        fp = os.path.join(root, f)
                         if os.path.exists(fp):
+                            temp_files_after.append(fp)
                             total_size += os.path.getsize(fp)
 
+                temp_files_created = len(temp_files_after) - len(temp_files_before)
+                new_files = set(temp_files_after) - set(temp_files_before)
+
                 size_mb = total_size / (1024 * 1024)
+                max_size_mb = max_temp_size / (1024 * 1024)
+
                 print(f"Query {query} took {elapsed:.2f} seconds")
                 print(f"  Temp files created: {temp_files_created}, Total temp size: {size_mb:.2f} MB")
+                print(f"  Max temp size during execution: {max_size_mb:.2f} MB")
+
+                if new_files:
+                    print(f"  New temp files:")
+                    for f in list(new_files)[:5]:  # Show first 5
+                        print(f"    - {f}")
 
                 # Store timings for each iteration
                 if query not in results:
