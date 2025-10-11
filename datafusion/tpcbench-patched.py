@@ -101,13 +101,6 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     except Exception as e:
         print(f"✗ Could not set batch_size: {e}")
 
-    # Set memory pool type to fair
-    try:
-        ctx.sql("SET datafusion.execution.memory_pool_type = 'Fair'")
-        print(f"✓ Set memory_pool_type = Fair")
-    except Exception as e:
-        print(f"✗ Could not set memory_pool_type: {e}")
-
     # Set prefer_hash_join configuration
     try:
         ctx.sql(f"SET datafusion.optimizer.prefer_hash_join = {str(prefer_hash_join).lower()}")
