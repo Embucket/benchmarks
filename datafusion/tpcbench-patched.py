@@ -264,6 +264,7 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
                         # Convert to pandas to get full string values without truncation
                         import pyarrow as pa
+                        import re
 
                         for batch in rows:
                             # Get the actual string values from the Arrow batch
@@ -274,21 +275,44 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                                 plan_type = plan_type_array[i].as_py()
                                 plan_text = plan_array[i].as_py()
 
+                                # Pretty print the plan with proper indentation
+                                # Add newlines after each operator and indent properly
+                                formatted_plan = plan_text
+                                # Add newline before each Exec operator
+                                formatted_plan = re.sub(r'([A-Z][a-zA-Z]+Exec:)', r'\n\1', formatted_plan)
+                                # Indent nested operators
+                                lines = formatted_plan.split('\n')
+                                indented_lines = []
+                                indent_level = 0
+                                for line in lines:
+                                    if line.strip():
+                                        # Count leading spaces to determine nesting
+                                        if 'Exec:' in line:
+                                            indented_lines.append('  ' * indent_level + line.strip())
+                                            indent_level += 1
+                                        else:
+                                            indented_lines.append('  ' * max(0, indent_level - 1) + line.strip())
+
+                                formatted_plan = '\n'.join(indented_lines)
+
                                 # Save to file in same directory as output_file for full details
                                 output_dir = os.path.dirname(output_file) if output_file else "."
                                 plan_file = os.path.join(output_dir, f"query_{query}_plan.txt")
                                 with open(plan_file, 'w') as f:
                                     f.write(f"{plan_type}:\n")
-                                    f.write(plan_text)
-                                    f.write("\n")
+                                    f.write("=" * 80 + "\n\n")
+                                    f.write(formatted_plan)
+                                    f.write("\n\n" + "=" * 80 + "\n")
 
                                 # Print first 2000 chars to console
                                 print(f"\n{plan_type}:")
-                                if len(plan_text) > 2000:
-                                    print(plan_text[:2000])
-                                    print(f"\n... ({len(plan_text) - 2000} more characters)")
+                                print("=" * 80)
+                                if len(formatted_plan) > 2000:
+                                    print(formatted_plan[:2000])
+                                    print(f"\n... ({len(formatted_plan) - 2000} more characters)")
                                 else:
-                                    print(plan_text)
+                                    print(formatted_plan)
+                                print("=" * 80)
                                 print(f"\n(Full plan saved to: {plan_file})")
                         print("\n=== End Query Plan ===\n")
 
