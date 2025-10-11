@@ -130,9 +130,9 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         print(f"✗ Could not set target_partitions: {e}")
 
     # Set max temp directory size (default 1TB)
-    max_temp_dir_size_bytes = max_temp_dir_size_gb * 1024 * 1024 * 1024
+    # DataFusion expects a string with units like "1000G" or "1T"
     try:
-        ctx.sql(f"SET datafusion.runtime.max_temp_directory_size = {max_temp_dir_size_bytes}")
+        ctx.sql(f"SET datafusion.runtime.max_temp_directory_size = '{max_temp_dir_size_gb}G'")
         print(f"✓ Set max_temp_directory_size = {max_temp_dir_size_gb} GB")
     except Exception as e:
         print(f"✗ Could not set max_temp_directory_size: {e}")
