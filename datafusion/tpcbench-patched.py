@@ -29,7 +29,7 @@ from datetime import datetime
 import json
 import time
 
-def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None, memory_limit_mb: int | None = None):
+def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None, memory_limit_mb: int | None = None, prefer_hash_join: bool = False):
 
     # Register the tables
     if benchmark == "tpch":
@@ -78,6 +78,13 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
     ctx = SessionContext(runtime=runtime_config)
 
+    # Set prefer_hash_join configuration
+    try:
+        ctx.sql(f"SET datafusion.optimizer.prefer_hash_join = {str(prefer_hash_join).lower()}")
+        print(f"✓ Set prefer_hash_join = {prefer_hash_join}")
+    except Exception as e:
+        print(f"✗ Could not set prefer_hash_join: {e}")
+
     print(f"✓ Temp directory configured at: {temp_dir}")
     print()
 
@@ -119,7 +126,8 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         'query_path': query_path,
         'temp_dir': temp_dir,
         'iterations': iterations,
-        'memory_limit_mb': memory_limit_mb
+        'memory_limit_mb': memory_limit_mb,
+        'prefer_hash_join': prefer_hash_join
     }
 
     # Determine which queries to run
@@ -232,6 +240,8 @@ if __name__ == "__main__":
                         help="Specific query number to run (can be specified multiple times, e.g., --query 1 --query 18)")
     parser.add_argument("--memory-limit", type=int, dest='memory_limit_mb',
                         help="Memory limit in MB (forces spilling when exceeded, e.g., --memory-limit 1024 for 1GB)")
+    parser.add_argument("--prefer-hash-join", type=bool, dest='prefer_hash_join', default=False,
+                        help="Prefer hash join over sort-merge join (default: False)")
     args = parser.parse_args()
 
     # Generate default output filename if not specified
@@ -239,5 +249,5 @@ if __name__ == "__main__":
         current_time_millis = int(datetime.now().timestamp() * 1000)
         args.output = f"datafusion-python-{args.benchmark}-{current_time_millis}.json"
 
-    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir, args.queries_to_run, args.memory_limit_mb)
+    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir, args.queries_to_run, args.memory_limit_mb, args.prefer_hash_join)
 

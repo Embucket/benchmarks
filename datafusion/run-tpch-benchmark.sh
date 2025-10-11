@@ -19,18 +19,20 @@ Arguments:
   scale_factor    The TPC-H scale factor to benchmark (must match generated data)
 
 Options:
-  --iterations N     Number of iterations to run (default: 3)
-  --output FILE      Output JSON file for results (default: tpch-sf<scale_factor>-results.json)
-  --query N          Run only specific query number (can be specified multiple times)
-  --memory-limit MB  Memory limit in MB (forces spilling, e.g., --memory-limit 1024 for 1GB)
+  --iterations N        Number of iterations to run (default: 3)
+  --output FILE         Output JSON file for results (default: tpch-sf<scale_factor>-results.json)
+  --query N             Run only specific query number (can be specified multiple times)
+  --memory-limit MB     Memory limit in MB (forces spilling, e.g., --memory-limit 1024 for 1GB)
+  --hash-join           Enable hash join preference (default: sort-merge join)
 
 Examples:
   $0 1                           # Run all queries on SF1 data
   $0 100 --iterations 5          # Run all queries on SF100 data with 5 iterations
   $0 10 --output my-results.json # Run all queries and save to custom file
-  $0 1 --query 18                       # Run only query 18 on SF1 data
+  $0 1 --query 18                       # Run only query 18 on SF1 data (sort-merge join)
   $0 1 --query 1 --query 18             # Run only queries 1 and 18 on SF1 data
   $0 1 --query 18 --memory-limit 1024   # Run query 18 with 1GB memory limit (forces spilling)
+  $0 1000 --hash-join                   # Run all queries using hash join instead of sort-merge join
 
 The script expects data to be at: ${MOUNT_POINT}/datafusion/tpch-sf<scale_factor>/
 EOF
@@ -59,6 +61,7 @@ ITERATIONS=3
 OUTPUT_FILE=""  # Will be set to absolute path later
 QUERY_ARGS=()  # Array to store --query arguments
 MEMORY_LIMIT=""  # Memory limit in MB
+PREFER_HASH_JOIN="false"  # Default to sort-merge join (better spilling support)
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -77,6 +80,10 @@ while [[ $# -gt 0 ]]; do
     --memory-limit)
       MEMORY_LIMIT="$2"
       shift 2
+      ;;
+    --hash-join)
+      PREFER_HASH_JOIN="true"
+      shift 1
       ;;
     *)
       echo "Error: Unknown option $1"
@@ -191,7 +198,7 @@ echo
 
 cd "${BENCHMARK_REPO_DIR}/runners/datafusion-python"
 
-# Build the command with optional memory limit
+# Build the command with optional parameters
 CMD_ARGS=(
   --benchmark tpch
   --data "${DATA_DIR}"
@@ -210,6 +217,14 @@ fi
 if [[ -n "${MEMORY_LIMIT}" ]]; then
   CMD_ARGS+=(--memory-limit "${MEMORY_LIMIT}")
   echo ">>> Memory limit: ${MEMORY_LIMIT} MB"
+fi
+
+# Add prefer-hash-join setting
+CMD_ARGS+=(--prefer-hash-join "${PREFER_HASH_JOIN}")
+if [[ "${PREFER_HASH_JOIN}" == "true" ]]; then
+  echo ">>> Join strategy: Hash join"
+else
+  echo ">>> Join strategy: Sort-merge join (default)"
 fi
 
 # Run the benchmark with specified parameters (using python from venv and our patched script)
