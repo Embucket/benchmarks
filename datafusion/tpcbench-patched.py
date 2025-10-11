@@ -45,16 +45,20 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
     # Create SessionContext with custom temp directory for spill
     print(f"Configuring DataFusion to use temp directory: {temp_dir}")
-    
+
     # Create temp directory if it doesn't exist
     os.makedirs(temp_dir, exist_ok=True)
-    
+
     # Create RuntimeConfig with temp directory
+    # SessionContext(config, runtime) - runtime is the second parameter
     runtime_config = RuntimeConfig().with_temp_file_path(temp_dir)
-    ctx = SessionContext(runtime_config)
-    
+    ctx = SessionContext(runtime=runtime_config)
+
     # Also set via SQL for additional configuration options
-    ctx.sql(f"SET datafusion.execution.temp_file_path = '{temp_dir}'")
+    try:
+        ctx.sql(f"SET datafusion.execution.temp_file_path = '{temp_dir}'")
+    except Exception as e:
+        print(f"Note: Could not set temp path via SQL (this is okay): {e}")
 
     for table in table_names:
         path = f"{data_path}/{table}.parquet"
