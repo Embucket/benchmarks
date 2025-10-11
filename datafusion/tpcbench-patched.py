@@ -25,8 +25,7 @@ import shutil
 import tempfile
 
 import datafusion
-from datafusion import SessionContext
-from datafusion.runtime_env import RuntimeEnvBuilder
+from datafusion import SessionContext, RuntimeEnvBuilder
 from datetime import datetime
 import json
 import time
