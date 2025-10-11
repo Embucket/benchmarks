@@ -21,6 +21,7 @@
 import argparse
 import os
 import glob
+import shutil
 
 import datafusion
 from datafusion import SessionContext
@@ -46,6 +47,21 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
     # Create SessionContext with custom temp directory for spill
     print(f"Configuring DataFusion to use temp directory: {temp_dir}")
+
+    # Clean temp directory before starting
+    if os.path.exists(temp_dir):
+        print(f"Cleaning temp directory: {temp_dir}")
+        try:
+            # Remove all files and subdirectories
+            for item in os.listdir(temp_dir):
+                item_path = os.path.join(temp_dir, item)
+                if os.path.isfile(item_path) or os.path.islink(item_path):
+                    os.unlink(item_path)
+                elif os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+            print(f"✓ Temp directory cleaned")
+        except Exception as e:
+            print(f"✗ WARNING: Could not clean temp directory: {e}")
 
     # Create temp directory if it doesn't exist
     os.makedirs(temp_dir, exist_ok=True)
