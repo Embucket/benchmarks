@@ -264,10 +264,20 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                         for row in rows:
                             # Extract the plan string from the row
                             # Row has columns: plan_type, plan
-                            plan_type = row[0]
-                            plan_text = row[1]
+                            # Convert to Python native types to avoid truncation
+                            plan_type = str(row[0]) if hasattr(row[0], '__str__') else row[0]
+                            plan_text = str(row[1]) if hasattr(row[1], '__str__') else row[1]
+
+                            # Also save to file for full details
+                            plan_file = os.path.join(temp_dir, f"query_{query}_plan.txt")
+                            with open(plan_file, 'w') as f:
+                                f.write(f"{plan_type}:\n")
+                                f.write(plan_text)
+                                f.write("\n")
+
                             print(f"\n{plan_type}:")
                             print(plan_text)
+                            print(f"\n(Full plan saved to: {plan_file})")
                         print("\n=== End Query Plan ===\n")
 
                 end_time = time.time()
