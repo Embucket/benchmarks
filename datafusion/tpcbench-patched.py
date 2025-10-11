@@ -26,7 +26,7 @@ import tempfile
 
 import datafusion
 from datafusion import SessionContext
-from datafusion.context import RuntimeConfig
+from datafusion.runtime_env import RuntimeEnvBuilder
 from datetime import datetime
 import json
 import time
@@ -86,22 +86,24 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         print(f"✗ WARNING: Temp directory is not writable: {e}")
         raise
 
-    # Create RuntimeConfig with temp directory and optional memory limit
-    # SessionContext(config, runtime) - runtime is the second parameter
+    # Create RuntimeEnv with temp directory and optional memory limit
+    # Use RuntimeEnvBuilder (new API, replaces deprecated RuntimeConfig)
 
     # Configure the temp directory for spilling
-    runtime_config = RuntimeConfig().with_temp_file_path(temp_dir)
+    runtime_env_builder = RuntimeEnvBuilder().with_temp_file_path(temp_dir)
 
     # Set memory pool with limit if specified
     if memory_limit_mb:
         memory_limit_bytes = memory_limit_mb * 1024 * 1024
         print(f"Setting memory limit: {memory_limit_mb} MB ({memory_limit_bytes:,} bytes)")
         # Use fair spill pool - works best for queries with multiple spillable operators
-        runtime_config = runtime_config.with_fair_spill_pool(memory_limit_bytes)
+        runtime_env_builder = runtime_env_builder.with_fair_spill_pool(memory_limit_bytes)
     else:
         print("Using unbounded memory pool (no memory limit)")
 
-    ctx = SessionContext(runtime=runtime_config)
+    # Build the runtime environment
+    runtime_env = runtime_env_builder.build()
+    ctx = SessionContext(runtime=runtime_env)
 
     # Set batch size
     try:
@@ -132,10 +134,10 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     # except Exception as e:
     #     print(f"✗ Could not set repartition_joins: {e}")
 
-    # Set target partitions to 32 to reduce parallelism and memory usage
+    # Set target partitions to 64 to reduce parallelism and memory usage
     try:
-        ctx.sql("SET datafusion.execution.target_partitions = 32")
-        print(f"✓ Set target_partitions = 32")
+        ctx.sql("SET datafusion.execution.target_partitions = 64")
+        print(f"✓ Set target_partitions = 64")
     except Exception as e:
         print(f"✗ Could not set target_partitions: {e}")
 
@@ -233,7 +235,10 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                     sql = sql.strip()
                     if len(sql) > 0:
                         print(f"Executing: {sql[:100]}...")  # Print first 100 chars
-                        df = ctx.sql(sql)
+
+                        # Use EXPLAIN ANALYZE to execute query and get metrics
+                        explain_sql = f"EXPLAIN ANALYZE {sql}"
+                        df = ctx.sql(explain_sql)
 
                         # Check temp directory during execution (before collect)
                         temp_size_during = sum(
@@ -245,18 +250,12 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                         max_temp_size = max(max_temp_size, temp_size_during)
 
                         rows = df.collect()
-                        print(f"Query {query} returned {len(rows)} rows")
 
-                        # Show query execution plan
-                        try:
-                            print("\n=== Query Execution Plan ===")
-                            explain_df = ctx.sql(f"EXPLAIN {sql}")
-                            explain_rows = explain_df.collect()
-                            for row in explain_rows:
-                                print(row)
-                            print("=== End Query Plan ===\n")
-                        except Exception as e:
-                            print(f"Could not show query plan: {e}")
+                        # Show query execution plan with actual metrics
+                        print("\n=== Query Execution Plan (EXPLAIN ANALYZE) ===")
+                        for row in rows:
+                            print(row)
+                        print("=== End Query Plan ===\n")
 
                 end_time = time.time()
                 elapsed = end_time - start_time
