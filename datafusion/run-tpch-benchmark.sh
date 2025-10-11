@@ -19,16 +19,18 @@ Arguments:
   scale_factor    The TPC-H scale factor to benchmark (must match generated data)
 
 Options:
-  --iterations N  Number of iterations to run (default: 3)
-  --output FILE   Output JSON file for results (default: tpch-sf<scale_factor>-results.json)
-  --query N       Run only specific query number (can be specified multiple times)
+  --iterations N     Number of iterations to run (default: 3)
+  --output FILE      Output JSON file for results (default: tpch-sf<scale_factor>-results.json)
+  --query N          Run only specific query number (can be specified multiple times)
+  --memory-limit MB  Memory limit in MB (forces spilling, e.g., --memory-limit 1024 for 1GB)
 
 Examples:
   $0 1                           # Run all queries on SF1 data
   $0 100 --iterations 5          # Run all queries on SF100 data with 5 iterations
   $0 10 --output my-results.json # Run all queries and save to custom file
-  $0 1 --query 18                # Run only query 18 on SF1 data
-  $0 1 --query 1 --query 18      # Run only queries 1 and 18 on SF1 data
+  $0 1 --query 18                       # Run only query 18 on SF1 data
+  $0 1 --query 1 --query 18             # Run only queries 1 and 18 on SF1 data
+  $0 1 --query 18 --memory-limit 1024   # Run query 18 with 1GB memory limit (forces spilling)
 
 The script expects data to be at: ${MOUNT_POINT}/datafusion/tpch-sf<scale_factor>/
 EOF
@@ -56,6 +58,7 @@ fi
 ITERATIONS=3
 OUTPUT_FILE=""  # Will be set to absolute path later
 QUERY_ARGS=()  # Array to store --query arguments
+MEMORY_LIMIT=""  # Memory limit in MB
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -69,6 +72,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --query)
       QUERY_ARGS+=("--query" "$2")
+      shift 2
+      ;;
+    --memory-limit)
+      MEMORY_LIMIT="$2"
       shift 2
       ;;
     *)
@@ -184,15 +191,29 @@ echo
 
 cd "${BENCHMARK_REPO_DIR}/runners/datafusion-python"
 
+# Build the command with optional memory limit
+CMD_ARGS=(
+  --benchmark tpch
+  --data "${DATA_DIR}"
+  --queries "${BENCHMARK_REPO_DIR}/tpch/queries/"
+  --iterations "${ITERATIONS}"
+  --output "${OUTPUT_FILE}"
+  --temp-dir "${TEMP_DIR}"
+)
+
+# Add query arguments if specified
+if [[ ${#QUERY_ARGS[@]} -gt 0 ]]; then
+  CMD_ARGS+=("${QUERY_ARGS[@]}")
+fi
+
+# Add memory limit if specified
+if [[ -n "${MEMORY_LIMIT}" ]]; then
+  CMD_ARGS+=(--memory-limit "${MEMORY_LIMIT}")
+  echo ">>> Memory limit: ${MEMORY_LIMIT} MB"
+fi
+
 # Run the benchmark with specified parameters (using python from venv and our patched script)
-"${VENV_DIR}/bin/python" tpcbench-patched.py \
-  --benchmark tpch \
-  --data "${DATA_DIR}" \
-  --queries "${BENCHMARK_REPO_DIR}/tpch/queries/" \
-  --iterations "${ITERATIONS}" \
-  --output "${OUTPUT_FILE}" \
-  --temp-dir "${TEMP_DIR}" \
-  "${QUERY_ARGS[@]}"
+"${VENV_DIR}/bin/python" tpcbench-patched.py "${CMD_ARGS[@]}"
 
 echo
 echo ">>> Benchmark complete!"

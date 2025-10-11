@@ -20,6 +20,7 @@
 
 import argparse
 import os
+import glob
 
 import datafusion
 from datafusion import SessionContext
@@ -28,7 +29,7 @@ from datetime import datetime
 import json
 import time
 
-def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None):
+def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None, memory_limit_mb: int | None = None):
 
     # Register the tables
     if benchmark == "tpch":
@@ -49,9 +50,18 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     # Create temp directory if it doesn't exist
     os.makedirs(temp_dir, exist_ok=True)
 
-    # Create RuntimeConfig with temp directory
+    # Create RuntimeConfig with temp directory and optional memory limit
     # SessionContext(config, runtime) - runtime is the second parameter
     runtime_config = RuntimeConfig().with_temp_file_path(temp_dir)
+
+    # Set memory pool with limit if specified
+    if memory_limit_mb:
+        memory_limit_bytes = memory_limit_mb * 1024 * 1024
+        print(f"Setting memory limit: {memory_limit_mb} MB ({memory_limit_bytes:,} bytes)")
+        runtime_config = runtime_config.with_greedy_memory_pool(memory_limit_bytes)
+    else:
+        print("Using unbounded memory pool (no memory limit)")
+
     ctx = SessionContext(runtime=runtime_config)
 
     # Also set via SQL for additional configuration options
@@ -97,7 +107,8 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         'data_path': data_path,
         'query_path': query_path,
         'temp_dir': temp_dir,
-        'iterations': iterations
+        'iterations': iterations,
+        'memory_limit_mb': memory_limit_mb
     }
 
     # Determine which queries to run
@@ -121,6 +132,9 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                 # each file can contain multiple queries
                 queries = text.split(";")
 
+                # Check temp directory before query
+                temp_files_before = len(glob.glob(f"{temp_dir}/**/*", recursive=True))
+
                 start_time = time.time()
                 for sql in queries:
                     sql = sql.strip()
@@ -132,7 +146,22 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                         print(f"Query {query} returned {len(rows)} rows")
                 end_time = time.time()
                 elapsed = end_time - start_time
+
+                # Check temp directory after query
+                temp_files_after = len(glob.glob(f"{temp_dir}/**/*", recursive=True))
+                temp_files_created = temp_files_after - temp_files_before
+
+                # Get temp directory size
+                total_size = 0
+                for dirpath, dirnames, filenames in os.walk(temp_dir):
+                    for f in filenames:
+                        fp = os.path.join(dirpath, f)
+                        if os.path.exists(fp):
+                            total_size += os.path.getsize(fp)
+
+                size_mb = total_size / (1024 * 1024)
                 print(f"Query {query} took {elapsed:.2f} seconds")
+                print(f"  Temp files created: {temp_files_created}, Total temp size: {size_mb:.2f} MB")
 
                 # Store timings for each iteration
                 if query not in results:
@@ -164,6 +193,8 @@ if __name__ == "__main__":
     parser.add_argument("--temp-dir", required=True, help="Temporary directory for DataFusion spill operations")
     parser.add_argument("--query", type=int, action='append', dest='queries_to_run',
                         help="Specific query number to run (can be specified multiple times, e.g., --query 1 --query 18)")
+    parser.add_argument("--memory-limit", type=int, dest='memory_limit_mb',
+                        help="Memory limit in MB (forces spilling when exceeded, e.g., --memory-limit 1024 for 1GB)")
     args = parser.parse_args()
 
     # Generate default output filename if not specified
@@ -171,5 +202,5 @@ if __name__ == "__main__":
         current_time_millis = int(datetime.now().timestamp() * 1000)
         args.output = f"datafusion-python-{args.benchmark}-{current_time_millis}.json"
 
-    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir, args.queries_to_run)
+    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir, args.queries_to_run, args.memory_limit_mb)
 
