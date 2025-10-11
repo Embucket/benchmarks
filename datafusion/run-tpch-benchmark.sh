@@ -195,7 +195,7 @@ cd "${BENCHMARK_REPO_DIR}/runners/datafusion-python"
 CMD_ARGS=(
   --benchmark tpch
   --data "${DATA_DIR}"
-  --queries "${BENCHMARK_REPO_DIR}/tpch/queries/"
+  --queries "${BENCHMARK_REPO_DIR}/tpch/queries"
   --iterations "${ITERATIONS}"
   --output "${OUTPUT_FILE}"
   --temp-dir "${TEMP_DIR}"
