@@ -261,24 +261,35 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
                         # Show query execution plan with actual metrics
                         print("\n=== Query Execution Plan (EXPLAIN ANALYZE) ===")
-                        for row in rows:
-                            # Extract the plan string from the row
-                            # Row has columns: plan_type, plan
-                            # Convert to Python native types to avoid truncation
-                            plan_type = str(row[0]) if hasattr(row[0], '__str__') else row[0]
-                            plan_text = str(row[1]) if hasattr(row[1], '__str__') else row[1]
 
-                            # Save to file in same directory as output_file for full details
-                            output_dir = os.path.dirname(output_file) if output_file else "."
-                            plan_file = os.path.join(output_dir, f"query_{query}_plan.txt")
-                            with open(plan_file, 'w') as f:
-                                f.write(f"{plan_type}:\n")
-                                f.write(plan_text)
-                                f.write("\n")
+                        # Convert to pandas to get full string values without truncation
+                        import pyarrow as pa
 
-                            print(f"\n{plan_type}:")
-                            print(plan_text)
-                            print(f"\n(Full plan saved to: {plan_file})")
+                        for batch in rows:
+                            # Get the actual string values from the Arrow batch
+                            plan_type_array = batch.column(0)
+                            plan_array = batch.column(1)
+
+                            for i in range(len(batch)):
+                                plan_type = plan_type_array[i].as_py()
+                                plan_text = plan_array[i].as_py()
+
+                                # Save to file in same directory as output_file for full details
+                                output_dir = os.path.dirname(output_file) if output_file else "."
+                                plan_file = os.path.join(output_dir, f"query_{query}_plan.txt")
+                                with open(plan_file, 'w') as f:
+                                    f.write(f"{plan_type}:\n")
+                                    f.write(plan_text)
+                                    f.write("\n")
+
+                                # Print first 2000 chars to console
+                                print(f"\n{plan_type}:")
+                                if len(plan_text) > 2000:
+                                    print(plan_text[:2000])
+                                    print(f"\n... ({len(plan_text) - 2000} more characters)")
+                                else:
+                                    print(plan_text)
+                                print(f"\n(Full plan saved to: {plan_file})")
                         print("\n=== End Query Plan ===\n")
 
                 end_time = time.time()
