@@ -116,8 +116,8 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
     # Set batch size
     try:
-        ctx.sql("SET datafusion.execution.batch_size = 8192")
-        print(f"✓ Set batch_size = 8192")
+        ctx.sql("SET datafusion.execution.batch_size = 16384")
+        print(f"✓ Set batch_size = 16384")
     except Exception as e:
         print(f"✗ Could not set batch_size: {e}")
 
