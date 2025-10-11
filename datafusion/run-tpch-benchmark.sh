@@ -51,7 +51,7 @@ fi
 
 # Parse optional arguments
 ITERATIONS=3
-OUTPUT_FILE="tpch-sf${SCALE_FACTOR}-results.json"
+OUTPUT_FILE=""  # Will be set to absolute path later
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -60,7 +60,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --output)
-      OUTPUT_FILE="$2"
+      OUTPUT_FILE="$(realpath "$2")"  # Convert to absolute path
       shift 2
       ;;
     *)
@@ -69,6 +69,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# Set default output file to current directory if not specified
+if [[ -z "${OUTPUT_FILE}" ]]; then
+  OUTPUT_FILE="$(pwd)/tpch-sf${SCALE_FACTOR}-results.json"
+fi
 
 echo "=== DataFusion TPC-H Benchmark ==="
 echo "Scale Factor: ${SCALE_FACTOR}"
@@ -183,6 +188,7 @@ cd "${BENCHMARK_REPO_DIR}/runners/datafusion-python"
 echo
 echo ">>> Benchmark complete!"
 echo ">>> Results saved to: ${OUTPUT_FILE}"
+echo ">>> Full path: $(realpath "${OUTPUT_FILE}" 2>/dev/null || echo "${OUTPUT_FILE}")"
 echo
 
 # Display summary if jq is available
