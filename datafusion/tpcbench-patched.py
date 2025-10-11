@@ -61,9 +61,34 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         print(f"Note: Could not set temp path via SQL (this is okay): {e}")
 
     for table in table_names:
-        path = f"{data_path}/{table}.parquet"
-        print(f"Registering table {table} using path {path}")
-        ctx.register_parquet(table, path)
+        # Try different possible file patterns
+        # tpchgen-cli might create files like table.parquet or table/*.parquet
+        possible_paths = [
+            f"{data_path}/{table}.parquet",
+            f"{data_path}/{table}",
+            f"{data_path}/{table}/*.parquet",
+        ]
+
+        registered = False
+        for path in possible_paths:
+            if os.path.exists(path.replace("/*.parquet", "")):
+                try:
+                    print(f"Registering table {table} using path {path}")
+                    ctx.register_parquet(table, path)
+                    registered = True
+                    break
+                except Exception as e:
+                    print(f"  Failed to register {path}: {e}")
+                    continue
+
+        if not registered:
+            print(f"ERROR: Could not find data for table {table}")
+            print(f"  Tried paths: {possible_paths}")
+            print(f"  Contents of {data_path}:")
+            if os.path.exists(data_path):
+                for item in os.listdir(data_path):
+                    print(f"    {item}")
+            raise FileNotFoundError(f"Could not find data for table {table}")
 
     results = {
         'engine': 'datafusion-python',
