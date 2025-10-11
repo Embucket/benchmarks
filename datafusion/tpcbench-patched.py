@@ -143,10 +143,10 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     # except Exception as e:
     #     print(f"✗ Could not set repartition_joins: {e}")
 
-    # Set target partitions to 64 to reduce parallelism and memory usage
+    # Set target partitions to 32 to reduce parallelism and memory usage
     try:
-        ctx.sql("SET datafusion.execution.target_partitions = 64")
-        print(f"✓ Set target_partitions = 64")
+        ctx.sql("SET datafusion.execution.target_partitions = 32")
+        print(f"✓ Set target_partitions = 32")
     except Exception as e:
         print(f"✗ Could not set target_partitions: {e}")
 
@@ -263,8 +263,13 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                         # Show query execution plan with actual metrics
                         print("\n=== Query Execution Plan (EXPLAIN ANALYZE) ===")
                         for row in rows:
-                            print(row)
-                        print("=== End Query Plan ===\n")
+                            # Extract the plan string from the row
+                            # Row has columns: plan_type, plan
+                            plan_type = row[0]
+                            plan_text = row[1]
+                            print(f"\n{plan_type}:")
+                            print(plan_text)
+                        print("\n=== End Query Plan ===\n")
 
                 end_time = time.time()
                 elapsed = end_time - start_time
