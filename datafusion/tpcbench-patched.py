@@ -89,19 +89,18 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     # Use RuntimeEnvBuilder (new API, replaces deprecated RuntimeConfig)
 
     # Configure the temp directory for spilling
-    runtime_env_builder = RuntimeEnvBuilder().with_temp_file_path(temp_dir)
+    runtime_env = RuntimeEnvBuilder().with_temp_file_path(temp_dir)
 
     # Set memory pool with limit if specified
     if memory_limit_mb:
         memory_limit_bytes = memory_limit_mb * 1024 * 1024
         print(f"Setting memory limit: {memory_limit_mb} MB ({memory_limit_bytes:,} bytes)")
         # Use fair spill pool - works best for queries with multiple spillable operators
-        runtime_env_builder = runtime_env_builder.with_fair_spill_pool(memory_limit_bytes)
+        runtime_env = runtime_env.with_fair_spill_pool(memory_limit_bytes)
     else:
         print("Using unbounded memory pool (no memory limit)")
 
-    # Build the runtime environment
-    runtime_env = runtime_env_builder.build()
+    # Create SessionContext with the runtime environment
     ctx = SessionContext(runtime=runtime_env)
 
     # Set batch size
