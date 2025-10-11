@@ -80,6 +80,14 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
     # Also configure via SQL for additional settings
     print("Configuring DataFusion settings via SQL...")
+
+    # Set the temp directory - this is the key setting for spilling
+    try:
+        ctx.sql(f"SET datafusion.runtime.temp_dir = '{temp_dir}'")
+        print(f"  ✓ Set datafusion.runtime.temp_dir = '{temp_dir}'")
+    except Exception as e:
+        print(f"  ✗ Could not set datafusion.runtime.temp_dir: {e}")
+
     try:
         # Enable spilling
         ctx.sql("SET datafusion.execution.memory_pool_type = 'Fair'")
