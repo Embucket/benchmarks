@@ -108,8 +108,8 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
     # Set target partitions to 1 to reduce parallelism and memory usage
     try:
-        ctx.sql("SET datafusion.execution.target_partitions = 1")
-        print(f"✓ Set target_partitions = 1")
+        ctx.sql("SET datafusion.execution.target_partitions = 32")
+        print(f"✓ Set target_partitions = 32")
     except Exception as e:
         print(f"✗ Could not set target_partitions: {e}")
 
