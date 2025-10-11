@@ -240,7 +240,8 @@ if __name__ == "__main__":
                         help="Specific query number to run (can be specified multiple times, e.g., --query 1 --query 18)")
     parser.add_argument("--memory-limit", type=int, dest='memory_limit_mb',
                         help="Memory limit in MB (forces spilling when exceeded, e.g., --memory-limit 1024 for 1GB)")
-    parser.add_argument("--prefer-hash-join", type=bool, dest='prefer_hash_join', default=False,
+    parser.add_argument("--prefer-hash-join", dest='prefer_hash_join',
+                        action='store_true', default=False,
                         help="Prefer hash join over sort-merge join (default: False)")
     args = parser.parse_args()
 
