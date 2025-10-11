@@ -21,11 +21,14 @@ Arguments:
 Options:
   --iterations N  Number of iterations to run (default: 3)
   --output FILE   Output JSON file for results (default: tpch-sf<scale_factor>-results.json)
+  --query N       Run only specific query number (can be specified multiple times)
 
 Examples:
-  $0 1                           # Run benchmark on SF1 data
-  $0 100 --iterations 5          # Run benchmark on SF100 data with 5 iterations
-  $0 10 --output my-results.json # Run benchmark and save to custom file
+  $0 1                           # Run all queries on SF1 data
+  $0 100 --iterations 5          # Run all queries on SF100 data with 5 iterations
+  $0 10 --output my-results.json # Run all queries and save to custom file
+  $0 1 --query 18                # Run only query 18 on SF1 data
+  $0 1 --query 1 --query 18      # Run only queries 1 and 18 on SF1 data
 
 The script expects data to be at: ${MOUNT_POINT}/datafusion/tpch-sf<scale_factor>/
 EOF
@@ -52,6 +55,7 @@ fi
 # Parse optional arguments
 ITERATIONS=3
 OUTPUT_FILE=""  # Will be set to absolute path later
+QUERY_ARGS=()  # Array to store --query arguments
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -61,6 +65,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --output)
       OUTPUT_FILE="$(realpath "$2")"  # Convert to absolute path
+      shift 2
+      ;;
+    --query)
+      QUERY_ARGS+=("--query" "$2")
       shift 2
       ;;
     *)
@@ -183,7 +191,8 @@ cd "${BENCHMARK_REPO_DIR}/runners/datafusion-python"
   --queries "${BENCHMARK_REPO_DIR}/tpch/queries/" \
   --iterations "${ITERATIONS}" \
   --output "${OUTPUT_FILE}" \
-  --temp-dir "${TEMP_DIR}"
+  --temp-dir "${TEMP_DIR}" \
+  "${QUERY_ARGS[@]}"
 
 echo
 echo ">>> Benchmark complete!"

@@ -28,7 +28,7 @@ from datetime import datetime
 import json
 import time
 
-def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str):
+def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None):
 
     # Register the tables
     if benchmark == "tpch":
@@ -100,11 +100,19 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         'iterations': iterations
     }
 
+    # Determine which queries to run
+    if queries_to_run:
+        queries_list = queries_to_run
+        print(f"Running specific queries: {queries_list}")
+    else:
+        queries_list = list(range(1, num_queries + 1))
+        print(f"Running all {num_queries} queries")
+
     # Run multiple iterations
     for iteration in range(iterations):
         print(f"\n=== Iteration {iteration + 1}/{iterations} ===\n")
-        
-        for query in range(1, num_queries + 1):
+
+        for query in queries_list:
             # read text file
             path = f"{query_path}/q{query}.sql"
             print(f"Reading query {query} using path {path}")
@@ -133,7 +141,7 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
     # Calculate statistics for each query
     print("\n=== Summary ===\n")
-    for query in range(1, num_queries + 1):
+    for query in queries_list:
         if query in results:
             timings = results[query]
             avg_time = sum(timings) / len(timings)
@@ -154,6 +162,8 @@ if __name__ == "__main__":
     parser.add_argument("--iterations", type=int, default=3, help="Number of iterations to run (default: 3)")
     parser.add_argument("--output", default=None, help="Output JSON file (default: auto-generated)")
     parser.add_argument("--temp-dir", required=True, help="Temporary directory for DataFusion spill operations")
+    parser.add_argument("--query", type=int, action='append', dest='queries_to_run',
+                        help="Specific query number to run (can be specified multiple times, e.g., --query 1 --query 18)")
     args = parser.parse_args()
 
     # Generate default output filename if not specified
@@ -161,5 +171,5 @@ if __name__ == "__main__":
         current_time_millis = int(datetime.now().timestamp() * 1000)
         args.output = f"datafusion-python-{args.benchmark}-{current_time_millis}.json"
 
-    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir)
+    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir, args.queries_to_run)
 
