@@ -79,6 +79,7 @@ echo
 # Set paths
 DATA_DIR="${MOUNT_POINT}/datafusion/tpch-sf${SCALE_FACTOR}"
 BENCHMARK_REPO_DIR="${MOUNT_POINT}/datafusion/datafusion-benchmarks"
+TEMP_DIR="${MOUNT_POINT}/datafusion/temp"
 
 # Check if data directory exists
 if [[ ! -d "${DATA_DIR}" ]]; then
@@ -89,7 +90,12 @@ fi
 
 echo ">>> Data directory: ${DATA_DIR}"
 echo ">>> Benchmark repository: ${BENCHMARK_REPO_DIR}"
+echo ">>> Temp directory (for spill): ${TEMP_DIR}"
 echo
+
+# Create temp directory for DataFusion spill operations
+echo ">>> Creating temp directory for DataFusion spill operations..."
+mkdir -p "${TEMP_DIR}"
 
 # Clone or update DataFusion benchmarks repository
 if [[ -d "${BENCHMARK_REPO_DIR}" ]]; then
@@ -113,22 +119,38 @@ if ! command -v python3 &> /dev/null; then
   exit 1
 fi
 
-# Check if pip is available
-if ! command -v pip3 &> /dev/null; then
-  echo ">>> Installing pip..."
+# Install python3-venv if not available
+if ! python3 -m venv --help &> /dev/null; then
+  echo ">>> Installing python3-venv..."
   sudo apt-get update
-  sudo apt-get install -y python3-pip
+  sudo apt-get install -y python3-venv
 fi
+
+# Create virtual environment if it doesn't exist
+VENV_DIR="${BENCHMARK_REPO_DIR}/venv"
+if [[ ! -d "${VENV_DIR}" ]]; then
+  echo ">>> Creating Python virtual environment..."
+  python3 -m venv "${VENV_DIR}"
+fi
+
+# Activate virtual environment
+echo ">>> Activating virtual environment..."
+source "${VENV_DIR}/bin/activate"
 
 # Install requirements
 if [[ -f requirements.txt ]]; then
-  pip3 install -r requirements.txt --user
+  echo ">>> Installing requirements from requirements.txt..."
+  pip install -r requirements.txt
 else
   echo "Warning: requirements.txt not found, installing datafusion manually"
-  pip3 install datafusion --user
+  pip install datafusion
 fi
 
 echo
+
+# Copy our patched benchmark script
+echo ">>> Copying patched benchmark script..."
+cp "${SCRIPT_DIR}/tpcbench-patched.py" "${BENCHMARK_REPO_DIR}/runners/datafusion-python/"
 
 # Run the benchmark
 echo ">>> Running TPC-H benchmark..."
@@ -137,13 +159,14 @@ echo
 
 cd "${BENCHMARK_REPO_DIR}/runners/datafusion-python"
 
-# Run the benchmark with specified parameters
-python3 tpcbench.py \
+# Run the benchmark with specified parameters (using python from venv and our patched script)
+"${VENV_DIR}/bin/python" tpcbench-patched.py \
   --benchmark tpch \
   --data "${DATA_DIR}" \
   --queries "${BENCHMARK_REPO_DIR}/tpch/queries/" \
   --iterations "${ITERATIONS}" \
-  --output "${OUTPUT_FILE}"
+  --output "${OUTPUT_FILE}" \
+  --temp-dir "${TEMP_DIR}"
 
 echo
 echo ">>> Benchmark complete!"
