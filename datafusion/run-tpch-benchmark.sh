@@ -134,6 +134,15 @@ if [[ ! -d "${VENV_DIR}" ]] || [[ ! -f "${VENV_DIR}/bin/python" ]]; then
   # Remove broken venv if it exists
   rm -rf "${VENV_DIR}"
   python3 -m venv "${VENV_DIR}"
+
+  # Verify creation
+  if [[ ! -f "${VENV_DIR}/bin/activate" ]]; then
+    echo "Error: Failed to create virtual environment"
+    exit 1
+  fi
+  echo ">>> Virtual environment created successfully"
+else
+  echo ">>> Virtual environment already exists"
 fi
 
 # Activate virtual environment
