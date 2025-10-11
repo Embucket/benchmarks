@@ -119,17 +119,20 @@ if ! command -v python3 &> /dev/null; then
   exit 1
 fi
 
+# Get Python version for the venv package
+PYTHON_VERSION=$(python3 --version | awk '{print $2}' | cut -d. -f1,2)
+
 # Install python3-venv if not available
-if ! python3 -m venv --help &> /dev/null; then
-  echo ">>> Installing python3-venv..."
-  sudo apt-get update
-  sudo apt-get install -y python3-venv
-fi
+echo ">>> Ensuring python3-venv is installed..."
+sudo apt-get update
+sudo apt-get install -y python3-venv python${PYTHON_VERSION}-venv
 
 # Create virtual environment if it doesn't exist
 VENV_DIR="${BENCHMARK_REPO_DIR}/venv"
-if [[ ! -d "${VENV_DIR}" ]]; then
+if [[ ! -d "${VENV_DIR}" ]] || [[ ! -f "${VENV_DIR}/bin/python" ]]; then
   echo ">>> Creating Python virtual environment..."
+  # Remove broken venv if it exists
+  rm -rf "${VENV_DIR}"
   python3 -m venv "${VENV_DIR}"
 fi
 
