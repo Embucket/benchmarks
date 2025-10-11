@@ -117,6 +117,14 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     except Exception as e:
         print(f"✗ Could not set prefer_hash_join: {e}")
 
+    # Enable explain mode to show query plan after execution
+    try:
+        ctx.sql("SET datafusion.explain.logical_plan_only = false")
+        ctx.sql("SET datafusion.explain.physical_plan_only = false")
+        print(f"✓ Enabled query plan output")
+    except Exception as e:
+        print(f"✗ Could not enable explain mode: {e}")
+
     # Disable repartitioning to reduce memory pressure
     # try:
     #     ctx.sql("SET datafusion.optimizer.repartition_joins = false")
@@ -238,6 +246,17 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
                         rows = df.collect()
                         print(f"Query {query} returned {len(rows)} rows")
+
+                        # Show query execution plan
+                        try:
+                            print("\n=== Query Execution Plan ===")
+                            explain_df = ctx.sql(f"EXPLAIN {sql}")
+                            explain_rows = explain_df.collect()
+                            for row in explain_rows:
+                                print(row)
+                            print("=== End Query Plan ===\n")
+                        except Exception as e:
+                            print(f"Could not show query plan: {e}")
 
                 end_time = time.time()
                 elapsed = end_time - start_time
