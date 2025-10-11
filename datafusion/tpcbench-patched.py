@@ -22,7 +22,8 @@ import argparse
 import os
 
 import datafusion
-from datafusion import SessionContext, RuntimeConfig
+from datafusion import SessionContext
+from datafusion.context import RuntimeConfig
 from datetime import datetime
 import json
 import time
