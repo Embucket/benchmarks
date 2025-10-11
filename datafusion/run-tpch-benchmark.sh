@@ -220,8 +220,8 @@ if [[ -n "${MEMORY_LIMIT}" ]]; then
 fi
 
 # Add prefer-hash-join setting
-CMD_ARGS+=(--prefer-hash-join "${PREFER_HASH_JOIN}")
 if [[ "${PREFER_HASH_JOIN}" == "true" ]]; then
+  CMD_ARGS+=(--prefer-hash-join)
   echo ">>> Join strategy: Hash join"
 else
   echo ">>> Join strategy: Sort-merge join (default)"
