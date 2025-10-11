@@ -268,8 +268,9 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                             plan_type = str(row[0]) if hasattr(row[0], '__str__') else row[0]
                             plan_text = str(row[1]) if hasattr(row[1], '__str__') else row[1]
 
-                            # Also save to file for full details
-                            plan_file = os.path.join(temp_dir, f"query_{query}_plan.txt")
+                            # Save to file in same directory as output_file for full details
+                            output_dir = os.path.dirname(output_file) if output_file else "."
+                            plan_file = os.path.join(output_dir, f"query_{query}_plan.txt")
                             with open(plan_file, 'w') as f:
                                 f.write(f"{plan_type}:\n")
                                 f.write(plan_text)
