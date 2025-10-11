@@ -132,7 +132,7 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     # Set max temp directory size (default 1TB)
     max_temp_dir_size_bytes = max_temp_dir_size_gb * 1024 * 1024 * 1024
     try:
-        ctx.sql(f"SET datafusion.execution.max_temp_directory_size = {max_temp_dir_size_bytes}")
+        ctx.sql(f"SET datafusion.runtime.max_temp_directory_size = {max_temp_dir_size_bytes}")
         print(f"✓ Set max_temp_directory_size = {max_temp_dir_size_gb} GB")
     except Exception as e:
         print(f"✗ Could not set max_temp_directory_size: {e}")
