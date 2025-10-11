@@ -197,6 +197,27 @@ echo
 echo ">>> Copying patched benchmark script..."
 cp "${SCRIPT_DIR}/tpcbench-patched.py" "${BENCHMARK_REPO_DIR}/runners/datafusion-python/"
 
+# Increase file descriptor limit for this session
+CURRENT_LIMIT=$(ulimit -n)
+if [[ ${CURRENT_LIMIT} -lt 65536 ]]; then
+  echo ">>> Increasing file descriptor limit from ${CURRENT_LIMIT} to 65536..."
+  ulimit -n 65536 2>/dev/null || {
+    echo "⚠ Warning: Could not increase file descriptor limit to 65536"
+    echo "  Current limit: $(ulimit -n)"
+    echo "  You may encounter 'Too many open files' errors with large datasets"
+    echo ""
+    echo "  To fix permanently, run:"
+    echo "    echo '* soft nofile 65536' | sudo tee -a /etc/security/limits.conf"
+    echo "    echo '* hard nofile 65536' | sudo tee -a /etc/security/limits.conf"
+    echo "  Then log out and log back in."
+    echo ""
+  }
+  echo "✓ File descriptor limit: $(ulimit -n)"
+else
+  echo "✓ File descriptor limit already sufficient: ${CURRENT_LIMIT}"
+fi
+echo
+
 # Run the benchmark
 echo ">>> Running TPC-H benchmark..."
 echo ">>> This may take a while depending on the scale factor and number of iterations..."

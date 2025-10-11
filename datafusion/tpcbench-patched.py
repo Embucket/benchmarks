@@ -23,6 +23,7 @@ import os
 import glob
 import shutil
 import tempfile
+import resource
 
 import datafusion
 from datafusion import SessionContext, RuntimeEnvBuilder
@@ -31,6 +32,16 @@ import json
 import time
 
 def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None, memory_limit_mb: int | None = None, prefer_hash_join: bool = False, max_temp_dir_size_gb: int = 1000):
+
+    # Increase file descriptor limit to handle large Parquet datasets
+    try:
+        soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+        # Try to set to hard limit (or 65536 if hard limit is higher)
+        new_limit = min(hard, 65536)
+        resource.setrlimit(resource.RLIMIT_NOFILE, (new_limit, hard))
+        print(f"✓ Increased file descriptor limit from {soft} to {new_limit}")
+    except Exception as e:
+        print(f"✗ Could not increase file descriptor limit: {e}")
 
     # Register the tables
     if benchmark == "tpch":
