@@ -99,6 +99,20 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     except Exception as e:
         print(f"✗ Could not set prefer_hash_join: {e}")
 
+    # Disable repartitioning to reduce memory pressure
+    try:
+        ctx.sql("SET datafusion.optimizer.repartition_joins = false")
+        print(f"✓ Set repartition_joins = false")
+    except Exception as e:
+        print(f"✗ Could not set repartition_joins: {e}")
+
+    # Set target partitions to 1 to reduce parallelism and memory usage
+    try:
+        ctx.sql("SET datafusion.execution.target_partitions = 1")
+        print(f"✓ Set target_partitions = 1")
+    except Exception as e:
+        print(f"✗ Could not set target_partitions: {e}")
+
     print(f"✓ Temp directory configured at: {temp_dir}")
     print()
 
