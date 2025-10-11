@@ -130,7 +130,11 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     except Exception as e:
         print(f"✗ Could not set max_temp_directory_size: {e}")
 
+    # Verify temp directory disk space
+    import shutil
+    total, used, free = shutil.disk_usage(temp_dir)
     print(f"✓ Temp directory configured at: {temp_dir}")
+    print(f"  Disk space: {free / (1024**3):.1f} GB free / {total / (1024**3):.1f} GB total")
     print()
 
     for table in table_names:
