@@ -19,11 +19,12 @@ Arguments:
   scale_factor    The TPC-H scale factor to benchmark (must match generated data)
 
 Options:
-  --iterations N        Number of iterations to run (default: 3)
-  --output FILE         Output JSON file for results (default: tpch-sf<scale_factor>-results.json)
-  --query N             Run only specific query number (can be specified multiple times)
-  --memory-limit MB     Memory limit in MB (forces spilling, e.g., --memory-limit 1024 for 1GB)
-  --hash-join           Enable hash join preference (default: sort-merge join)
+  --iterations N           Number of iterations to run (default: 3)
+  --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-results.json)
+  --query N                Run only specific query number (can be specified multiple times)
+  --memory-limit MB        Memory limit in MB (forces spilling, e.g., --memory-limit 1024 for 1GB)
+  --hash-join              Enable hash join preference (default: sort-merge join)
+  --max-temp-dir-size GB   Maximum temp directory size in GB (default: 1000GB = 1TB)
 
 Examples:
   $0 1                           # Run all queries on SF1 data
@@ -62,6 +63,7 @@ OUTPUT_FILE=""  # Will be set to absolute path later
 QUERY_ARGS=()  # Array to store --query arguments
 MEMORY_LIMIT=""  # Memory limit in MB
 PREFER_HASH_JOIN="false"  # Default to sort-merge join (better spilling support)
+MAX_TEMP_DIR_SIZE="1000"  # Max temp directory size in GB (default 1TB)
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -84,6 +86,10 @@ while [[ $# -gt 0 ]]; do
     --hash-join)
       PREFER_HASH_JOIN="true"
       shift 1
+      ;;
+    --max-temp-dir-size)
+      MAX_TEMP_DIR_SIZE="$2"
+      shift 2
       ;;
     *)
       echo "Error: Unknown option $1"
@@ -226,6 +232,10 @@ if [[ "${PREFER_HASH_JOIN}" == "true" ]]; then
 else
   echo ">>> Join strategy: Sort-merge join (default)"
 fi
+
+# Add max temp directory size (always set, default 1TB)
+CMD_ARGS+=(--max-temp-dir-size "${MAX_TEMP_DIR_SIZE}")
+echo ">>> Max temp directory size: ${MAX_TEMP_DIR_SIZE} GB"
 
 # Run the benchmark with specified parameters (using python from venv and our patched script)
 "${VENV_DIR}/bin/python" tpcbench-patched.py "${CMD_ARGS[@]}"

@@ -30,7 +30,7 @@ from datetime import datetime
 import json
 import time
 
-def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None, memory_limit_mb: int | None = None, prefer_hash_join: bool = False):
+def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None, memory_limit_mb: int | None = None, prefer_hash_join: bool = False, max_temp_dir_size_gb: int = 1000):
 
     # Register the tables
     if benchmark == "tpch":
@@ -129,6 +129,14 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     except Exception as e:
         print(f"✗ Could not set target_partitions: {e}")
 
+    # Set max temp directory size (default 1TB)
+    max_temp_dir_size_bytes = max_temp_dir_size_gb * 1024 * 1024 * 1024
+    try:
+        ctx.sql(f"SET datafusion.execution.max_temp_directory_size = {max_temp_dir_size_bytes}")
+        print(f"✓ Set max_temp_directory_size = {max_temp_dir_size_gb} GB")
+    except Exception as e:
+        print(f"✗ Could not set max_temp_directory_size: {e}")
+
     print(f"✓ Temp directory configured at: {temp_dir}")
     print()
 
@@ -171,7 +179,8 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         'temp_dir': temp_dir,
         'iterations': iterations,
         'memory_limit_mb': memory_limit_mb,
-        'prefer_hash_join': prefer_hash_join
+        'prefer_hash_join': prefer_hash_join,
+        'max_temp_dir_size_gb': max_temp_dir_size_gb
     }
 
     # Determine which queries to run
@@ -287,6 +296,8 @@ if __name__ == "__main__":
     parser.add_argument("--prefer-hash-join", dest='prefer_hash_join',
                         action='store_true', default=False,
                         help="Prefer hash join over sort-merge join (default: False)")
+    parser.add_argument("--max-temp-dir-size", type=int, dest='max_temp_dir_size_gb', default=1000,
+                        help="Maximum temp directory size in GB (default: 1000GB = 1TB)")
     args = parser.parse_args()
 
     # Generate default output filename if not specified
@@ -294,5 +305,5 @@ if __name__ == "__main__":
         current_time_millis = int(datetime.now().timestamp() * 1000)
         args.output = f"datafusion-python-{args.benchmark}-{current_time_millis}.json"
 
-    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir, args.queries_to_run, args.memory_limit_mb, args.prefer_hash_join)
+    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir, args.queries_to_run, args.memory_limit_mb, args.prefer_hash_join, args.max_temp_dir_size_gb)
 
