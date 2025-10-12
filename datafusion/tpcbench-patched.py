@@ -106,8 +106,11 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     if memory_limit_mb:
         memory_limit_bytes = memory_limit_mb * 1024 * 1024
         print(f"Setting memory limit: {memory_limit_mb} MB ({memory_limit_bytes:,} bytes)")
-        # Use fair spill pool - works best for queries with multiple spillable operators
-        runtime_env = runtime_env.with_fair_spill_pool(memory_limit_bytes)
+        # Use greedy memory pool - tracks actual usage instead of pessimistic reservations
+        # FairSpillPool can over-reserve memory (reserve 500GB but only use 100GB)
+        # GreedyMemoryPool tracks actual allocations and allows better memory utilization
+        runtime_env = runtime_env.with_greedy_memory_pool(memory_limit_bytes)
+        print(f"Using GreedyMemoryPool (tracks actual usage, not reservations)")
     else:
         print("Using unbounded memory pool (no memory limit)")
 
