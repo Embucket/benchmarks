@@ -114,10 +114,12 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     # Create SessionContext with the runtime environment
     ctx = SessionContext(runtime=runtime_env)
 
-    # Set batch size
+    # Set batch size - smaller batches use less memory but may be slower
+    # Default is 8192. Larger values (32768) use more memory per batch
+    # With limited memory, use smaller batches to reduce memory pressure
     try:
-        ctx.sql("SET datafusion.execution.batch_size = 32768")
-        print(f"✓ Set batch_size = 32768")
+        ctx.sql("SET datafusion.execution.batch_size = 8192")
+        print(f"✓ Set batch_size = 8192")
     except Exception as e:
         print(f"✗ Could not set batch_size: {e}")
 
@@ -141,8 +143,8 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     # Recommended: 4-8 for memory-constrained, 16-32 for balanced, 64+ for performance
     # Note: RepartitionExec does NOT support spilling, so lower values reduce memory pressure
     try:
-        ctx.sql("SET datafusion.execution.target_partitions = 2")
-        print(f"✓ Set target_partitions = 2")
+        ctx.sql("SET datafusion.execution.target_partitions = 4")
+        print(f"✓ Set target_partitions = 4")
     except Exception as e:
         print(f"✗ Could not set target_partitions: {e}")
 
@@ -152,6 +154,13 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         print(f"✓ Enabled coalesce_batches")
     except Exception as e:
         print(f"✗ Could not enable coalesce_batches: {e}")
+
+    # Reduce sort spill reservation to allow more aggressive spilling
+    try:
+        ctx.sql("SET datafusion.execution.sort_spill_reservation_bytes = 1048576")  # 1MB instead of default 10MB
+        print(f"✓ Set sort_spill_reservation_bytes = 1MB")
+    except Exception as e:
+        print(f"✗ Could not set sort_spill_reservation_bytes: {e}")
 
     # Set max temp directory size (default 1TB)
     # DataFusion expects a string with units like "1000G" or "1T"
