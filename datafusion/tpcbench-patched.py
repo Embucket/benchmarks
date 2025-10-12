@@ -138,10 +138,11 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
     # Set target partitions to control parallelism and memory usage
     # Lower values = less memory, slower queries. Higher values = more memory, faster queries
-    # Recommended: 8-16 for memory-constrained, 32-64 for performance
+    # Recommended: 4-8 for memory-constrained, 16-32 for balanced, 64+ for performance
+    # Note: RepartitionExec does NOT support spilling, so lower values reduce memory pressure
     try:
-        ctx.sql("SET datafusion.execution.target_partitions = 16")
-        print(f"✓ Set target_partitions = 16")
+        ctx.sql("SET datafusion.execution.target_partitions = 8")
+        print(f"✓ Set target_partitions = 8")
     except Exception as e:
         print(f"✗ Could not set target_partitions: {e}")
 
