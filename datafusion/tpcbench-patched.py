@@ -159,11 +159,11 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         print(f"✗ Could not enable coalesce_batches: {e}")
 
     # Reduce sort spill reservation to allow more aggressive spilling
-    # try:
-    #     ctx.sql("SET datafusion.execution.sort_spill_reservation_bytes = 1048576")  # 1MB instead of default 10MB
-    #     print(f"✓ Set sort_spill_reservation_bytes = 1MB")
-    # except Exception as e:
-    #     print(f"✗ Could not set sort_spill_reservation_bytes: {e}")
+    try:
+        ctx.sql("SET datafusion.execution.sort_spill_reservation_bytes = 1048576")  # 1MB instead of default 10MB
+        print(f"✓ Set sort_spill_reservation_bytes = 1MB")
+    except Exception as e:
+        print(f"✗ Could not set sort_spill_reservation_bytes: {e}")
 
     # Set max temp directory size (default 1TB)
     # DataFusion expects a string with units like "1000G" or "1T"
