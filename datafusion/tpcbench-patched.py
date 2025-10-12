@@ -373,8 +373,10 @@ if __name__ == "__main__":
     parser.add_argument("--temp-dir", required=True, help="Temporary directory for DataFusion spill operations")
     parser.add_argument("--query", type=int, action='append', dest='queries_to_run',
                         help="Specific query number to run (can be specified multiple times, e.g., --query 1 --query 18)")
-    parser.add_argument("--memory-limit", type=int, dest='memory_limit_mb',
-                        help="Memory limit in MB (forces spilling when exceeded, e.g., --memory-limit 1024 for 1GB)")
+    parser.add_argument("--memory-limit-mb", type=int, dest='memory_limit_mb',
+                        help="Memory limit in MB (forces spilling when exceeded, e.g., --memory-limit-mb 122880 for 120GB)")
+    parser.add_argument("--memory-limit-gb", type=int, dest='memory_limit_gb',
+                        help="Memory limit in GB (forces spilling when exceeded, e.g., --memory-limit-gb 120 for 120GB)")
     parser.add_argument("--prefer-hash-join", dest='prefer_hash_join',
                         action='store_true', default=False,
                         help="Prefer hash join over sort-merge join (default: False)")
