@@ -244,9 +244,16 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                     if len(sql) > 0:
                         print(f"Executing: {sql[:100]}...")  # Print first 100 chars
 
-                        # Use EXPLAIN ANALYZE to execute query and get metrics
-                        explain_sql = f"EXPLAIN ANALYZE {sql}"
-                        df = ctx.sql(explain_sql)
+                        # Check if query contains CREATE VIEW (can't use EXPLAIN ANALYZE with it)
+                        use_explain_analyze = "CREATE VIEW" not in sql.upper()
+
+                        if use_explain_analyze:
+                            # Use EXPLAIN ANALYZE to execute query and get metrics
+                            explain_sql = f"EXPLAIN ANALYZE {sql}"
+                            df = ctx.sql(explain_sql)
+                        else:
+                            # For queries with CREATE VIEW, execute normally
+                            df = ctx.sql(sql)
 
                         # Check temp directory during execution (before collect)
                         temp_size_during = sum(
@@ -259,62 +266,65 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
                         rows = df.collect()
 
-                        # Show query execution plan with actual metrics
-                        print("\n=== Query Execution Plan (EXPLAIN ANALYZE) ===")
+                        # Show query execution plan with actual metrics (only if EXPLAIN ANALYZE was used)
+                        if use_explain_analyze:
+                            print("\n=== Query Execution Plan (EXPLAIN ANALYZE) ===")
 
-                        # Convert to pandas to get full string values without truncation
-                        import pyarrow as pa
-                        import re
+                            # Convert to pandas to get full string values without truncation
+                            import pyarrow as pa
+                            import re
 
-                        for batch in rows:
-                            # Get the actual string values from the Arrow batch
-                            plan_type_array = batch.column(0)
-                            plan_array = batch.column(1)
+                            for batch in rows:
+                                # Get the actual string values from the Arrow batch
+                                plan_type_array = batch.column(0)
+                                plan_array = batch.column(1)
 
-                            for i in range(len(batch)):
-                                plan_type = plan_type_array[i].as_py()
-                                plan_text = plan_array[i].as_py()
+                                for i in range(len(batch)):
+                                    plan_type = plan_type_array[i].as_py()
+                                    plan_text = plan_array[i].as_py()
 
-                                # Pretty print the plan with proper indentation
-                                # Add newlines after each operator and indent properly
-                                formatted_plan = plan_text
-                                # Add newline before each Exec operator
-                                formatted_plan = re.sub(r'([A-Z][a-zA-Z]+Exec:)', r'\n\1', formatted_plan)
-                                # Indent nested operators
-                                lines = formatted_plan.split('\n')
-                                indented_lines = []
-                                indent_level = 0
-                                for line in lines:
-                                    if line.strip():
-                                        # Count leading spaces to determine nesting
-                                        if 'Exec:' in line:
-                                            indented_lines.append('  ' * indent_level + line.strip())
-                                            indent_level += 1
-                                        else:
-                                            indented_lines.append('  ' * max(0, indent_level - 1) + line.strip())
+                                    # Pretty print the plan with proper indentation
+                                    # Add newlines after each operator and indent properly
+                                    formatted_plan = plan_text
+                                    # Add newline before each Exec operator
+                                    formatted_plan = re.sub(r'([A-Z][a-zA-Z]+Exec:)', r'\n\1', formatted_plan)
+                                    # Indent nested operators
+                                    lines = formatted_plan.split('\n')
+                                    indented_lines = []
+                                    indent_level = 0
+                                    for line in lines:
+                                        if line.strip():
+                                            # Count leading spaces to determine nesting
+                                            if 'Exec:' in line:
+                                                indented_lines.append('  ' * indent_level + line.strip())
+                                                indent_level += 1
+                                            else:
+                                                indented_lines.append('  ' * max(0, indent_level - 1) + line.strip())
 
-                                formatted_plan = '\n'.join(indented_lines)
+                                    formatted_plan = '\n'.join(indented_lines)
 
-                                # Save to file in same directory as output_file for full details
-                                output_dir = os.path.dirname(output_file) if output_file else "."
-                                plan_file = os.path.join(output_dir, f"query_{query}_plan.txt")
-                                with open(plan_file, 'w') as f:
-                                    f.write(f"{plan_type}:\n")
-                                    f.write("=" * 80 + "\n\n")
-                                    f.write(formatted_plan)
-                                    f.write("\n\n" + "=" * 80 + "\n")
+                                    # Save to file in same directory as output_file for full details
+                                    output_dir = os.path.dirname(output_file) if output_file else "."
+                                    plan_file = os.path.join(output_dir, f"query_{query}_plan.txt")
+                                    with open(plan_file, 'w') as f:
+                                        f.write(f"{plan_type}:\n")
+                                        f.write("=" * 80 + "\n\n")
+                                        f.write(formatted_plan)
+                                        f.write("\n\n" + "=" * 80 + "\n")
 
-                                # Print first 2000 chars to console
-                                print(f"\n{plan_type}:")
-                                print("=" * 80)
-                                if len(formatted_plan) > 2000:
-                                    print(formatted_plan[:2000])
-                                    print(f"\n... ({len(formatted_plan) - 2000} more characters)")
-                                else:
-                                    print(formatted_plan)
-                                print("=" * 80)
-                                print(f"\n(Full plan saved to: {plan_file})")
-                        print("\n=== End Query Plan ===\n")
+                                    # Print first 2000 chars to console
+                                    print(f"\n{plan_type}:")
+                                    print("=" * 80)
+                                    if len(formatted_plan) > 2000:
+                                        print(formatted_plan[:2000])
+                                        print(f"\n... ({len(formatted_plan) - 2000} more characters)")
+                                    else:
+                                        print(formatted_plan)
+                                    print("=" * 80)
+                                    print(f"\n(Full plan saved to: {plan_file})")
+                            print("\n=== End Query Plan ===\n")
+                        else:
+                            print(f"Query {query} returned {len(rows)} rows (CREATE VIEW query, no EXPLAIN ANALYZE)")
 
                 end_time = time.time()
                 elapsed = end_time - start_time
