@@ -56,36 +56,62 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
     for query_num in query_numbers:
         print(f"=== Running Query {query_num} ===")
         query_file = os.path.join(queries_dir, f"q{query_num:02d}.sql")
-        
+
         if not os.path.exists(query_file):
             print(f"⚠ Query file not found: {query_file}")
             continue
-        
+
         with open(query_file, 'r') as f:
             query = f.read()
-        
+
         iteration_times = []
-        
+
         for i in range(iterations):
             print(f"  Iteration {i+1}/{iterations}...", end=' ', flush=True)
-            
+
             start = time.time()
             try:
-                result = conn.execute(query).fetchall()
+                # Check if query contains DDL statements (can't use EXPLAIN ANALYZE with them)
+                query_upper = query.upper()
+                use_explain_analyze = not any(stmt in query_upper for stmt in ["CREATE VIEW", "DROP VIEW", "CREATE TABLE", "DROP TABLE"])
+
+                if use_explain_analyze:
+                    # Use EXPLAIN ANALYZE to get execution metrics
+                    explain_query = f"EXPLAIN ANALYZE {query}"
+                    explain_result = conn.execute(explain_query).fetchall()
+
+                    # Save EXPLAIN ANALYZE output to file (only on first iteration)
+                    if i == 0:
+                        output_dir = os.path.dirname(output_file) if output_file else "."
+                        plan_file = os.path.join(output_dir, f"query_{query_num}_plan.txt")
+                        with open(plan_file, 'w') as f:
+                            f.write(f"DuckDB EXPLAIN ANALYZE - Query {query_num}\n")
+                            f.write("=" * 80 + "\n\n")
+                            for row in explain_result:
+                                f.write(str(row[1]) + "\n")  # explain_value column
+                            f.write("\n" + "=" * 80 + "\n")
+                        print(f"\n  ✓ Query plan saved to: {plan_file}")
+
+                    # Execute the actual query for timing
+                    result = conn.execute(query).fetchall()
+                else:
+                    # For DDL queries, execute normally
+                    result = conn.execute(query).fetchall()
+
                 elapsed = time.time() - start
                 iteration_times.append(elapsed)
                 print(f"{elapsed:.2f}s ({len(result)} rows)")
             except Exception as e:
                 print(f"ERROR: {e}")
                 break
-        
+
         if iteration_times:
             avg_time = sum(iteration_times) / len(iteration_times)
             min_time = min(iteration_times)
             max_time = max(iteration_times)
             print(f"  Query {query_num}: avg={avg_time:.2f}s, min={min_time:.2f}s, max={max_time:.2f}s")
             results[str(query_num)] = iteration_times
-        
+
         print()
     
     # Save results

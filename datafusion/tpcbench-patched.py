@@ -267,10 +267,8 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 
                         rows = df.collect()
 
-                        # Show query execution plan with actual metrics (only if EXPLAIN ANALYZE was used)
+                        # Save query execution plan to file (only if EXPLAIN ANALYZE was used)
                         if use_explain_analyze:
-                            print("\n=== Query Execution Plan (EXPLAIN ANALYZE) ===")
-
                             # Convert to pandas to get full string values without truncation
                             import pyarrow as pa
                             import re
@@ -313,19 +311,7 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                                         f.write(formatted_plan)
                                         f.write("\n\n" + "=" * 80 + "\n")
 
-                                    # Print first 2000 chars to console
-                                    print(f"\n{plan_type}:")
-                                    print("=" * 80)
-                                    if len(formatted_plan) > 2000:
-                                        print(formatted_plan[:2000])
-                                        print(f"\n... ({len(formatted_plan) - 2000} more characters)")
-                                    else:
-                                        print(formatted_plan)
-                                    print("=" * 80)
-                                    print(f"\n(Full plan saved to: {plan_file})")
-                            print("\n=== End Query Plan ===\n")
-                        else:
-                            print(f"Query {query} completed (DDL statement, no EXPLAIN ANALYZE available)")
+                                    print(f"✓ Query plan saved to: {plan_file}")
 
                 end_time = time.time()
                 elapsed = end_time - start_time
