@@ -35,7 +35,7 @@ Examples:
   $0 1 --query 18 --memory-limit 1024   # Run query 18 with 1GB memory limit (forces spilling)
   $0 1000 --hash-join                   # Run all queries using hash join instead of sort-merge join
 
-The script expects data to be at: ${MOUNT_POINT}/datafusion/tpch-sf<scale_factor>/
+The script expects data to be at: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
 EOF
   exit 1
 }
