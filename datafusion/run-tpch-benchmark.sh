@@ -22,7 +22,8 @@ Options:
   --iterations N           Number of iterations to run (default: 3)
   --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-results.json)
   --query N                Run only specific query number (can be specified multiple times)
-  --memory-limit MB        Memory limit in MB (forces spilling, e.g., --memory-limit 1024 for 1GB)
+  --memory-limit MB        Memory limit in MB (forces spilling, e.g., --memory-limit 122880 for 120GB)
+  --memory-limit-gb GB     Memory limit in GB (forces spilling, e.g., --memory-limit-gb 120 for 120GB)
   --hash-join              Enable hash join preference (default: sort-merge join)
   --max-temp-dir-size GB   Maximum temp directory size in GB (default: 1000GB = 1TB)
 
@@ -31,9 +32,10 @@ Examples:
   $0 100 --iterations 5          # Run all queries on SF100 data with 5 iterations
   $0 10 --output my-results.json # Run all queries and save to custom file
   $0 1 --query 18                       # Run only query 18 on SF1 data (sort-merge join)
-  $0 1 --query 1 --query 18             # Run only queries 1 and 18 on SF1 data
-  $0 1 --query 18 --memory-limit 1024   # Run query 18 with 1GB memory limit (forces spilling)
-  $0 1000 --hash-join                   # Run all queries using hash join instead of sort-merge join
+  $0 1 --query 1 --query 18                # Run only queries 1 and 18 on SF1 data
+  $0 1 --query 18 --memory-limit 1024      # Run query 18 with 1GB memory limit (forces spilling)
+  $0 1000 --memory-limit-gb 120            # Run all queries with 120GB memory limit
+  $0 1000 --hash-join                      # Run all queries using hash join instead of sort-merge join
 
 The script expects data to be at: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
 EOF
@@ -62,6 +64,7 @@ ITERATIONS=3
 OUTPUT_FILE=""  # Will be set to absolute path later
 QUERY_ARGS=()  # Array to store --query arguments
 MEMORY_LIMIT=""  # Memory limit in MB
+MEMORY_LIMIT_GB=""  # Memory limit in GB
 PREFER_HASH_JOIN="false"  # Default to sort-merge join (better spilling support)
 MAX_TEMP_DIR_SIZE="1000"  # Max temp directory size in GB (default 1TB)
 
@@ -83,6 +86,10 @@ while [[ $# -gt 0 ]]; do
       MEMORY_LIMIT="$2"
       shift 2
       ;;
+    --memory-limit-gb)
+      MEMORY_LIMIT_GB="$2"
+      shift 2
+      ;;
     --hash-join)
       PREFER_HASH_JOIN="true"
       shift 1
@@ -97,6 +104,15 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# Convert GB to MB if --memory-limit-gb is specified
+if [[ -n "${MEMORY_LIMIT_GB}" ]]; then
+  if [[ -n "${MEMORY_LIMIT}" ]]; then
+    echo "Error: Cannot specify both --memory-limit and --memory-limit-gb"
+    exit 1
+  fi
+  MEMORY_LIMIT=$((MEMORY_LIMIT_GB * 1024))
+fi
 
 # Set default output file to current directory if not specified
 if [[ -z "${OUTPUT_FILE}" ]]; then
