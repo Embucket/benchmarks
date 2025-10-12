@@ -136,19 +136,21 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     except Exception as e:
         print(f"✗ Could not enable explain mode: {e}")
 
-    # Disable repartitioning to reduce memory pressure
-    # try:
-    #     ctx.sql("SET datafusion.optimizer.repartition_joins = false")
-    #     print(f"✓ Set repartition_joins = false")
-    # except Exception as e:
-    #     print(f"✗ Could not set repartition_joins: {e}")
-
-    # Set target partitions to 32 to reduce parallelism and memory usage
+    # Set target partitions to control parallelism and memory usage
+    # Lower values = less memory, slower queries. Higher values = more memory, faster queries
+    # Recommended: 8-16 for memory-constrained, 32-64 for performance
     try:
-        ctx.sql("SET datafusion.execution.target_partitions = 32")
-        print(f"✓ Set target_partitions = 32")
+        ctx.sql("SET datafusion.execution.target_partitions = 16")
+        print(f"✓ Set target_partitions = 16")
     except Exception as e:
         print(f"✗ Could not set target_partitions: {e}")
+
+    # Enable coalesce batches to reduce memory fragmentation
+    try:
+        ctx.sql("SET datafusion.execution.coalesce_batches = true")
+        print(f"✓ Enabled coalesce_batches")
+    except Exception as e:
+        print(f"✗ Could not enable coalesce_batches: {e}")
 
     # Set max temp directory size (default 1TB)
     # DataFusion expects a string with units like "1000G" or "1T"
