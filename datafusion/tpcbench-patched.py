@@ -244,15 +244,16 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                     if len(sql) > 0:
                         print(f"Executing: {sql[:100]}...")  # Print first 100 chars
 
-                        # Check if query contains CREATE VIEW (can't use EXPLAIN ANALYZE with it)
-                        use_explain_analyze = "CREATE VIEW" not in sql.upper()
+                        # Check if query contains DDL statements (can't use EXPLAIN ANALYZE with them)
+                        sql_upper = sql.upper()
+                        use_explain_analyze = not any(stmt in sql_upper for stmt in ["CREATE VIEW", "DROP VIEW", "CREATE TABLE", "DROP TABLE"])
 
                         if use_explain_analyze:
                             # Use EXPLAIN ANALYZE to execute query and get metrics
                             explain_sql = f"EXPLAIN ANALYZE {sql}"
                             df = ctx.sql(explain_sql)
                         else:
-                            # For queries with CREATE VIEW, execute normally
+                            # For queries with DDL statements, execute normally
                             df = ctx.sql(sql)
 
                         # Check temp directory during execution (before collect)
@@ -324,7 +325,7 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                                     print(f"\n(Full plan saved to: {plan_file})")
                             print("\n=== End Query Plan ===\n")
                         else:
-                            print(f"Query {query} returned {len(rows)} rows (CREATE VIEW query, no EXPLAIN ANALYZE)")
+                            print(f"Query {query} completed (DDL statement, no EXPLAIN ANALYZE available)")
 
                 end_time = time.time()
                 elapsed = end_time - start_time
