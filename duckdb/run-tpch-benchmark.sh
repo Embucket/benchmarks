@@ -131,8 +131,19 @@ if ! command -v duckdb &> /dev/null; then
       sudo apt-get install -y unzip
     fi
 
-    echo ">>> Downloading DuckDB for Linux..."
-    wget -q https://github.com/duckdb/duckdb/releases/latest/download/duckdb_cli-linux-amd64.zip -O /tmp/duckdb.zip
+    # Detect architecture
+    ARCH=$(uname -m)
+    if [[ "$ARCH" == "x86_64" ]]; then
+      DUCKDB_ARCH="amd64"
+    elif [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
+      DUCKDB_ARCH="aarch64"
+    else
+      echo "Error: Unsupported architecture: $ARCH"
+      exit 1
+    fi
+
+    echo ">>> Downloading DuckDB for Linux ($ARCH)..."
+    wget -q https://github.com/duckdb/duckdb/releases/latest/download/duckdb_cli-linux-${DUCKDB_ARCH}.zip -O /tmp/duckdb.zip
     unzip -q /tmp/duckdb.zip -d /tmp/
     sudo mv /tmp/duckdb /usr/local/bin/
     sudo chmod +x /usr/local/bin/duckdb
@@ -157,7 +168,7 @@ echo
 echo ">>> Checking for Python DuckDB package..."
 if ! python3 -c "import duckdb" &> /dev/null; then
   echo ">>> Python DuckDB package not found. Installing..."
-  pip3 install duckdb --quiet
+  pip3 install duckdb --break-system-packages --quiet
   echo ">>> Python DuckDB package installed successfully"
 else
   echo ">>> Python DuckDB package already installed"
