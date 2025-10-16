@@ -153,6 +153,18 @@ fi
 
 echo
 
+# Check for Python DuckDB package
+echo ">>> Checking for Python DuckDB package..."
+if ! python3 -c "import duckdb" &> /dev/null; then
+  echo ">>> Python DuckDB package not found. Installing..."
+  pip3 install duckdb --quiet
+  echo ">>> Python DuckDB package installed successfully"
+else
+  echo ">>> Python DuckDB package already installed"
+fi
+
+echo
+
 # Increase file descriptor limit for this session
 CURRENT_LIMIT=$(ulimit -n)
 if [[ ${CURRENT_LIMIT} -lt 65536 ]]; then
