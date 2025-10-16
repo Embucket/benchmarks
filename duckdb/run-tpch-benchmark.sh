@@ -143,8 +143,18 @@ if ! command -v duckdb &> /dev/null; then
     fi
 
     echo ">>> Downloading DuckDB for Linux ($ARCH)..."
-    wget -q https://github.com/duckdb/duckdb/releases/latest/download/duckdb_cli-linux-${DUCKDB_ARCH}.zip -O /tmp/duckdb.zip
-    unzip -q /tmp/duckdb.zip -d /tmp/
+    DUCKDB_URL="https://github.com/duckdb/duckdb/releases/latest/download/duckdb_cli-linux-${DUCKDB_ARCH}.zip"
+    if ! wget --show-progress -q "$DUCKDB_URL" -O /tmp/duckdb.zip; then
+      echo "Error: Failed to download DuckDB from $DUCKDB_URL"
+      exit 1
+    fi
+
+    if ! unzip -q /tmp/duckdb.zip -d /tmp/; then
+      echo "Error: Failed to unzip DuckDB"
+      rm /tmp/duckdb.zip
+      exit 1
+    fi
+
     sudo mv /tmp/duckdb /usr/local/bin/
     sudo chmod +x /usr/local/bin/duckdb
     rm /tmp/duckdb.zip
