@@ -136,7 +136,7 @@ if ! command -v duckdb &> /dev/null; then
     if [[ "$ARCH" == "x86_64" ]]; then
       DUCKDB_ARCH="amd64"
     elif [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
-      DUCKDB_ARCH="aarch64"
+      DUCKDB_ARCH="arm64"
     else
       echo "Error: Unsupported architecture: $ARCH"
       exit 1
