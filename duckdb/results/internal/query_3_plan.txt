@@ -1,0 +1,215 @@
+DuckDB EXPLAIN ANALYZE - Query 3
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     l_orderkey,     sum(l_extendedprice * (1 - l_discount)) AS revenue,     o_orderdate,     o_shippriority FROM     customer,     orders,     lineitem WHERE     c_mktsegment = 'BUILDING'     AND c_custkey = o_custkey     AND l_orderkey = o_orderkey     AND o_orderdate < CAST('1995-03-15' AS date)     AND l_shipdate > CAST('1995-03-15' AS date) GROUP BY     l_orderkey,     o_orderdate,     o_shippriority ORDER BY     revenue DESC,     o_orderdate LIMIT 10; 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 10.01s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│           TOP_N           │
+│    ────────────────────   │
+│          Top: 10          │
+│                           │
+│         Order By:         │
+│  sum(("tpch-sf1000".main  │
+│ .lineitem.l_extendedprice │
+│ * (1 - "tpch-sf1000".main │
+│  .lineitem.l_discount)))  │
+│            DESC           │
+│ "tpch-sf1000".main.orders │
+│      .o_orderdate ASC     │
+│                           │
+│          10 rows          │
+│          (0.07s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│         l_orderkey        │
+│          revenue          │
+│        o_orderdate        │
+│       o_shippriority      │
+│                           │
+│      11,326,372 rows      │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             #0            │
+│             #1            │
+│__internal_decompress_integ│
+│     ral_integer(#2, 0)    │
+│             #3            │
+│                           │
+│      11,326,372 rows      │
+│          (0.01s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │
+│    ────────────────────   │
+│          Groups:          │
+│             #0            │
+│             #1            │
+│             #2            │
+│                           │
+│    Aggregates: sum(#3)    │
+│                           │
+│      11,326,372 rows      │
+│          (8.69s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│         l_orderkey        │
+│        o_orderdate        │
+│       o_shippriority      │
+│ (l_extendedprice * (1.00 -│
+│        l_discount))       │
+│                           │
+│      29,931,857 rows      │
+│          (0.15s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             #0            │
+│             #1            │
+│             #2            │
+│             #3            │
+│__internal_compress_integra│
+│     l_utinyint(#4, 0)     │
+│                           │
+│      29,931,857 rows      │
+│          (0.05s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             #0            │
+│             #1            │
+│             #2            │
+│             #3            │
+│__internal_decompress_integ│
+│     ral_integer(#4, 0)    │
+│                           │
+│      29,931,857 rows      │
+│          (0.10s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│  l_orderkey = o_orderkey  │              │
+│                           │              │
+│      29,931,857 rows      │              │
+│         (208.74s)         │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││         PROJECTION        │
+│    ────────────────────   ││    ────────────────────   │
+│      Table: lineitem      ││             #0            │
+│   Type: Sequential Scan   ││             #1            │
+│                           ││__internal_compress_integra│
+│        Projections:       ││     l_utinyint(#2, 0)     │
+│         l_orderkey        ││__internal_compress_integra│
+│      l_extendedprice      ││     l_uinteger(#3, 1)     │
+│         l_discount        ││                           │
+│                           ││                           │
+│          Filters:         ││                           │
+│  l_shipdate>'1995-03-15': ││                           │
+│           :DATE           ││                           │
+│                           ││                           │
+│     3,234,397,581 rows    ││      145,769,513 rows     │
+│         (154.97s)         ││          (1.52s)          │
+└───────────────────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         PROJECTION        │
+                             │    ────────────────────   │
+                             │             #0            │
+                             │             #1            │
+                             │             #2            │
+                             │__internal_decompress_integ│
+                             │     ral_bigint(#3, 1)     │
+                             │                           │
+                             │      145,769,513 rows     │
+                             │          (1.27s)          │
+                             └─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         HASH_JOIN         │
+                             │    ────────────────────   │
+                             │      Join Type: INNER     │
+                             │                           │
+                             │        Conditions:        ├──────────────┐
+                             │   o_custkey = c_custkey   │              │
+                             │                           │              │
+                             │      145,769,513 rows     │              │
+                             │          (64.51s)         │              │
+                             └─────────────┬─────────────┘              │
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │         PROJECTION        ││         PROJECTION        │
+                             │    ────────────────────   ││    ────────────────────   │
+                             │__internal_compress_integra││__internal_compress_integra│
+                             │     l_uinteger(#0, 1)     ││     l_uinteger(#0, 1)     │
+                             │             #1            ││                           │
+                             │             #2            ││                           │
+                             │             #3            ││                           │
+                             │                           ││                           │
+                             │      728,813,953 rows     ││      29,998,152 rows      │
+                             │          (2.42s)          ││          (0.11s)          │
+                             └─────────────┬─────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        ││           FILTER          │
+                             │    ────────────────────   ││    ────────────────────   │
+                             │       Table: orders       ││  (c_custkey <= 149999999) │
+                             │   Type: Sequential Scan   ││                           │
+                             │                           ││                           │
+                             │        Projections:       ││                           │
+                             │         o_custkey         ││                           │
+                             │         o_orderkey        ││                           │
+                             │        o_orderdate        ││                           │
+                             │       o_shippriority      ││                           │
+                             │                           ││                           │
+                             │          Filters:         ││                           │
+                             │ o_orderdate<'1995-03-15': ││                           │
+                             │           :DATE           ││                           │
+                             │                           ││                           │
+                             │      728,813,953 rows     ││      29,998,152 rows      │
+                             │         (137.56s)         ││          (0.14s)          │
+                             └───────────────────────────┘└─────────────┬─────────────┘
+                                                          ┌─────────────┴─────────────┐
+                                                          │         TABLE_SCAN        │
+                                                          │    ────────────────────   │
+                                                          │      Table: customer      │
+                                                          │   Type: Sequential Scan   │
+                                                          │                           │
+                                                          │        Projections:       │
+                                                          │         c_custkey         │
+                                                          │                           │
+                                                          │          Filters:         │
+                                                          │  c_mktsegment='BUILDING'  │
+                                                          │                           │
+                                                          │      29,998,152 rows      │
+                                                          │          (3.39s)          │
+                                                          └───────────────────────────┘
+
+
+================================================================================

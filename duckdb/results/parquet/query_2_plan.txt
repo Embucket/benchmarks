@@ -1,0 +1,255 @@
+DuckDB EXPLAIN ANALYZE - Query 2
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     s_acctbal,     s_name,     n_name,     p_partkey,     p_mfgr,     s_address,     s_phone,     s_comment FROM     part,     supplier,     partsupp,     nation,     region WHERE     p_partkey = ps_partkey     AND s_suppkey = ps_suppkey     AND p_size = 15     AND p_type LIKE '%BRASS'     AND s_nationkey = n_nationkey     AND n_regionkey = r_regionkey     AND r_name = 'EUROPE'     AND ps_supplycost = (         SELECT             min(ps_supplycost)         FROM             partsupp,             supplier,             nation,             region         WHERE             p_partkey = ps_partkey             AND s_suppkey = ps_suppkey             AND s_nationkey = n_nationkey             AND n_regionkey = r_regionkey             AND r_name = 'EUROPE') ORDER BY     s_acctbal DESC,     n_name,     s_name,     p_partkey LIMIT 100; 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││               Total Time: 3.87s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌─────────────────┐
+│      QUERY      │
+└────────┬────────┘
+┌────────┴────────┐
+│ EXPLAIN_ANALYZE │
+│    ──────────   │
+│      0 rows     │
+│     (0.00s)     │
+└────────┬────────┘
+┌────────┴────────┐
+│      TOP_N      │
+│    ──────────   │
+│     Top: 100    │
+│                 │
+│    Order By:    │
+│   memory.main   │
+│    .supplier    │
+│ .s_acctbal DESC │
+│   memory.main   │
+│  .nation.n_name │
+│        ASC      │
+│   memory.main   │
+│ .supplier.s_name│
+│        ASC      │
+│ memory.main.part│
+│  .p_partkey ASC │
+│                 │
+│     100 rows    │
+│     (0.04s)     │
+└────────┬────────┘
+┌────────┴────────┐
+│    PROJECTION   │
+│    ──────────   │
+│    s_acctbal    │
+│      s_name     │
+│      n_name     │
+│    p_partkey    │
+│      p_mfgr     │
+│    s_address    │
+│     s_phone     │
+│    s_comment    │
+│                 │
+│   470,727 rows  │
+│     (0.00s)     │
+└────────┬────────┘
+┌────────┴────────┐
+│    PROJECTION   │
+│    ──────────   │
+│        #1       │
+│        #2       │
+│        #3       │
+│        #4       │
+│        #5       │
+│        #6       │
+│        #7       │
+│        #8       │
+│                 │
+│   470,727 rows  │
+│     (0.00s)     │
+└────────┬────────┘
+┌────────┴────────┐
+│      FILTER     │
+│    ──────────   │
+│ (ps_supplycost =│
+│     SUBQUERY)   │
+│                 │
+│   470,727 rows  │
+│     (0.01s)     │
+└────────┬────────┘
+┌────────┴────────┐
+│ LEFT_DELIM_JOIN │
+│    ──────────   │
+│    Join Type:   │
+│       LEFT      │
+│                 │
+│   Conditions:   │
+│ p_partkey IS NOT│
+│   DISTINCT FROM ├─────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│     p_partkey   │                                                                                     │                                                                                                                 │
+│                 │                                                                                     │                                                                                                                 │
+│   Delim Index:  │                                                                                     │                                                                                                                 │
+│        1        │                                                                                     │                                                                                                                 │
+│                 │                                                                                     │                                                                                                                 │
+│      0 rows     │                                                                                     │                                                                                                                 │
+│     (0.15s)     │                                                                                     │                                                                                                                 │
+└────────┬────────┘                                                                                     │                                                                                                                 │
+┌────────┴────────┐                                                                            ┌────────┴────────┐                                                                                               ┌────────┴────────┐
+│    HASH_JOIN    │                                                                            │    HASH_JOIN    │                                                                                               │  HASH_GROUP_BY  │
+│    ──────────   │                                                                            │    ──────────   │                                                                                               │    ──────────   │
+│    Join Type:   │                                                                            │    Join Type:   │                                                                                               │    Groups: #7   │
+│      INNER      │                                                                            │       LEFT      │                                                                                               │                 │
+│                 │                                                                            │                 │                                                                                               │                 │
+│   Conditions:   │                                                                            │   Conditions:   │                                                                                               │                 │
+│   ps_partkey =  ├──────────────────────────────────────────────────────────────────┐         │ p_partkey IS NOT├─────────┐                                                                                     │                 │
+│     p_partkey   │                                                                  │         │   DISTINCT FROM │         │                                                                                     │                 │
+│                 │                                                                  │         │     p_partkey   │         │                                                                                     │                 │
+│                 │                                                                  │         │                 │         │                                                                                     │                 │
+│   637,969 rows  │                                                                  │         │   637,969 rows  │         │                                                                                     │   470,725 rows  │
+│     (11.43s)    │                                                                  │         │     (0.07s)     │         │                                                                                     │     (0.03s)     │
+└────────┬────────┘                                                                  │         └────────┬────────┘         │                                                                                     └─────────────────┘
+┌────────┴────────┐                                                         ┌────────┴────────┐┌────────┴────────┐┌────────┴────────┐
+│    HASH_JOIN    │                                                         │    TABLE_SCAN   ││ COLUMN_DATA_SCAN││    PROJECTION   │
+│    ──────────   │                                                         │    ──────────   ││                 ││    ──────────   │
+│    Join Type:   │                                                         │    Function:    ││                 ││min(ps_supplycost│
+│      INNER      │                                                         │   READ_PARQUET  ││                 ││        )        │
+│                 │                                                         │                 ││                 ││    p_partkey    │
+│   Conditions:   │                                                         │   Projections:  ││                 ││                 │
+│   ps_suppkey =  │                                                         │    p_partkey    ││                 ││                 │
+│     s_suppkey   │                                                         │      p_mfgr     ││                 ││                 │
+│                 │                                                         │                 ││                 ││                 │
+│                 ├─────────┐                                               │     Filters:    ││                 ││                 │
+│                 │         │                                               │ suffix(p_type,  ││                 ││                 │
+│                 │         │                                               │     'BRASS')    ││                 ││                 │
+│                 │         │                                               │    p_size=15    ││                 ││                 │
+│                 │         │                                               │                 ││                 ││                 │
+│                 │         │                                               │Total Files Read:││                 ││                 │
+│                 │         │                                               │        20       ││                 ││                 │
+│                 │         │                                               │                 ││                 ││                 │
+│ 159,971,236 rows│         │                                               │   797,750 rows  ││   637,969 rows  ││   470,725 rows  │
+│     (58.42s)    │         │                                               │     (8.17s)     ││     (0.01s)     ││     (0.00s)     │
+└────────┬────────┘         │                                               └─────────────────┘└─────────────────┘└────────┬────────┘
+┌────────┴────────┐┌────────┴────────┐                                                                            ┌────────┴────────┐
+│    TABLE_SCAN   ││    HASH_JOIN    │                                                                            │  HASH_GROUP_BY  │
+│    ──────────   ││    ──────────   │                                                                            │    ──────────   │
+│    Function:    ││    Join Type:   │                                                                            │    Groups: #0   │
+│   READ_PARQUET  ││      INNER      │                                                                            │                 │
+│                 ││                 │                                                                            │   Aggregates:   │
+│   Projections:  ││   Conditions:   │                                                                            │     min(#1)     │
+│    ps_partkey   ││  s_nationkey =  │                                                                            │                 │
+│    ps_suppkey   ││    n_nationkey  ├─────────┐                                                                  │                 │
+│  ps_supplycost  ││                 │         │                                                                  │                 │
+│                 ││                 │         │                                                                  │                 │
+│Total Files Read:││                 │         │                                                                  │                 │
+│        20       ││                 │         │                                                                  │                 │
+│                 ││                 │         │                                                                  │                 │
+│ 799,997,759 rows││  1,999,643 rows │         │                                                                  │   470,725 rows  │
+│     (34.60s)    ││     (0.07s)     │         │                                                                  │     (0.13s)     │
+└─────────────────┘└────────┬────────┘         │                                                                  └────────┬────────┘
+                   ┌────────┴────────┐┌────────┴────────┐                                                         ┌────────┴────────┐
+                   │    TABLE_SCAN   ││    HASH_JOIN    │                                                         │    PROJECTION   │
+                   │    ──────────   ││    ──────────   │                                                         │    ──────────   │
+                   │    Function:    ││    Join Type:   │                                                         │    p_partkey    │
+                   │   READ_PARQUET  ││      INNER      │                                                         │  ps_supplycost  │
+                   │                 ││                 │                                                         │                 │
+                   │   Projections:  ││   Conditions:   │                                                         │                 │
+                   │    s_suppkey    ││  n_regionkey =  │                                                         │                 │
+                   │      s_name     ││    r_regionkey  │                                                         │                 │
+                   │    s_address    ││                 │                                                         │                 │
+                   │   s_nationkey   ││                 ├─────────┐                                               │                 │
+                   │     s_phone     ││                 │         │                                               │                 │
+                   │    s_acctbal    ││                 │         │                                               │                 │
+                   │    s_comment    ││                 │         │                                               │                 │
+                   │                 ││                 │         │                                               │                 │
+                   │Total Files Read:││                 │         │                                               │                 │
+                   │        20       ││                 │         │                                               │                 │
+                   │                 ││                 │         │                                               │                 │
+                   │  7,199,132 rows ││      5 rows     │         │                                               │   637,969 rows  │
+                   │     (3.30s)     ││     (0.00s)     │         │                                               │     (0.00s)     │
+                   └─────────────────┘└────────┬────────┘         │                                               └────────┬────────┘
+                                      ┌────────┴────────┐┌────────┴────────┐                                      ┌────────┴────────┐
+                                      │    TABLE_SCAN   ││    TABLE_SCAN   │                                      │    PROJECTION   │
+                                      │    ──────────   ││    ──────────   │                                      │    ──────────   │
+                                      │    Function:    ││    Function:    │                                      │        #0       │
+                                      │   READ_PARQUET  ││   READ_PARQUET  │                                      │        #1       │
+                                      │                 ││                 │                                      │        #2       │
+                                      │   Projections:  ││   Projections:  │                                      │__internal_compre│
+                                      │   n_nationkey   ││   r_regionkey   │                                      │ss_integral_utiny│
+                                      │      n_name     ││                 │                                      │    int(#3, 0)   │
+                                      │   n_regionkey   ││     Filters:    │                                      │__internal_compre│
+                                      │                 ││ r_name='EUROPE' │                                      │ss_integral_utiny│
+                                      │Total Files Read:││                 │                                      │    int(#4, 0)   │
+                                      │        1        ││Total Files Read:│                                      │                 │
+                                      │                 ││        1        │                                      │                 │
+                                      │                 ││                 │                                      │                 │
+                                      │      5 rows     ││      1 row      │                                      │   637,969 rows  │
+                                      │     (0.00s)     ││     (0.00s)     │                                      │     (0.01s)     │
+                                      └─────────────────┘└─────────────────┘                                      └────────┬────────┘
+                                                                                                                  ┌────────┴────────┐
+                                                                                                                  │    HASH_JOIN    │
+                                                                                                                  │    ──────────   │
+                                                                                                                  │    Join Type:   │
+                                                                                                                  │      INNER      │
+                                                                                                                  │                 │
+                                                                                                                  │   Conditions:   ├────────────────────────────┐
+                                                                                                                  │   ps_suppkey =  │                            │
+                                                                                                                  │     s_suppkey   │                            │
+                                                                                                                  │                 │                            │
+                                                                                                                  │   637,969 rows  │                            │
+                                                                                                                  │     (0.45s)     │                            │
+                                                                                                                  └────────┬────────┘                            │
+                                                                                                                  ┌────────┴────────┐                   ┌────────┴────────┐
+                                                                                                                  │    HASH_JOIN    │                   │    HASH_JOIN    │
+                                                                                                                  │    ──────────   │                   │    ──────────   │
+                                                                                                                  │    Join Type:   │                   │    Join Type:   │
+                                                                                                                  │      INNER      │                   │      INNER      │
+                                                                                                                  │                 │                   │                 │
+                                                                                                                  │   Conditions:   ├─────────┐         │   Conditions:   ├─────────┐
+                                                                                                                  │   ps_partkey =  │         │         │  s_nationkey =  │         │
+                                                                                                                  │     p_partkey   │         │         │    n_nationkey  │         │
+                                                                                                                  │                 │         │         │                 │         │
+                                                                                                                  │  1,882,896 rows │         │         │  1,999,643 rows │         │
+                                                                                                                  │     (14.40s)    │         │         │     (0.05s)     │         │
+                                                                                                                  └────────┬────────┘         │         └────────┬────────┘         │
+                                                                                                                  ┌────────┴────────┐┌────────┴────────┐┌────────┴────────┐┌────────┴────────┐
+                                                                                                                  │    TABLE_SCAN   ││    DELIM_SCAN   ││    TABLE_SCAN   ││    HASH_JOIN    │
+                                                                                                                  │    ──────────   ││    ──────────   ││    ──────────   ││    ──────────   │
+                                                                                                                  │    Function:    ││   Delim Index:  ││    Function:    ││    Join Type:   │
+                                                                                                                  │   READ_PARQUET  ││        1        ││   READ_PARQUET  ││      INNER      │
+                                                                                                                  │                 ││                 ││                 ││                 │
+                                                                                                                  │   Projections:  ││                 ││   Projections:  ││   Conditions:   │
+                                                                                                                  │    ps_partkey   ││                 ││    s_suppkey    ││  n_regionkey =  │
+                                                                                                                  │    ps_suppkey   ││                 ││   s_nationkey   ││    r_regionkey  ├─────────┐
+                                                                                                                  │  ps_supplycost  ││                 ││                 ││                 │         │
+                                                                                                                  │                 ││                 ││Total Files Read:││                 │         │
+                                                                                                                  │Total Files Read:││                 ││        20       ││                 │         │
+                                                                                                                  │        20       ││                 ││                 ││                 │         │
+                                                                                                                  │                 ││                 ││                 ││                 │         │
+                                                                                                                  │ 799,995,119 rows││      0 rows     ││  7,199,132 rows ││      5 rows     │         │
+                                                                                                                  │     (27.44s)    ││     (0.00s)     ││     (0.26s)     ││     (0.00s)     │         │
+                                                                                                                  └─────────────────┘└─────────────────┘└─────────────────┘└────────┬────────┘         │
+                                                                                                                                                                           ┌────────┴────────┐┌────────┴────────┐
+                                                                                                                                                                           │    TABLE_SCAN   ││    TABLE_SCAN   │
+                                                                                                                                                                           │    ──────────   ││    ──────────   │
+                                                                                                                                                                           │    Function:    ││    Function:    │
+                                                                                                                                                                           │   READ_PARQUET  ││   READ_PARQUET  │
+                                                                                                                                                                           │                 ││                 │
+                                                                                                                                                                           │   Projections:  ││   Projections:  │
+                                                                                                                                                                           │   n_nationkey   ││   r_regionkey   │
+                                                                                                                                                                           │   n_regionkey   ││                 │
+                                                                                                                                                                           │                 ││     Filters:    │
+                                                                                                                                                                           │Total Files Read:││ r_name='EUROPE' │
+                                                                                                                                                                           │        1        ││                 │
+                                                                                                                                                                           │                 ││Total Files Read:│
+                                                                                                                                                                           │                 ││        1        │
+                                                                                                                                                                           │                 ││                 │
+                                                                                                                                                                           │      5 rows     ││      1 row      │
+                                                                                                                                                                           │     (0.00s)     ││     (0.00s)     │
+                                                                                                                                                                           └─────────────────┘└─────────────────┘
+
+
+================================================================================

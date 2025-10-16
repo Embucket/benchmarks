@@ -1,0 +1,213 @@
+DuckDB EXPLAIN ANALYZE - Query 11
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     ps_partkey,     sum(ps_supplycost * ps_availqty) AS value FROM     partsupp,     supplier,     nation WHERE     ps_suppkey = s_suppkey     AND s_nationkey = n_nationkey     AND n_name = 'GERMANY' GROUP BY     ps_partkey HAVING     sum(ps_supplycost * ps_availqty) > (         SELECT             sum(ps_supplycost * ps_availqty) * 0.0001000000         FROM             partsupp,             supplier,             nation         WHERE             ps_suppkey = s_suppkey             AND s_nationkey = n_nationkey             AND n_name = 'GERMANY') ORDER BY     value DESC; 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││               Total Time: 2.21s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│__internal_decompress_integ│
+│     ral_bigint(#0, 1)     │
+│             #1            │
+│                           │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│          ORDER_BY         │
+│    ────────────────────   │
+│  sum(("tpch-sf1000".main  │
+│ .partsupp.ps_supplycost * │
+│     "tpch-sf1000".main    │
+│  .partsupp.ps_availqty))  │
+│            DESC           │
+│                           │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│__internal_compress_integra│
+│     l_uinteger(#0, 1)     │
+│             #1            │
+│                           │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│         ps_partkey        │
+│           value           │
+│                           │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      NESTED_LOOP_JOIN     │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        │
+│       CAST(sum((CAST      │
+│ (ps_supplycost AS DECIMAL ├────────────────────────────────────────────────────────────────────────┐
+│ (34,2)) * CAST(ps_availqty│                                                                        │
+│   AS DECIMAL(34,0)))) AS  │                                                                        │
+│ DECIMAL(38,12)) > SUBQUERY│                                                                        │
+│                           │                                                                        │
+│           0 rows          │                                                                        │
+│          (1.30s)          │                                                                        │
+└─────────────┬─────────────┘                                                                        │
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         PROJECTION        │                                                          │         PROJECTION        │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│__internal_decompress_integ│                                                          │ CASE  WHEN ((#1 > 1)) THEN│
+│     ral_bigint(#0, 1)     │                                                          │   ("error"('More than one │
+│             #1            │                                                          │      row returned by a    │
+│                           │                                                          │     subquery used as an   │
+│                           │                                                          │     expression - scalar   │
+│                           │                                                          │     subqueries can only   │
+│                           │                                                          │    return a single row.   │
+│                           │                                                          │          Use "SET         │
+│                           │                                                          │ scalar_subquery_error_on_m│
+│                           │                                                          │   ultiple_rows=false" to  │
+│                           │                                                          │     revert to previous    │
+│                           │                                                          │   behavior of returning a │
+│                           │                                                          │ random row.')) ELSE #0 END│
+│                           │                                                          │                           │
+│      30,129,021 rows      │                                                          │           1 row           │
+│          (0.03s)          │                                                          │          (0.00s)          │
+└─────────────┬─────────────┘                                                          └─────────────┬─────────────┘
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │                                                          │    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│         Groups: #0        │                                                          │        Aggregates:        │
+│    Aggregates: sum(#1)    │                                                          │        "first"(#0)        │
+│                           │                                                          │        count_star()       │
+│                           │                                                          │                           │
+│      30,129,021 rows      │                                                          │           1 row           │
+│          (19.82s)         │                                                          │          (0.00s)          │
+└─────────────┬─────────────┘                                                          └─────────────┬─────────────┘
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         PROJECTION        │                                                          │         PROJECTION        │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│         ps_partkey        │                                                          │             #0            │
+│   (CAST(ps_supplycost AS  │                                                          │                           │
+│    DECIMAL(34,2)) * CAST  │                                                          │                           │
+│ (ps_availqty AS DECIMAL(34│                                                          │                           │
+│           ,0)))           │                                                          │                           │
+│                           │                                                          │                           │
+│      31,995,840 rows      │                                                          │           1 row           │
+│          (3.22s)          │                                                          │          (0.00s)          │
+└─────────────┬─────────────┘                                                          └─────────────┬─────────────┘
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         PROJECTION        │                                                          │         PROJECTION        │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│__internal_compress_integra│                                                          │  (sum((CAST(ps_supplycost │
+│     l_uinteger(#0, 1)     │                                                          │  AS DECIMAL(34,2)) * CAST │
+│__internal_compress_integra│                                                          │ (ps_availqty AS DECIMAL(34│
+│     l_uinteger(#1, 1)     │                                                          │   ,0)))) * 0.0001000000)  │
+│             #2            │                                                          │                           │
+│             #3            │                                                          │                           │
+│__internal_compress_integra│                                                          │                           │
+│     l_uinteger(#4, 1)     │                                                          │                           │
+│__internal_compress_integra│                                                          │                           │
+│     l_utinyint(#5, 0)     │                                                          │                           │
+│__internal_compress_integra│                                                          │                           │
+│     l_utinyint(#6, 0)     │                                                          │                           │
+│                           │                                                          │                           │
+│      31,995,840 rows      │                                                          │           1 row           │
+│          (2.19s)          │                                                          │          (0.00s)          │
+└─────────────┬─────────────┘                                                          └─────────────┬─────────────┘
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                                                          │    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│      Join Type: INNER     │                                                          │    Aggregates: sum(#0)    │
+│                           │                                                          │                           │
+│        Conditions:        ├──────────────┐                                           │                           │
+│   ps_suppkey = s_suppkey  │              │                                           │                           │
+│                           │              │                                           │                           │
+│      31,995,840 rows      │              │                                           │           1 row           │
+│          (23.32s)         │              │                                           │          (0.57s)          │
+└─────────────┬─────────────┘              │                                           └─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││         HASH_JOIN         │                             │         PROJECTION        │
+│    ────────────────────   ││    ────────────────────   │                             │    ────────────────────   │
+│      Table: partsupp      ││      Join Type: INNER     │                             │   (CAST(ps_supplycost AS  │
+│   Type: Sequential Scan   ││                           │                             │    DECIMAL(34,2)) * CAST  │
+│                           ││        Conditions:        │                             │ (ps_availqty AS DECIMAL(34│
+│        Projections:       ││ s_nationkey = n_nationkey │                             │           ,0)))           │
+│         ps_suppkey        ││                           ├──────────────┐              │                           │
+│         ps_partkey        ││                           │              │              │                           │
+│       ps_supplycost       ││                           │              │              │                           │
+│        ps_availqty        ││                           │              │              │                           │
+│                           ││                           │              │              │                           │
+│      799,994,960 rows     ││        399,948 rows       │              │              │      31,995,840 rows      │
+│          (6.07s)          ││          (0.02s)          │              │              │          (3.23s)          │
+└───────────────────────────┘└─────────────┬─────────────┘              │              └─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        ││         TABLE_SCAN        ││         HASH_JOIN         │
+                             │    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+                             │      Table: supplier      ││       Table: nation       ││      Join Type: INNER     │
+                             │   Type: Sequential Scan   ││   Type: Sequential Scan   ││                           │
+                             │                           ││                           ││        Conditions:        │
+                             │        Projections:       ││        Projections:       ││   ps_suppkey = s_suppkey  │
+                             │         s_suppkey         ││        n_nationkey        ││                           ├──────────────┐
+                             │        s_nationkey        ││                           ││                           │              │
+                             │                           ││          Filters:         ││                           │              │
+                             │                           ││      n_name='GERMANY'     ││                           │              │
+                             │                           ││                           ││                           │              │
+                             │        399,948 rows       ││           1 row           ││      31,995,840 rows      │              │
+                             │          (0.04s)          ││          (0.00s)          ││          (17.47s)         │              │
+                             └───────────────────────────┘└───────────────────────────┘└─────────────┬─────────────┘              │
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │         TABLE_SCAN        ││         HASH_JOIN         │
+                                                                                       │    ────────────────────   ││    ────────────────────   │
+                                                                                       │      Table: partsupp      ││      Join Type: INNER     │
+                                                                                       │   Type: Sequential Scan   ││                           │
+                                                                                       │                           ││        Conditions:        │
+                                                                                       │        Projections:       ││ s_nationkey = n_nationkey │
+                                                                                       │         ps_suppkey        ││                           ├──────────────┐
+                                                                                       │       ps_supplycost       ││                           │              │
+                                                                                       │        ps_availqty        ││                           │              │
+                                                                                       │                           ││                           │              │
+                                                                                       │      799,994,960 rows     ││        399,948 rows       │              │
+                                                                                       │          (9.78s)          ││          (0.04s)          │              │
+                                                                                       └───────────────────────────┘└─────────────┬─────────────┘              │
+                                                                                                                    ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                                                    │         TABLE_SCAN        ││         TABLE_SCAN        │
+                                                                                                                    │    ────────────────────   ││    ────────────────────   │
+                                                                                                                    │      Table: supplier      ││       Table: nation       │
+                                                                                                                    │   Type: Sequential Scan   ││   Type: Sequential Scan   │
+                                                                                                                    │                           ││                           │
+                                                                                                                    │        Projections:       ││        Projections:       │
+                                                                                                                    │         s_suppkey         ││        n_nationkey        │
+                                                                                                                    │        s_nationkey        ││                           │
+                                                                                                                    │                           ││          Filters:         │
+                                                                                                                    │                           ││      n_name='GERMANY'     │
+                                                                                                                    │                           ││                           │
+                                                                                                                    │        399,948 rows       ││           1 row           │
+                                                                                                                    │          (0.04s)          ││          (0.00s)          │
+                                                                                                                    └───────────────────────────┘└───────────────────────────┘
+
+
+================================================================================

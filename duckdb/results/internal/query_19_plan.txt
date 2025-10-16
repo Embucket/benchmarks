@@ -1,0 +1,173 @@
+DuckDB EXPLAIN ANALYZE - Query 19
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     sum(l_extendedprice * (1 - l_discount)) AS revenue FROM     lineitem,     part WHERE (p_partkey = l_partkey     AND p_brand = 'Brand#12'     AND p_container IN ('SM CASE', 'SM BOX', 'SM PACK', 'SM PKG')     AND l_quantity >= 1     AND l_quantity <= 1 + 10     AND p_size BETWEEN 1 AND 5     AND l_shipmode IN ('AIR', 'AIR REG')     AND l_shipinstruct = 'DELIVER IN PERSON')     OR (p_partkey = l_partkey         AND p_brand = 'Brand#23'         AND p_container IN ('MED BAG', 'MED BOX', 'MED PKG', 'MED PACK')         AND l_quantity >= 10         AND l_quantity <= 10 + 10         AND p_size BETWEEN 1 AND 10         AND l_shipmode IN ('AIR', 'AIR REG')         AND l_shipinstruct = 'DELIVER IN PERSON')     OR (p_partkey = l_partkey         AND p_brand = 'Brand#34'         AND p_container IN ('LG CASE', 'LG BOX', 'LG PACK', 'LG PKG')         AND l_quantity >= 20         AND l_quantity <= 20 + 10         AND p_size BETWEEN 1 AND 15         AND l_shipmode IN ('AIR', 'AIR REG')         AND l_shipinstruct = 'DELIVER IN PERSON'); 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││               Total Time: 6.04s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │
+│    Aggregates: sum(#0)    │
+│                           │
+│           1 row           │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│ (l_extendedprice * (1.00 -│
+│        l_discount))       │
+│                           │
+│        113,638 rows       │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             #1            │
+│             #2            │
+│                           │
+│        113,638 rows       │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│           FILTER          │
+│    ────────────────────   │
+│  (((l_quantity <= 11.00)  │
+│   AND (p_size <= 5) AND   │
+│ (p_brand = 'Brand#12') AND│
+│  ((p_container = 'SM CASE'│
+│  ) OR (p_container = 'SM  │
+│  BOX') OR (p_container =  │
+│ 'SM PACK') OR (p_container│
+│     = 'SM PKG'))) OR (    │
+│ (l_quantity >= 10.00) AND │
+│ (l_quantity <= 20.00) AND │
+│    (p_size <= 10) AND     │
+│ (p_brand = 'Brand#23') AND│
+│  ((p_container = 'MED BAG'│
+│  ) OR (p_container = 'MED │
+│  BOX') OR (p_container =  │
+│ 'MED PKG') OR (p_container│
+│    = 'MED PACK'))) OR (   │
+│ (l_quantity >= 20.00) AND │
+│ (l_quantity <= 30.00) AND │
+│    (p_size <= 15) AND     │
+│ (p_brand = 'Brand#34') AND│
+│  ((p_container = 'LG CASE'│
+│  ) OR (p_container = 'LG  │
+│  BOX') OR (p_container =  │
+│ 'LG PACK') OR (p_container│
+│       = 'LG PKG'))))      │
+│                           │
+│        113,638 rows       │
+│          (43.88s)         │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             #0            │
+│             #1            │
+│             #2            │
+│__internal_decompress_strin│
+│           g(#3)           │
+│__internal_decompress_strin│
+│           g(#4)           │
+│__internal_decompress_integ│
+│     ral_integer(#5, 1)    │
+│                           │
+│      214,260,122 rows     │
+│          (6.17s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│   l_partkey = p_partkey   │              │
+│                           │              │
+│      214,260,122 rows     │              │
+│         (108.84s)         │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         PROJECTION        ││         PROJECTION        │
+│    ────────────────────   ││    ────────────────────   │
+│__internal_compress_integra││__internal_compress_integra│
+│     l_uinteger(#0, 1)     ││     l_uinteger(#0, 1)     │
+│             #1            ││__internal_compress_string_│
+│             #2            ││        uhugeint(#1)       │
+│             #3            ││__internal_compress_string_│
+│                           ││        uhugeint(#2)       │
+│                           ││__internal_compress_integra│
+│                           ││     l_utinyint(#3, 1)     │
+│                           ││                           │
+│      214,260,122 rows     ││      200,000,000 rows     │
+│          (4.34s)          ││          (0.50s)          │
+└─────────────┬─────────────┘└─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         PROJECTION        ││         TABLE_SCAN        │
+│    ────────────────────   ││    ────────────────────   │
+│             #0            ││        Table: part        │
+│             #1            ││   Type: Sequential Scan   │
+│             #3            ││                           │
+│             #4            ││        Projections:       │
+│                           ││         p_partkey         │
+│                           ││          p_brand          │
+│                           ││        p_container        │
+│                           ││           p_size          │
+│                           ││                           │
+│      214,260,122 rows     ││      200,000,000 rows     │
+│          (1.57s)          ││          (1.97s)          │
+└─────────────┬─────────────┘└───────────────────────────┘
+┌─────────────┴─────────────┐
+│           FILTER          │
+│    ────────────────────   │
+│ ((l_shipmode = 'AIR') OR  │
+│ (l_shipmode = 'AIR REG')) │
+│                           │
+│      214,260,122 rows     │
+│          (29.98s)         │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         TABLE_SCAN        │
+│    ────────────────────   │
+│      Table: lineitem      │
+│   Type: Sequential Scan   │
+│                           │
+│        Projections:       │
+│         l_partkey         │
+│         l_quantity        │
+│         l_shipmode        │
+│      l_extendedprice      │
+│         l_discount        │
+│                           │
+│          Filters:         │
+│ optional: l_shipmode IN ( │
+│     'AIR', 'AIR REG')     │
+│ l_shipinstruct='DELIVER IN│
+│           PERSON'         │
+│                           │
+│     1,499,964,728 rows    │
+│         (102.12s)         │
+└───────────────────────────┘
+
+
+================================================================================

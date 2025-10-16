@@ -1,0 +1,130 @@
+DuckDB EXPLAIN ANALYZE - Query 10
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     c_custkey,     c_name,     sum(l_extendedprice * (1 - l_discount)) AS revenue,     c_acctbal,     n_name,     c_address,     c_phone,     c_comment FROM     customer,     orders,     lineitem,     nation WHERE     c_custkey = o_custkey     AND l_orderkey = o_orderkey     AND o_orderdate >= CAST('1993-10-01' AS date)     AND o_orderdate < CAST('1994-01-01' AS date)     AND l_returnflag = 'R'     AND c_nationkey = n_nationkey GROUP BY     c_custkey,     c_name,     c_acctbal,     c_phone,     n_name,     c_address,     c_comment ORDER BY     revenue DESC LIMIT 20; 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 19.78s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│           TOP_N           │
+│    ────────────────────   │
+│          Top: 20          │
+│                           │
+│         Order By:         │
+│ sum((memory.main.lineitem │
+│  .l_extendedprice * (1 -  │
+│    memory.main.lineitem   │
+│    .l_discount))) DESC    │
+│                           │
+│          20 rows          │
+│          (0.21s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│         c_custkey         │
+│           c_name          │
+│          revenue          │
+│         c_acctbal         │
+│           n_name          │
+│         c_address         │
+│          c_phone          │
+│         c_comment         │
+│                           │
+│      44,528,891 rows      │
+│          (0.02s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │
+│    ────────────────────   │
+│          Groups:          │
+│             #0            │
+│             #1            │
+│             #2            │
+│             #3            │
+│             #4            │
+│             #5            │
+│             #6            │
+│                           │
+│    Aggregates: sum(#7)    │
+│                           │
+│      44,528,891 rows      │
+│          (99.98s)         │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│         c_custkey         │
+│           c_name          │
+│         c_acctbal         │
+│          c_phone          │
+│           n_name          │
+│         c_address         │
+│         c_comment         │
+│ (l_extendedprice * (1.00 -│
+│        l_discount))       │
+│                           │
+│      114,711,320 rows     │
+│          (1.70s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├───────────────────────────────────────────┐
+│   c_custkey = o_custkey   │                                           │
+│                           │                                           │
+│      114,711,320 rows     │                                           │
+│          (47.70s)         │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │         HASH_JOIN         │
+│    ────────────────────   │                             │    ────────────────────   │
+│      Join Type: INNER     │                             │      Join Type: INNER     │
+│                           │                             │                           │
+│        Conditions:        ├──────────────┐              │        Conditions:        ├──────────────┐
+│ c_nationkey = n_nationkey │              │              │  l_orderkey = o_orderkey  │              │
+│                           │              │              │                           │              │
+│      149,999,990 rows     │              │              │      114,711,320 rows     │              │
+│          (5.18s)          │              │              │          (97.53s)         │              │
+└─────────────┬─────────────┘              │              └─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││         TABLE_SCAN        ││         TABLE_SCAN        ││         TABLE_SCAN        │
+│    ────────────────────   ││    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+│         Function:         ││         Function:         ││         Function:         ││         Function:         │
+│        READ_PARQUET       ││        READ_PARQUET       ││        READ_PARQUET       ││        READ_PARQUET       │
+│                           ││                           ││                           ││                           │
+│        Projections:       ││        Projections:       ││        Projections:       ││        Projections:       │
+│         c_custkey         ││        n_nationkey        ││         l_orderkey        ││         o_orderkey        │
+│           c_name          ││           n_name          ││      l_extendedprice      ││         o_custkey         │
+│         c_address         ││                           ││         l_discount        ││                           │
+│        c_nationkey        ││    Total Files Read: 1    ││                           ││          Filters:         │
+│          c_phone          ││                           ││          Filters:         ││ o_orderdate>='1993-10-01':│
+│         c_acctbal         ││                           ││      l_returnflag='R'     ││   :DATE AND o_orderdate<  │
+│         c_comment         ││                           ││                           ││     '1994-01-01'::DATE    │
+│                           ││                           ││    Total Files Read: 20   ││                           │
+│    Total Files Read: 20   ││                           ││                           ││    Total Files Read: 20   │
+│                           ││                           ││                           ││                           │
+│      149,999,990 rows     ││          25 rows          ││     1,480,675,150 rows    ││      57,358,391 rows      │
+│         (101.38s)         ││          (0.00s)          ││         (218.60s)         ││         (172.57s)         │
+└───────────────────────────┘└───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
+
+
+================================================================================

@@ -1,0 +1,239 @@
+DuckDB EXPLAIN ANALYZE - Query 5
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     n_name,     sum(l_extendedprice * (1 - l_discount)) AS revenue FROM     customer,     orders,     lineitem,     supplier,     nation,     region WHERE     c_custkey = o_custkey     AND l_orderkey = o_orderkey     AND l_suppkey = s_suppkey     AND c_nationkey = s_nationkey     AND s_nationkey = n_nationkey     AND n_regionkey = r_regionkey     AND r_name = 'ASIA'     AND o_orderdate >= CAST('1994-01-01' AS date)     AND o_orderdate < CAST('1995-01-01' AS date) GROUP BY     n_name ORDER BY     revenue DESC; 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││               Total Time: 6.22s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│__internal_decompress_strin│
+│           g(#0)           │
+│             #1            │
+│                           │
+│           5 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│          ORDER_BY         │
+│    ────────────────────   │
+│  sum(("tpch-sf1000".main  │
+│ .lineitem.l_extendedprice │
+│ * (1 - "tpch-sf1000".main │
+│  .lineitem.l_discount)))  │
+│            DESC           │
+│                           │
+│           5 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│__internal_compress_string_│
+│        uhugeint(#0)       │
+│             #1            │
+│                           │
+│           5 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│__internal_decompress_strin│
+│           g(#0)           │
+│             #1            │
+│                           │
+│           5 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │
+│    ────────────────────   │
+│         Groups: #0        │
+│    Aggregates: sum(#1)    │
+│                           │
+│           5 rows          │
+│          (0.68s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│           n_name          │
+│ (l_extendedprice * (1.00 -│
+│        l_discount))       │
+│                           │
+│       7,282,311 rows      │
+│          (0.34s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│__internal_compress_string_│
+│        uhugeint(#2)       │
+│             #0            │
+│             #1            │
+│__internal_compress_integra│
+│     l_uinteger(#3, 1)     │
+│__internal_compress_integra│
+│     l_utinyint(#4, 0)     │
+│                           │
+│       7,282,311 rows      │
+│          (0.53s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        │
+│ c_nationkey = s_nationkey ├──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│   l_suppkey = s_suppkey   │                                                                                                                                  │
+│                           │                                                                                                                                  │
+│       7,282,311 rows      │                                                                                                                                  │
+│          (19.36s)         │                                                                                                                                  │
+└─────────────┬─────────────┘                                                                                                                                  │
+┌─────────────┴─────────────┐                                                                                                                    ┌─────────────┴─────────────┐
+│         PROJECTION        │                                                                                                                    │         TABLE_SCAN        │
+│    ────────────────────   │                                                                                                                    │    ────────────────────   │
+│             #0            │                                                                                                                    │      Table: supplier      │
+│             #1            │                                                                                                                    │   Type: Sequential Scan   │
+│             #2            │                                                                                                                    │                           │
+│__internal_decompress_integ│                                                                                                                    │        Projections:       │
+│     ral_integer(#3, 0)    │                                                                                                                    │         s_suppkey         │
+│__internal_decompress_strin│                                                                                                                    │        s_nationkey        │
+│           g(#4)           │                                                                                                                    │                           │
+│                           │                                                                                                                    │                           │
+│      182,094,202 rows     │                                                                                                                    │      10,000,000 rows      │
+│          (4.00s)          │                                                                                                                    │          (0.03s)          │
+└─────────────┬─────────────┘                                                                                                                    └───────────────────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│  l_orderkey = o_orderkey  │              │
+│                           │              │
+│      182,094,202 rows     │              │
+│         (148.61s)         │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││         PROJECTION        │
+│    ────────────────────   ││    ────────────────────   │
+│      Table: lineitem      ││             #0            │
+│   Type: Sequential Scan   ││__internal_compress_integra│
+│                           ││     l_utinyint(#1, 0)     │
+│        Projections:       ││__internal_compress_string_│
+│         l_orderkey        ││        uhugeint(#2)       │
+│         l_suppkey         ││                           │
+│      l_extendedprice      ││                           │
+│         l_discount        ││                           │
+│                           ││                           │
+│     5,999,989,583 rows    ││      45,523,964 rows      │
+│         (125.14s)         ││          (0.96s)          │
+└───────────────────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         PROJECTION        │
+                             │    ────────────────────   │
+                             │             #0            │
+                             │__internal_decompress_integ│
+                             │     ral_integer(#1, 0)    │
+                             │__internal_decompress_strin│
+                             │           g(#2)           │
+                             │                           │
+                             │      45,523,964 rows      │
+                             │          (0.67s)          │
+                             └─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         HASH_JOIN         │
+                             │    ────────────────────   │
+                             │      Join Type: INNER     │
+                             │                           │
+                             │        Conditions:        ├──────────────┐
+                             │   o_custkey = c_custkey   │              │
+                             │                           │              │
+                             │      45,523,964 rows      │              │
+                             │          (26.63s)         │              │
+                             └─────────────┬─────────────┘              │
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │         PROJECTION        ││         PROJECTION        │
+                             │    ────────────────────   ││    ────────────────────   │
+                             │__internal_compress_integra││__internal_compress_integra│
+                             │     l_uinteger(#0, 1)     ││     l_uinteger(#0, 1)     │
+                             │             #1            ││__internal_compress_integra│
+                             │                           ││     l_utinyint(#1, 0)     │
+                             │                           ││__internal_compress_string_│
+                             │                           ││        uhugeint(#2)       │
+                             │                           ││                           │
+                             │      227,571,151 rows     ││      30,007,619 rows      │
+                             │          (1.28s)          ││          (0.64s)          │
+                             └─────────────┬─────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        ││         HASH_JOIN         │
+                             │    ────────────────────   ││    ────────────────────   │
+                             │       Table: orders       ││      Join Type: INNER     │
+                             │   Type: Sequential Scan   ││                           │
+                             │                           ││        Conditions:        │
+                             │        Projections:       ││ c_nationkey = n_nationkey │
+                             │         o_custkey         ││                           │
+                             │         o_orderkey        ││                           │
+                             │                           ││                           ├──────────────┐
+                             │          Filters:         ││                           │              │
+                             │ o_orderdate>='1994-01-01':││                           │              │
+                             │   :DATE AND o_orderdate<  ││                           │              │
+                             │     '1995-01-01'::DATE    ││                           │              │
+                             │                           ││                           │              │
+                             │      227,571,151 rows     ││      30,007,619 rows      │              │
+                             │          (11.94s)         ││          (0.69s)          │              │
+                             └───────────────────────────┘└─────────────┬─────────────┘              │
+                                                          ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                          │         TABLE_SCAN        ││         HASH_JOIN         │
+                                                          │    ────────────────────   ││    ────────────────────   │
+                                                          │      Table: customer      ││      Join Type: INNER     │
+                                                          │   Type: Sequential Scan   ││                           │
+                                                          │                           ││        Conditions:        │
+                                                          │        Projections:       ││ n_regionkey = r_regionkey │
+                                                          │         c_custkey         ││                           │
+                                                          │        c_nationkey        ││                           ├──────────────┐
+                                                          │                           ││                           │              │
+                                                          │          Filters:         ││                           │              │
+                                                          │    c_custkey<=149999999   ││                           │              │
+                                                          │                           ││                           │              │
+                                                          │      84,008,198 rows      ││           5 rows          │              │
+                                                          │          (1.64s)          ││          (0.00s)          │              │
+                                                          └───────────────────────────┘└─────────────┬─────────────┘              │
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │         TABLE_SCAN        ││         TABLE_SCAN        │
+                                                                                       │    ────────────────────   ││    ────────────────────   │
+                                                                                       │       Table: nation       ││       Table: region       │
+                                                                                       │   Type: Sequential Scan   ││   Type: Sequential Scan   │
+                                                                                       │                           ││                           │
+                                                                                       │        Projections:       ││        Projections:       │
+                                                                                       │        n_nationkey        ││        r_regionkey        │
+                                                                                       │        n_regionkey        ││                           │
+                                                                                       │           n_name          ││          Filters:         │
+                                                                                       │                           ││       r_name='ASIA'       │
+                                                                                       │                           ││                           │
+                                                                                       │           5 rows          ││           1 row           │
+                                                                                       │          (0.00s)          ││          (0.00s)          │
+                                                                                       └───────────────────────────┘└───────────────────────────┘
+
+
+================================================================================

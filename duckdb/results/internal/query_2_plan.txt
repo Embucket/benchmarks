@@ -1,0 +1,341 @@
+DuckDB EXPLAIN ANALYZE - Query 2
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     s_acctbal,     s_name,     n_name,     p_partkey,     p_mfgr,     s_address,     s_phone,     s_comment FROM     part,     supplier,     partsupp,     nation,     region WHERE     p_partkey = ps_partkey     AND s_suppkey = ps_suppkey     AND p_size = 15     AND p_type LIKE '%BRASS'     AND s_nationkey = n_nationkey     AND n_regionkey = r_regionkey     AND r_name = 'EUROPE'     AND ps_supplycost = (         SELECT             min(ps_supplycost)         FROM             partsupp,             supplier,             nation,             region         WHERE             p_partkey = ps_partkey             AND s_suppkey = ps_suppkey             AND s_nationkey = n_nationkey             AND n_regionkey = r_regionkey             AND r_name = 'EUROPE') ORDER BY     s_acctbal DESC,     n_name,     s_name,     p_partkey LIMIT 100; 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││               Total Time: 2.29s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌─────────────────┐
+│      QUERY      │
+└────────┬────────┘
+┌────────┴────────┐
+│ EXPLAIN_ANALYZE │
+│    ──────────   │
+│      0 rows     │
+│     (0.00s)     │
+└────────┬────────┘
+┌────────┴────────┐
+│      TOP_N      │
+│    ──────────   │
+│     Top: 100    │
+│                 │
+│    Order By:    │
+│  "tpch-sf1000"  │
+│  .main.supplier │
+│ .s_acctbal DESC │
+│  "tpch-sf1000"  │
+│   .main.nation  │
+│   .n_name ASC   │
+│  "tpch-sf1000"  │
+│  .main.supplier │
+│   .s_name ASC   │
+│  "tpch-sf1000"  │
+│    .main.part   │
+│  .p_partkey ASC │
+│                 │
+│     100 rows    │
+│     (0.04s)     │
+└────────┬────────┘
+┌────────┴────────┐
+│    PROJECTION   │
+│    ──────────   │
+│    s_acctbal    │
+│      s_name     │
+│      n_name     │
+│    p_partkey    │
+│      p_mfgr     │
+│    s_address    │
+│     s_phone     │
+│    s_comment    │
+│                 │
+│   470,727 rows  │
+│     (0.00s)     │
+└────────┬────────┘
+┌────────┴────────┐
+│    PROJECTION   │
+│    ──────────   │
+│        #1       │
+│        #2       │
+│        #3       │
+│        #4       │
+│        #5       │
+│        #6       │
+│        #7       │
+│        #8       │
+│                 │
+│   470,727 rows  │
+│     (0.00s)     │
+└────────┬────────┘
+┌────────┴────────┐
+│      FILTER     │
+│    ──────────   │
+│ (ps_supplycost =│
+│     SUBQUERY)   │
+│                 │
+│   470,727 rows  │
+│     (0.01s)     │
+└────────┬────────┘
+┌────────┴────────┐
+│ LEFT_DELIM_JOIN │
+│    ──────────   │
+│    Join Type:   │
+│       LEFT      │
+│                 │
+│   Conditions:   │
+│ p_partkey IS NOT│
+│   DISTINCT FROM ├─────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│     p_partkey   │                                                                                     │                                                                                                                 │
+│                 │                                                                                     │                                                                                                                 │
+│   Delim Index:  │                                                                                     │                                                                                                                 │
+│        1        │                                                                                     │                                                                                                                 │
+│                 │                                                                                     │                                                                                                                 │
+│      0 rows     │                                                                                     │                                                                                                                 │
+│     (0.83s)     │                                                                                     │                                                                                                                 │
+└────────┬────────┘                                                                                     │                                                                                                                 │
+┌────────┴────────┐                                                                            ┌────────┴────────┐                                                                                               ┌────────┴────────┐
+│    PROJECTION   │                                                                            │    HASH_JOIN    │                                                                                               │  HASH_GROUP_BY  │
+│    ──────────   │                                                                            │    ──────────   │                                                                                               │    ──────────   │
+│        #0       │                                                                            │    Join Type:   │                                                                                               │    Groups: #3   │
+│__internal_decomp│                                                                            │       LEFT      │                                                                                               │                 │
+│ress_integral_big│                                                                            │                 │                                                                                               │                 │
+│    int(#1, 1)   │                                                                            │   Conditions:   │                                                                                               │                 │
+│        #2       │                                                                            │ p_partkey IS NOT│                                                                                               │                 │
+│        #3       │                                                                            │   DISTINCT FROM │                                                                                               │                 │
+│        #4       │                                                                            │     p_partkey   │                                                                                               │                 │
+│__internal_decomp│                                                                            │                 │                                                                                               │                 │
+│ress_integral_big│                                                                            │                 │                                                                                               │                 │
+│    int(#5, 1)   │                                                                            │                 │                                                                                               │                 │
+│__internal_decomp│                                                                            │                 │                                                                                               │                 │
+│ress_integral_int│                                                                            │                 │                                                                                               │                 │
+│   eger(#6, 0)   │                                                                            │                 │                                                                                               │                 │
+│        #7       │                                                                            │                 │                                                                                               │                 │
+│        #8       │                                                                            │                 │                                                                                               │                 │
+│        #9       │                                                                            │                 ├─────────┐                                                                                     │                 │
+│__internal_decomp│                                                                            │                 │         │                                                                                     │                 │
+│ ress_string(#10)│                                                                            │                 │         │                                                                                     │                 │
+│       #11       │                                                                            │                 │         │                                                                                     │                 │
+│__internal_decomp│                                                                            │                 │         │                                                                                     │                 │
+│ress_integral_int│                                                                            │                 │         │                                                                                     │                 │
+│   eger(#12, 0)  │                                                                            │                 │         │                                                                                     │                 │
+│__internal_decomp│                                                                            │                 │         │                                                                                     │                 │
+│ress_integral_int│                                                                            │                 │         │                                                                                     │                 │
+│   eger(#13, 0)  │                                                                            │                 │         │                                                                                     │                 │
+│__internal_decomp│                                                                            │                 │         │                                                                                     │                 │
+│ ress_string(#14)│                                                                            │                 │         │                                                                                     │                 │
+│__internal_decomp│                                                                            │                 │         │                                                                                     │                 │
+│ress_integral_int│                                                                            │                 │         │                                                                                     │                 │
+│   eger(#15, 0)  │                                                                            │                 │         │                                                                                     │                 │
+│                 │                                                                            │                 │         │                                                                                     │                 │
+│   637,969 rows  │                                                                            │   637,969 rows  │         │                                                                                     │   470,725 rows  │
+│     (0.04s)     │                                                                            │     (0.08s)     │         │                                                                                     │     (0.04s)     │
+└────────┬────────┘                                                                            └────────┬────────┘         │                                                                                     └─────────────────┘
+┌────────┴────────┐                                                                            ┌────────┴────────┐┌────────┴────────┐
+│    HASH_JOIN    │                                                                            │ COLUMN_DATA_SCAN││    PROJECTION   │
+│    ──────────   │                                                                            │                 ││    ──────────   │
+│    Join Type:   │                                                                            │                 ││min(ps_supplycost│
+│      INNER      │                                                                            │                 ││        )        │
+│                 │                                                                            │                 ││    p_partkey    │
+│   Conditions:   ├────────────────────────────┐                                               │                 ││                 │
+│   ps_suppkey =  │                            │                                               │                 ││                 │
+│     s_suppkey   │                            │                                               │                 ││                 │
+│                 │                            │                                               │                 ││                 │
+│   637,969 rows  │                            │                                               │   637,969 rows  ││   470,725 rows  │
+│     (1.76s)     │                            │                                               │     (0.01s)     ││     (0.00s)     │
+└────────┬────────┘                            │                                               └─────────────────┘└────────┬────────┘
+┌────────┴────────┐                   ┌────────┴────────┐                                                         ┌────────┴────────┐
+│    PROJECTION   │                   │    PROJECTION   │                                                         │    PROJECTION   │
+│    ──────────   │                   │    ──────────   │                                                         │    ──────────   │
+│        #0       │                   │__internal_compre│                                                         │__internal_decomp│
+│__internal_compre│                   │ss_integral_uinte│                                                         │ress_integral_big│
+│ss_integral_uinte│                   │    ger(#0, 1)   │                                                         │    int(#0, 1)   │
+│    ger(#1, 1)   │                   │__internal_compre│                                                         │        #1       │
+│        #2       │                   │ss_integral_utiny│                                                         │                 │
+│        #3       │                   │    int(#1, 0)   │                                                         │                 │
+│        #4       │                   │        #2       │                                                         │                 │
+│                 │                   │        #3       │                                                         │                 │
+│                 │                   │        #4       │                                                         │                 │
+│                 │                   │__internal_compre│                                                         │                 │
+│                 │                   │ss_string_uhugein│                                                         │                 │
+│                 │                   │      t(#5)      │                                                         │                 │
+│                 │                   │        #6       │                                                         │                 │
+│                 │                   │__internal_compre│                                                         │                 │
+│                 │                   │ss_integral_utiny│                                                         │                 │
+│                 │                   │    int(#7, 0)   │                                                         │                 │
+│                 │                   │__internal_compre│                                                         │                 │
+│                 │                   │ss_integral_utiny│                                                         │                 │
+│                 │                   │    int(#8, 0)   │                                                         │                 │
+│                 │                   │__internal_compre│                                                         │                 │
+│                 │                   │ss_string_uhugein│                                                         │                 │
+│                 │                   │      t(#9)      │                                                         │                 │
+│                 │                   │__internal_compre│                                                         │                 │
+│                 │                   │ss_integral_utiny│                                                         │                 │
+│                 │                   │   int(#10, 0)   │                                                         │                 │
+│                 │                   │                 │                                                         │                 │
+│  3,191,000 rows │                   │  1,999,643 rows │                                                         │   470,725 rows  │
+│     (0.01s)     │                   │     (0.14s)     │                                                         │     (0.00s)     │
+└────────┬────────┘                   └────────┬────────┘                                                         └────────┬────────┘
+┌────────┴────────┐                   ┌────────┴────────┐                                                         ┌────────┴────────┐
+│    PROJECTION   │                   │    HASH_JOIN    │                                                         │  HASH_GROUP_BY  │
+│    ──────────   │                   │    ──────────   │                                                         │    ──────────   │
+│__internal_decomp│                   │    Join Type:   │                                                         │    Groups: #0   │
+│ress_integral_big│                   │      INNER      │                                                         │                 │
+│    int(#0, 1)   │                   │                 │                                                         │   Aggregates:   │
+│        #1       │                   │   Conditions:   │                                                         │     min(#1)     │
+│        #2       │                   │  s_nationkey =  │                                                         │                 │
+│__internal_decomp│                   │    n_nationkey  ├─────────┐                                               │                 │
+│ress_integral_big│                   │                 │         │                                               │                 │
+│    int(#3, 1)   │                   │                 │         │                                               │                 │
+│__internal_decomp│                   │                 │         │                                               │                 │
+│ ress_string(#4) │                   │                 │         │                                               │                 │
+│                 │                   │                 │         │                                               │                 │
+│  3,191,000 rows │                   │  1,999,643 rows │         │                                               │   470,725 rows  │
+│     (0.04s)     │                   │     (0.10s)     │         │                                               │     (0.12s)     │
+└────────┬────────┘                   └────────┬────────┘         │                                               └────────┬────────┘
+┌────────┴────────┐                   ┌────────┴────────┐┌────────┴────────┐                                      ┌────────┴────────┐
+│    HASH_JOIN    │                   │    TABLE_SCAN   ││    HASH_JOIN    │                                      │    PROJECTION   │
+│    ──────────   │                   │    ──────────   ││    ──────────   │                                      │    ──────────   │
+│    Join Type:   │                   │      Table:     ││    Join Type:   │                                      │    p_partkey    │
+│      INNER      │                   │     supplier    ││      INNER      │                                      │  ps_supplycost  │
+│                 │                   │                 ││                 │                                      │                 │
+│   Conditions:   │                   │      Type:      ││   Conditions:   │                                      │                 │
+│   ps_partkey =  │                   │ Sequential Scan ││  n_regionkey =  │                                      │                 │
+│     p_partkey   │                   │                 ││    r_regionkey  │                                      │                 │
+│                 │                   │   Projections:  ││                 │                                      │                 │
+│                 ├─────────┐         │    s_suppkey    ││                 ├─────────┐                            │                 │
+│                 │         │         │   s_nationkey   ││                 │         │                            │                 │
+│                 │         │         │    s_acctbal    ││                 │         │                            │                 │
+│                 │         │         │      s_name     ││                 │         │                            │                 │
+│                 │         │         │    s_address    ││                 │         │                            │                 │
+│                 │         │         │     s_phone     ││                 │         │                            │                 │
+│                 │         │         │    s_comment    ││                 │         │                            │                 │
+│                 │         │         │                 ││                 │         │                            │                 │
+│  3,191,000 rows │         │         │  7,199,132 rows ││      5 rows     │         │                            │   637,969 rows  │
+│     (14.32s)    │         │         │     (8.13s)     ││     (0.00s)     │         │                            │     (0.00s)     │
+└────────┬────────┘         │         └─────────────────┘└────────┬────────┘         │                            └────────┬────────┘
+┌────────┴────────┐┌────────┴────────┐                   ┌────────┴────────┐┌────────┴────────┐                   ┌────────┴────────┐
+│    PROJECTION   ││    PROJECTION   │                   │    TABLE_SCAN   ││    TABLE_SCAN   │                   │    PROJECTION   │
+│    ──────────   ││    ──────────   │                   │    ──────────   ││    ──────────   │                   │    ──────────   │
+│__internal_compre││__internal_compre│                   │      Table:     ││      Table:     │                   │__internal_compre│
+│ss_integral_uinte││ss_integral_uinte│                   │      nation     ││      region     │                   │ss_integral_uinte│
+│    ger(#0, 1)   ││    ger(#0, 1)   │                   │                 ││                 │                   │    ger(#0, 1)   │
+│        #1       ││__internal_compre│                   │      Type:      ││      Type:      │                   │        #1       │
+│        #2       ││ss_string_uhugein│                   │ Sequential Scan ││ Sequential Scan │                   │__internal_compre│
+│                 ││      t(#1)      │                   │                 ││                 │                   │ss_integral_uinte│
+│                 ││                 │                   │   Projections:  ││   Projections:  │                   │    ger(#2, 1)   │
+│                 ││                 │                   │   n_nationkey   ││   r_regionkey   │                   │__internal_compre│
+│                 ││                 │                   │   n_regionkey   ││                 │                   │ss_integral_utiny│
+│                 ││                 │                   │      n_name     ││     Filters:    │                   │    int(#3, 0)   │
+│                 ││                 │                   │                 ││ r_name='EUROPE' │                   │__internal_compre│
+│                 ││                 │                   │                 ││                 │                   │ss_integral_utiny│
+│                 ││                 │                   │                 ││                 │                   │    int(#4, 0)   │
+│                 ││                 │                   │                 ││                 │                   │                 │
+│ 800,000,000 rows││   797,750 rows  │                   │      5 rows     ││      1 row      │                   │   637,969 rows  │
+│     (0.71s)     ││     (0.20s)     │                   │     (0.00s)     ││     (0.00s)     │                   │     (0.01s)     │
+└────────┬────────┘└────────┬────────┘                   └─────────────────┘└─────────────────┘                   └────────┬────────┘
+┌────────┴────────┐┌────────┴────────┐                                                                            ┌────────┴────────┐
+│    TABLE_SCAN   ││    TABLE_SCAN   │                                                                            │    PROJECTION   │
+│    ──────────   ││    ──────────   │                                                                            │    ──────────   │
+│      Table:     ││   Table: part   │                                                                            │        #0       │
+│     partsupp    ││                 │                                                                            │        #1       │
+│                 ││      Type:      │                                                                            │__internal_decomp│
+│      Type:      ││ Sequential Scan │                                                                            │ress_integral_big│
+│ Sequential Scan ││                 │                                                                            │    int(#2, 1)   │
+│                 ││   Projections:  │                                                                            │__internal_decomp│
+│   Projections:  ││    p_partkey    │                                                                            │ress_integral_int│
+│    ps_partkey   ││      p_mfgr     │                                                                            │   eger(#3, 0)   │
+│    ps_suppkey   ││                 │                                                                            │__internal_decomp│
+│  ps_supplycost  ││     Filters:    │                                                                            │ress_integral_int│
+│                 ││    p_size=15    │                                                                            │   eger(#4, 0)   │
+│                 ││ suffix(p_type,  │                                                                            │                 │
+│                 ││     'BRASS')    │                                                                            │                 │
+│                 ││                 │                                                                            │                 │
+│ 800,000,000 rows││   797,750 rows  │                                                                            │   637,969 rows  │
+│     (87.06s)    ││     (7.11s)     │                                                                            │     (0.01s)     │
+└─────────────────┘└─────────────────┘                                                                            └────────┬────────┘
+                                                                                                                  ┌────────┴────────┐
+                                                                                                                  │    HASH_JOIN    │
+                                                                                                                  │    ──────────   │
+                                                                                                                  │    Join Type:   │
+                                                                                                                  │      INNER      │
+                                                                                                                  │                 │
+                                                                                                                  │   Conditions:   ├────────────────────────────┐
+                                                                                                                  │   ps_suppkey =  │                            │
+                                                                                                                  │     s_suppkey   │                            │
+                                                                                                                  │                 │                            │
+                                                                                                                  │   637,969 rows  │                            │
+                                                                                                                  │     (0.37s)     │                            │
+                                                                                                                  └────────┬────────┘                            │
+                                                                                                                  ┌────────┴────────┐                   ┌────────┴────────┐
+                                                                                                                  │    PROJECTION   │                   │    PROJECTION   │
+                                                                                                                  │    ──────────   │                   │    ──────────   │
+                                                                                                                  │        #0       │                   │__internal_compre│
+                                                                                                                  │__internal_compre│                   │ss_integral_uinte│
+                                                                                                                  │ss_integral_uinte│                   │    ger(#0, 1)   │
+                                                                                                                  │    ger(#1, 1)   │                   │__internal_compre│
+                                                                                                                  │        #2       │                   │ss_integral_utiny│
+                                                                                                                  │        #3       │                   │    int(#1, 0)   │
+                                                                                                                  │                 │                   │__internal_compre│
+                                                                                                                  │                 │                   │ss_integral_utiny│
+                                                                                                                  │                 │                   │    int(#2, 0)   │
+                                                                                                                  │                 │                   │                 │
+                                                                                                                  │  1,882,900 rows │                   │  1,999,643 rows │
+                                                                                                                  │     (0.01s)     │                   │     (0.02s)     │
+                                                                                                                  └────────┬────────┘                   └────────┬────────┘
+                                                                                                                  ┌────────┴────────┐                   ┌────────┴────────┐
+                                                                                                                  │    HASH_JOIN    │                   │    HASH_JOIN    │
+                                                                                                                  │    ──────────   │                   │    ──────────   │
+                                                                                                                  │    Join Type:   │                   │    Join Type:   │
+                                                                                                                  │      INNER      │                   │      INNER      │
+                                                                                                                  │                 │                   │                 │
+                                                                                                                  │   Conditions:   ├─────────┐         │   Conditions:   ├─────────┐
+                                                                                                                  │   ps_partkey =  │         │         │  s_nationkey =  │         │
+                                                                                                                  │     p_partkey   │         │         │    n_nationkey  │         │
+                                                                                                                  │                 │         │         │                 │         │
+                                                                                                                  │  1,882,900 rows │         │         │  1,999,643 rows │         │
+                                                                                                                  │     (10.94s)    │         │         │     (0.05s)     │         │
+                                                                                                                  └────────┬────────┘         │         └────────┬────────┘         │
+                                                                                                                  ┌────────┴────────┐┌────────┴────────┐┌────────┴────────┐┌────────┴────────┐
+                                                                                                                  │    TABLE_SCAN   ││    DELIM_SCAN   ││    TABLE_SCAN   ││    HASH_JOIN    │
+                                                                                                                  │    ──────────   ││    ──────────   ││    ──────────   ││    ──────────   │
+                                                                                                                  │      Table:     ││   Delim Index:  ││      Table:     ││    Join Type:   │
+                                                                                                                  │     partsupp    ││        1        ││     supplier    ││      INNER      │
+                                                                                                                  │                 ││                 ││                 ││                 │
+                                                                                                                  │      Type:      ││                 ││      Type:      ││   Conditions:   │
+                                                                                                                  │ Sequential Scan ││                 ││ Sequential Scan ││  n_regionkey =  │
+                                                                                                                  │                 ││                 ││                 ││    r_regionkey  ├─────────┐
+                                                                                                                  │   Projections:  ││                 ││   Projections:  ││                 │         │
+                                                                                                                  │    ps_partkey   ││                 ││    s_suppkey    ││                 │         │
+                                                                                                                  │    ps_suppkey   ││                 ││   s_nationkey   ││                 │         │
+                                                                                                                  │  ps_supplycost  ││                 ││                 ││                 │         │
+                                                                                                                  │                 ││                 ││                 ││                 │         │
+                                                                                                                  │ 799,996,304 rows││      0 rows     ││  7,199,132 rows ││      5 rows     │         │
+                                                                                                                  │     (3.54s)     ││     (0.00s)     ││     (0.38s)     ││     (0.00s)     │         │
+                                                                                                                  └─────────────────┘└─────────────────┘└─────────────────┘└────────┬────────┘         │
+                                                                                                                                                                           ┌────────┴────────┐┌────────┴────────┐
+                                                                                                                                                                           │    TABLE_SCAN   ││    TABLE_SCAN   │
+                                                                                                                                                                           │    ──────────   ││    ──────────   │
+                                                                                                                                                                           │      Table:     ││      Table:     │
+                                                                                                                                                                           │      nation     ││      region     │
+                                                                                                                                                                           │                 ││                 │
+                                                                                                                                                                           │      Type:      ││      Type:      │
+                                                                                                                                                                           │ Sequential Scan ││ Sequential Scan │
+                                                                                                                                                                           │                 ││                 │
+                                                                                                                                                                           │   Projections:  ││   Projections:  │
+                                                                                                                                                                           │   n_nationkey   ││   r_regionkey   │
+                                                                                                                                                                           │   n_regionkey   ││                 │
+                                                                                                                                                                           │                 ││     Filters:    │
+                                                                                                                                                                           │                 ││ r_name='EUROPE' │
+                                                                                                                                                                           │                 ││                 │
+                                                                                                                                                                           │      5 rows     ││      1 row      │
+                                                                                                                                                                           │     (0.00s)     ││     (0.00s)     │
+                                                                                                                                                                           └─────────────────┘└─────────────────┘
+
+
+================================================================================

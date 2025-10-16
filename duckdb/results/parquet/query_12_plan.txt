@@ -1,0 +1,134 @@
+DuckDB EXPLAIN ANALYZE - Query 12
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     l_shipmode,     sum(         CASE WHEN o_orderpriority = '1-URGENT'             OR o_orderpriority = '2-HIGH' THEN             1         ELSE             0         END) AS high_line_count,     sum(         CASE WHEN o_orderpriority <> '1-URGENT'             AND o_orderpriority <> '2-HIGH' THEN             1         ELSE             0         END) AS low_line_count FROM     orders,     lineitem WHERE     o_orderkey = l_orderkey     AND l_shipmode IN ('MAIL', 'SHIP')     AND l_commitdate < l_receiptdate     AND l_shipdate < l_commitdate     AND l_receiptdate >= CAST('1994-01-01' AS date)     AND l_receiptdate < CAST('1995-01-01' AS date) GROUP BY     l_shipmode ORDER BY     l_shipmode; 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 16.23s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│          ORDER_BY         │
+│    ────────────────────   │
+│    memory.main.lineitem   │
+│      .l_shipmode ASC      │
+│                           │
+│           2 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │
+│    ────────────────────   │
+│         Groups: #0        │
+│                           │
+│        Aggregates:        │
+│          sum(#1)          │
+│          sum(#2)          │
+│                           │
+│           2 rows          │
+│          (1.45s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│         l_shipmode        │
+│       CASE  WHEN ((       │
+│   (o_orderpriority = '1   │
+│       -URGENT') OR        │
+│ (o_orderpriority = '2-HIGH│
+│  '))) THEN (1) ELSE 0 END │
+│       CASE  WHEN ((       │
+│   (o_orderpriority != '1  │
+│       -URGENT') AND       │
+│   (o_orderpriority != '2  │
+│ -HIGH'))) THEN (1) ELSE 0 │
+│             END           │
+│                           │
+│      31,162,904 rows      │
+│          (1.41s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│  o_orderkey = l_orderkey  │              │
+│                           │              │
+│      31,162,904 rows      │              │
+│          (88.00s)         │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││         PROJECTION        │
+│    ────────────────────   ││    ────────────────────   │
+│         Function:         ││             #0            │
+│        READ_PARQUET       ││             #4            │
+│                           ││                           │
+│        Projections:       ││                           │
+│         o_orderkey        ││                           │
+│      o_orderpriority      ││                           │
+│                           ││                           │
+│    Total Files Read: 20   ││                           │
+│                           ││                           │
+│     1,499,999,904 rows    ││      31,162,904 rows      │
+│          (46.84s)         ││          (0.02s)          │
+└───────────────────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │           FILTER          │
+                             │    ────────────────────   │
+                             │      ((l_commitdate <     │
+                             │     l_receiptdate) AND    │
+                             │ (l_shipdate < l_commitdate│
+                             │ ) AND ((l_shipmode = 'MAIL│
+                             │ ') OR (l_shipmode = 'SHIP'│
+                             │            )))            │
+                             │                           │
+                             │      31,162,904 rows      │
+                             │          (45.67s)         │
+                             └─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        │
+                             │    ────────────────────   │
+                             │         Function:         │
+                             │        READ_PARQUET       │
+                             │                           │
+                             │        Projections:       │
+                             │         l_orderkey        │
+                             │         l_shipdate        │
+                             │        l_commitdate       │
+                             │       l_receiptdate       │
+                             │         l_shipmode        │
+                             │                           │
+                             │          Filters:         │
+                             │  l_shipdate<'1995-01-01': │
+                             │           :DATE           │
+                             │ l_commitdate<'1995-01-01':│
+                             │           :DATE           │
+                             │ l_receiptdate>='1994-01-01│
+                             │ '::DATE AND l_receiptdate<│
+                             │     '1995-01-01'::DATE    │
+                             │ optional: l_shipmode IN ( │
+                             │      'MAIL', 'SHIP')      │
+                             │                           │
+                             │    Total Files Read: 20   │
+                             │                           │
+                             │      886,317,625 rows     │
+                             │         (174.46s)         │
+                             └───────────────────────────┘
+
+
+================================================================================

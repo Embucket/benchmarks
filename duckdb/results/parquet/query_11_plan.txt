@@ -1,0 +1,195 @@
+DuckDB EXPLAIN ANALYZE - Query 11
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     ps_partkey,     sum(ps_supplycost * ps_availqty) AS value FROM     partsupp,     supplier,     nation WHERE     ps_suppkey = s_suppkey     AND s_nationkey = n_nationkey     AND n_name = 'GERMANY' GROUP BY     ps_partkey HAVING     sum(ps_supplycost * ps_availqty) > (         SELECT             sum(ps_supplycost * ps_availqty) * 0.0001000000         FROM             partsupp,             supplier,             nation         WHERE             ps_suppkey = s_suppkey             AND s_nationkey = n_nationkey             AND n_name = 'GERMANY') ORDER BY     value DESC; 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 10.21s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│          ORDER_BY         │
+│    ────────────────────   │
+│ sum((memory.main.partsupp │
+│  .ps_supplycost * memory  │
+│ .main.partsupp.ps_availqty│
+│          )) DESC          │
+│                           │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│         ps_partkey        │
+│           value           │
+│                           │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      NESTED_LOOP_JOIN     │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        │
+│ CAST(sum((ps_supplycost * │
+│     CAST(ps_availqty AS   ├────────────────────────────────────────────────────────────────────────┐
+│     DECIMAL(18,0)))) AS   │                                                                        │
+│ DECIMAL(38,12)) > SUBQUERY│                                                                        │
+│                           │                                                                        │
+│           0 rows          │                                                                        │
+│          (0.89s)          │                                                                        │
+└─────────────┬─────────────┘                                                                        │
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │                                                          │         PROJECTION        │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│         Groups: #0        │                                                          │ CASE  WHEN ((#1 > 1)) THEN│
+│    Aggregates: sum(#1)    │                                                          │   ("error"('More than one │
+│                           │                                                          │      row returned by a    │
+│                           │                                                          │     subquery used as an   │
+│                           │                                                          │     expression - scalar   │
+│                           │                                                          │     subqueries can only   │
+│                           │                                                          │    return a single row.   │
+│                           │                                                          │          Use "SET         │
+│                           │                                                          │ scalar_subquery_error_on_m│
+│                           │                                                          │   ultiple_rows=false" to  │
+│                           │                                                          │     revert to previous    │
+│                           │                                                          │   behavior of returning a │
+│                           │                                                          │ random row.')) ELSE #0 END│
+│                           │                                                          │                           │
+│      30,129,021 rows      │                                                          │           1 row           │
+│          (13.58s)         │                                                          │          (0.00s)          │
+└─────────────┬─────────────┘                                                          └─────────────┬─────────────┘
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         PROJECTION        │                                                          │    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│         ps_partkey        │                                                          │        Aggregates:        │
+│   (ps_supplycost * CAST   │                                                          │        "first"(#0)        │
+│ (ps_availqty AS DECIMAL(18│                                                          │        count_star()       │
+│           ,0)))           │                                                          │                           │
+│                           │                                                          │                           │
+│      31,995,840 rows      │                                                          │           1 row           │
+│          (3.76s)          │                                                          │          (0.00s)          │
+└─────────────┬─────────────┘                                                          └─────────────┬─────────────┘
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         PROJECTION        │                                                          │         PROJECTION        │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│             #0            │                                                          │             #0            │
+│             #1            │                                                          │                           │
+│             #2            │                                                          │                           │
+│             #3            │                                                          │                           │
+│             #4            │                                                          │                           │
+│             #5            │                                                          │                           │
+│__internal_compress_integra│                                                          │                           │
+│     l_utinyint(#6, 0)     │                                                          │                           │
+│                           │                                                          │                           │
+│      31,995,840 rows      │                                                          │           1 row           │
+│          (0.96s)          │                                                          │          (0.00s)          │
+└─────────────┬─────────────┘                                                          └─────────────┬─────────────┘
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                                                          │         PROJECTION        │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│      Join Type: INNER     │                                                          │ (sum((ps_supplycost * CAST│
+│                           │                                                          │ (ps_availqty AS DECIMAL(18│
+│        Conditions:        ├──────────────┐                                           │   ,0)))) * 0.0001000000)  │
+│   ps_suppkey = s_suppkey  │              │                                           │                           │
+│                           │              │                                           │                           │
+│      31,995,840 rows      │              │                                           │           1 row           │
+│          (22.35s)         │              │                                           │          (0.00s)          │
+└─────────────┬─────────────┘              │                                           └─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││         HASH_JOIN         │                             │    UNGROUPED_AGGREGATE    │
+│    ────────────────────   ││    ────────────────────   │                             │    ────────────────────   │
+│         Function:         ││      Join Type: INNER     │                             │    Aggregates: sum(#0)    │
+│        READ_PARQUET       ││                           │                             │                           │
+│                           ││        Conditions:        │                             │                           │
+│        Projections:       ││ s_nationkey = n_nationkey │                             │                           │
+│         ps_partkey        ││                           │                             │                           │
+│         ps_suppkey        ││                           ├──────────────┐              │                           │
+│        ps_availqty        ││                           │              │              │                           │
+│       ps_supplycost       ││                           │              │              │                           │
+│                           ││                           │              │              │                           │
+│    Total Files Read: 20   ││                           │              │              │                           │
+│                           ││                           │              │              │                           │
+│      799,994,960 rows     ││        399,948 rows       │              │              │           1 row           │
+│          (36.51s)         ││          (0.09s)          │              │              │          (0.41s)          │
+└───────────────────────────┘└─────────────┬─────────────┘              │              └─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        ││         TABLE_SCAN        ││         PROJECTION        │
+                             │    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+                             │         Function:         ││         Function:         ││   (ps_supplycost * CAST   │
+                             │        READ_PARQUET       ││        READ_PARQUET       ││ (ps_availqty AS DECIMAL(18│
+                             │                           ││                           ││           ,0)))           │
+                             │        Projections:       ││        Projections:       ││                           │
+                             │         s_suppkey         ││        n_nationkey        ││                           │
+                             │        s_nationkey        ││                           ││                           │
+                             │                           ││          Filters:         ││                           │
+                             │    Total Files Read: 20   ││      n_name='GERMANY'     ││                           │
+                             │                           ││                           ││                           │
+                             │                           ││    Total Files Read: 1    ││                           │
+                             │                           ││                           ││                           │
+                             │        399,948 rows       ││           1 row           ││      31,995,840 rows      │
+                             │          (0.19s)          ││          (0.00s)          ││          (3.26s)          │
+                             └───────────────────────────┘└───────────────────────────┘└─────────────┬─────────────┘
+                                                                                       ┌─────────────┴─────────────┐
+                                                                                       │         HASH_JOIN         │
+                                                                                       │    ────────────────────   │
+                                                                                       │      Join Type: INNER     │
+                                                                                       │                           │
+                                                                                       │        Conditions:        ├──────────────┐
+                                                                                       │   ps_suppkey = s_suppkey  │              │
+                                                                                       │                           │              │
+                                                                                       │      31,995,840 rows      │              │
+                                                                                       │          (19.75s)         │              │
+                                                                                       └─────────────┬─────────────┘              │
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │         TABLE_SCAN        ││         HASH_JOIN         │
+                                                                                       │    ────────────────────   ││    ────────────────────   │
+                                                                                       │         Function:         ││      Join Type: INNER     │
+                                                                                       │        READ_PARQUET       ││                           │
+                                                                                       │                           ││        Conditions:        │
+                                                                                       │        Projections:       ││ s_nationkey = n_nationkey │
+                                                                                       │         ps_suppkey        ││                           │
+                                                                                       │        ps_availqty        ││                           ├──────────────┐
+                                                                                       │       ps_supplycost       ││                           │              │
+                                                                                       │                           ││                           │              │
+                                                                                       │    Total Files Read: 20   ││                           │              │
+                                                                                       │                           ││                           │              │
+                                                                                       │      799,994,960 rows     ││        399,948 rows       │              │
+                                                                                       │          (28.89s)         ││          (0.04s)          │              │
+                                                                                       └───────────────────────────┘└─────────────┬─────────────┘              │
+                                                                                                                    ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                                                    │         TABLE_SCAN        ││         TABLE_SCAN        │
+                                                                                                                    │    ────────────────────   ││    ────────────────────   │
+                                                                                                                    │         Function:         ││         Function:         │
+                                                                                                                    │        READ_PARQUET       ││        READ_PARQUET       │
+                                                                                                                    │                           ││                           │
+                                                                                                                    │        Projections:       ││        Projections:       │
+                                                                                                                    │         s_suppkey         ││        n_nationkey        │
+                                                                                                                    │        s_nationkey        ││                           │
+                                                                                                                    │                           ││          Filters:         │
+                                                                                                                    │    Total Files Read: 20   ││      n_name='GERMANY'     │
+                                                                                                                    │                           ││                           │
+                                                                                                                    │                           ││    Total Files Read: 1    │
+                                                                                                                    │                           ││                           │
+                                                                                                                    │        399,948 rows       ││           1 row           │
+                                                                                                                    │          (2.67s)          ││          (0.00s)          │
+                                                                                                                    └───────────────────────────┘└───────────────────────────┘
+
+
+================================================================================

@@ -1,0 +1,130 @@
+DuckDB EXPLAIN ANALYZE - Query 3
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     l_orderkey,     sum(l_extendedprice * (1 - l_discount)) AS revenue,     o_orderdate,     o_shippriority FROM     customer,     orders,     lineitem WHERE     c_mktsegment = 'BUILDING'     AND c_custkey = o_custkey     AND l_orderkey = o_orderkey     AND o_orderdate < CAST('1995-03-15' AS date)     AND l_shipdate > CAST('1995-03-15' AS date) GROUP BY     l_orderkey,     o_orderdate,     o_shippriority ORDER BY     revenue DESC,     o_orderdate LIMIT 10; 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 12.37s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│           TOP_N           │
+│    ────────────────────   │
+│          Top: 10          │
+│                           │
+│         Order By:         │
+│ sum((memory.main.lineitem │
+│  .l_extendedprice * (1 -  │
+│    memory.main.lineitem   │
+│    .l_discount))) DESC    │
+│     memory.main.orders    │
+│      .o_orderdate ASC     │
+│                           │
+│          10 rows          │
+│          (0.08s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│         l_orderkey        │
+│          revenue          │
+│        o_orderdate        │
+│       o_shippriority      │
+│                           │
+│      11,326,372 rows      │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │
+│    ────────────────────   │
+│          Groups:          │
+│             #0            │
+│             #1            │
+│             #2            │
+│                           │
+│    Aggregates: sum(#3)    │
+│                           │
+│      11,326,372 rows      │
+│          (6.39s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│         l_orderkey        │
+│        o_orderdate        │
+│       o_shippriority      │
+│ (l_extendedprice * (1.00 -│
+│        l_discount))       │
+│                           │
+│      29,931,857 rows      │
+│          (0.40s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│  l_orderkey = o_orderkey  │              │
+│                           │              │
+│      29,931,857 rows      │              │
+│         (143.29s)         │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││         HASH_JOIN         │
+│    ────────────────────   ││    ────────────────────   │
+│         Function:         ││      Join Type: INNER     │
+│        READ_PARQUET       ││                           │
+│                           ││        Conditions:        │
+│        Projections:       ││   o_custkey = c_custkey   │
+│         l_orderkey        ││                           │
+│      l_extendedprice      ││                           │
+│         l_discount        ││                           │
+│                           ││                           ├──────────────┐
+│          Filters:         ││                           │              │
+│  l_shipdate>'1995-03-15': ││                           │              │
+│           :DATE           ││                           │              │
+│                           ││                           │              │
+│    Total Files Read: 20   ││                           │              │
+│                           ││                           │              │
+│     3,234,397,581 rows    ││      145,769,513 rows     │              │
+│         (240.29s)         ││          (70.20s)         │              │
+└───────────────────────────┘└─────────────┬─────────────┘              │
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        ││         TABLE_SCAN        │
+                             │    ────────────────────   ││    ────────────────────   │
+                             │         Function:         ││         Function:         │
+                             │        READ_PARQUET       ││        READ_PARQUET       │
+                             │                           ││                           │
+                             │        Projections:       ││        Projections:       │
+                             │         o_orderkey        ││         c_custkey         │
+                             │         o_custkey         ││                           │
+                             │        o_orderdate        ││          Filters:         │
+                             │       o_shippriority      ││  c_mktsegment='BUILDING'  │
+                             │                           ││                           │
+                             │          Filters:         ││    Total Files Read: 20   │
+                             │ o_orderdate<'1995-03-15': ││                           │
+                             │           :DATE           ││                           │
+                             │                           ││                           │
+                             │    Total Files Read: 20   ││                           │
+                             │                           ││                           │
+                             │      728,813,943 rows     ││      29,998,152 rows      │
+                             │         (201.15s)         ││          (4.80s)          │
+                             └───────────────────────────┘└───────────────────────────┘
+
+
+================================================================================

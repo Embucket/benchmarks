@@ -1,0 +1,125 @@
+DuckDB EXPLAIN ANALYZE - Query 9
+================================================================================
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+EXPLAIN ANALYZE SELECT     nation,     o_year,     sum(amount) AS sum_profit FROM (     SELECT         n_name AS nation,         extract(year FROM o_orderdate) AS o_year,         l_extendedprice * (1 - l_discount) - ps_supplycost * l_quantity AS amount     FROM         part,         supplier,         lineitem,         partsupp,         orders,         nation     WHERE         s_suppkey = l_suppkey         AND ps_suppkey = l_suppkey         AND ps_partkey = l_partkey         AND p_partkey = l_partkey         AND o_orderkey = l_orderkey         AND s_nationkey = n_nationkey         AND p_name LIKE '%green%') AS profit GROUP BY     nation,     o_year ORDER BY     nation,     o_year DESC; 
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 50.77s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│          ORDER_BY         │
+│    ────────────────────   │
+│     profit.nation ASC     │
+│     profit.o_year DESC    │
+│                           │
+│          175 rows         │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │
+│    ────────────────────   │
+│          Groups:          │
+│             #0            │
+│             #1            │
+│                           │
+│    Aggregates: sum(#2)    │
+│                           │
+│          175 rows         │
+│          (43.04s)         │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│           nation          │
+│           o_year          │
+│           amount          │
+│                           │
+│      326,147,632 rows     │
+│          (1.90s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│           nation          │
+│           o_year          │
+│           amount          │
+│                           │
+│      326,147,632 rows     │
+│          (32.76s)         │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        │
+│   p_partkey = ps_partkey  ├────────────────────────────────────────────────────────────────────────┐
+│   l_suppkey = ps_suppkey  │                                                                        │
+│                           │                                                                        │
+│      326,147,632 rows     │                                                                        │
+│         (403.01s)         │                                                                        │
+└─────────────┬─────────────┘                                                                        │
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                                                          │         HASH_JOIN         │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│      Join Type: INNER     │                                                          │      Join Type: INNER     │
+│                           │                                                          │                           │
+│        Conditions:        ├───────────────────────────────────────────┐              │        Conditions:        ├──────────────┐
+│  l_orderkey = o_orderkey  │                                           │              │   ps_suppkey = s_suppkey  │              │
+│                           │                                           │              │                           │              │
+│      326,147,632 rows     │                                           │              │      800,000,000 rows     │              │
+│         (524.34s)         │                                           │              │         (108.21s)         │              │
+└─────────────┬─────────────┘                                           │              └─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │         TABLE_SCAN        ││         TABLE_SCAN        ││         HASH_JOIN         │
+│    ────────────────────   │                             │    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+│      Join Type: INNER     │                             │         Function:         ││         Function:         ││      Join Type: INNER     │
+│                           │                             │        READ_PARQUET       ││        READ_PARQUET       ││                           │
+│        Conditions:        │                             │                           ││                           ││        Conditions:        │
+│   l_partkey = p_partkey   │                             │        Projections:       ││        Projections:       ││ s_nationkey = n_nationkey │
+│                           │                             │         o_orderkey        ││         ps_partkey        ││                           │
+│                           ├──────────────┐              │        o_orderdate        ││         ps_suppkey        ││                           ├──────────────┐
+│                           │              │              │                           ││       ps_supplycost       ││                           │              │
+│                           │              │              │    Total Files Read: 20   ││                           ││                           │              │
+│                           │              │              │                           ││    Total Files Read: 20   ││                           │              │
+│                           │              │              │                           ││                           ││                           │              │
+│      326,147,632 rows     │              │              │     1,500,000,000 rows    ││      800,000,000 rows     ││      10,000,000 rows      │              │
+│         (245.98s)         │              │              │          (33.51s)         ││          (36.71s)         ││          (0.22s)          │              │
+└─────────────┬─────────────┘              │              └───────────────────────────┘└───────────────────────────┘└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││         TABLE_SCAN        │                                                          │         TABLE_SCAN        ││         TABLE_SCAN        │
+│    ────────────────────   ││    ────────────────────   │                                                          │    ────────────────────   ││    ────────────────────   │
+│         Function:         ││         Function:         │                                                          │         Function:         ││         Function:         │
+│        READ_PARQUET       ││        READ_PARQUET       │                                                          │        READ_PARQUET       ││        READ_PARQUET       │
+│                           ││                           │                                                          │                           ││                           │
+│        Projections:       ││        Projections:       │                                                          │        Projections:       ││        Projections:       │
+│         l_orderkey        ││         p_partkey         │                                                          │         s_suppkey         ││        n_nationkey        │
+│         l_partkey         ││                           │                                                          │        s_nationkey        ││           n_name          │
+│         l_suppkey         ││          Filters:         │                                                          │                           ││                           │
+│         l_quantity        ││ contains(p_name, 'green') │                                                          │    Total Files Read: 20   ││    Total Files Read: 1    │
+│      l_extendedprice      ││                           │                                                          │                           ││                           │
+│         l_discount        ││    Total Files Read: 20   │                                                          │                           ││                           │
+│                           ││                           │                                                          │                           ││                           │
+│    Total Files Read: 20   ││                           │                                                          │                           ││                           │
+│                           ││                           │                                                          │                           ││                           │
+│     5,999,987,541 rows    ││      10,871,182 rows      │                                                          │      10,000,000 rows      ││          25 rows          │
+│         (419.96s)         ││          (33.93s)         │                                                          │          (0.19s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘                                                          └───────────────────────────┘└───────────────────────────┘
+
+
+================================================================================
