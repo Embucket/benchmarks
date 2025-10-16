@@ -120,10 +120,17 @@ mkdir -p "${TEMP_DIR}"
 echo ">>> Checking for DuckDB installation..."
 if ! command -v duckdb &> /dev/null; then
   echo ">>> DuckDB not found. Installing..."
-  
+
   # Detect OS
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Linux
+    # Check for unzip utility
+    if ! command -v unzip &> /dev/null; then
+      echo ">>> unzip not found. Installing unzip..."
+      sudo apt-get update -qq
+      sudo apt-get install -y unzip
+    fi
+
     echo ">>> Downloading DuckDB for Linux..."
     wget -q https://github.com/duckdb/duckdb/releases/latest/download/duckdb_cli-linux-amd64.zip -O /tmp/duckdb.zip
     unzip -q /tmp/duckdb.zip -d /tmp/
@@ -138,7 +145,7 @@ if ! command -v duckdb &> /dev/null; then
     echo "Error: Unsupported OS: $OSTYPE"
     exit 1
   fi
-  
+
   echo ">>> DuckDB installed successfully"
 else
   echo ">>> DuckDB already installed: $(duckdb --version)"
