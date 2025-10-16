@@ -6,36 +6,54 @@ import sys
 import os
 import glob
 
-def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_run, memory_limit_mb, threads):
-    # Create DuckDB connection
-    conn = duckdb.connect(':memory:')
-    
+def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_run, memory_limit_mb, threads, mode, db_file):
+    # Create DuckDB connection based on mode
+    if mode == 'internal':
+        if not db_file or not os.path.exists(db_file):
+            print(f"Error: Database file not found: {db_file}")
+            print("Please run download-tpch-db.sh first to download the database file.")
+            sys.exit(1)
+
+        print(f"✓ Using internal database file: {db_file}")
+        conn = duckdb.connect(db_file, read_only=True)
+    else:  # parquet mode
+        if not data_dir or not os.path.exists(data_dir):
+            print(f"Error: Data directory not found: {data_dir}")
+            print("Please run generate-tpch-data.sh first to generate the data.")
+            sys.exit(1)
+
+        print(f"✓ Using parquet files from: {data_dir}")
+        conn = duckdb.connect(':memory:')
+
     # Configure temp directory
     conn.execute(f"SET temp_directory = '{temp_dir}'")
     print(f"✓ Set temp directory: {temp_dir}")
-    
+
     # Set memory limit if specified
     if memory_limit_mb:
         conn.execute(f"SET memory_limit = '{memory_limit_mb}MB'")
         print(f"✓ Set memory limit: {memory_limit_mb} MB")
-    
+
     # Set number of threads if specified
     if threads:
         conn.execute(f"SET threads = {threads}")
         print(f"✓ Set threads: {threads}")
     else:
         print(f"✓ Using default threads")
-    
+
     print()
-    
-    # Register Parquet files as tables
-    tables = ['customer', 'lineitem', 'nation', 'orders', 'part', 'partsupp', 'region', 'supplier']
-    for table in tables:
-        table_path = os.path.join(data_dir, table, '*.parquet')
-        conn.execute(f"CREATE VIEW {table} AS SELECT * FROM read_parquet('{table_path}')")
-        print(f"✓ Registered table: {table}")
-    
-    print()
+
+    # Register Parquet files as tables (only for parquet mode)
+    if mode == 'parquet':
+        tables = ['customer', 'lineitem', 'nation', 'orders', 'part', 'partsupp', 'region', 'supplier']
+        for table in tables:
+            table_path = os.path.join(data_dir, table, '*.parquet')
+            conn.execute(f"CREATE VIEW {table} AS SELECT * FROM read_parquet('{table_path}')")
+            print(f"✓ Registered table: {table}")
+        print()
+    else:
+        print("✓ Using tables from internal database")
+        print()
     
     # Determine which queries to run
     if queries_to_run:
@@ -46,7 +64,8 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
     results = {
         'engine': 'duckdb',
         'duckdb-version': duckdb.__version__,
-        'data_path': data_dir,
+        'mode': mode,
+        'data_path': data_dir if mode == 'parquet' else db_file,
         'temp_dir': temp_dir,
         'iterations': iterations,
         'memory_limit_mb': memory_limit_mb,
@@ -124,7 +143,8 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data-dir', required=True)
+    parser.add_argument('--data-dir', help='Directory containing parquet files (required for parquet mode)')
+    parser.add_argument('--db-file', help='Path to DuckDB database file (required for internal mode)')
     parser.add_argument('--queries-dir', required=True)
     parser.add_argument('--temp-dir', required=True)
     parser.add_argument('--iterations', type=int, default=3)
@@ -132,8 +152,17 @@ if __name__ == '__main__':
     parser.add_argument('--query', action='append', type=int, dest='queries')
     parser.add_argument('--memory-limit', type=int, dest='memory_limit_mb')
     parser.add_argument('--threads', type=int)
-    
+    parser.add_argument('--mode', choices=['parquet', 'internal'], required=True,
+                        help='Benchmark mode: parquet (use parquet files) or internal (use DuckDB database file)')
+
     args = parser.parse_args()
-    main(args.data_dir, args.queries_dir, args.temp_dir, args.iterations, 
-         args.output, args.queries, args.memory_limit_mb, args.threads)
+
+    # Validate mode-specific requirements
+    if args.mode == 'parquet' and not args.data_dir:
+        parser.error("--data-dir is required when using parquet mode")
+    if args.mode == 'internal' and not args.db_file:
+        parser.error("--db-file is required when using internal mode")
+
+    main(args.data_dir, args.queries_dir, args.temp_dir, args.iterations,
+         args.output, args.queries, args.memory_limit_mb, args.threads, args.mode, args.db_file)
 

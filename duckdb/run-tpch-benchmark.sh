@@ -8,27 +8,34 @@ source "${SCRIPT_DIR}/../env.sh"
 # Usage function
 usage() {
   cat <<EOF
-Usage: $0 <scale_factor> [options]
+Usage: $0 <scale_factor> --mode <MODE> [options]
 
 Run TPC-H benchmark using DuckDB.
 
 Arguments:
   scale_factor    The TPC-H scale factor (e.g., 1, 10, 100, 1000)
 
-Options:
+Required Options:
+  --mode MODE              Benchmark mode: 'parquet' or 'internal'
+                           - parquet: Use parquet files from ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
+                           - internal: Use DuckDB database file from ${MOUNT_POINT}/duckdb/tpch-sf<scale_factor>.db
+
+Optional Arguments:
   --iterations N           Number of iterations to run (default: 3)
-  --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-results.json)
+  --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-<mode>-results.json)
   --query N                Run only specific query number (can be specified multiple times)
   --memory-limit MB        Memory limit in MB (e.g., --memory-limit 10240 for 10GB)
   --threads N              Number of threads to use (default: all available cores)
 
 Examples:
-  $0 1                                    # Run all queries on SF1 data
-  $0 10 --iterations 5                    # Run 5 iterations on SF10 data
-  $0 100 --query 1 --query 6              # Run only queries 1 and 6 on SF100 data
-  $0 1000 --memory-limit 190000           # Run on SF1000 with 190GB memory limit
+  $0 1 --mode parquet                     # Run all queries on SF1 parquet data
+  $0 10 --mode parquet --iterations 5     # Run 5 iterations on SF10 parquet data
+  $0 100 --mode parquet --query 1 --query 6  # Run only queries 1 and 6 on SF100 parquet data
+  $0 1000 --mode internal                 # Run on SF1000 using internal database file
+  $0 1000 --mode parquet --memory-limit 190000  # Run on SF1000 parquet with 190GB memory limit
 
-The benchmark will use data from: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
+Parquet mode uses data from: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
+Internal mode uses database from: ${MOUNT_POINT}/duckdb/tpch-sf<scale_factor>.db
 Temp files will be written to: ${MOUNT_POINT}/duckdb/temp/
 EOF
   exit 1
@@ -52,6 +59,7 @@ if ! [[ "${SCALE_FACTOR}" =~ ^[0-9]+$ ]] || [[ "${SCALE_FACTOR}" -le 0 ]]; then
 fi
 
 # Parse optional arguments
+MODE=""  # Mode is now required
 ITERATIONS=3
 OUTPUT_FILE=""  # Will be set to absolute path later
 QUERY_ARGS=()  # Array to store query numbers
@@ -60,6 +68,14 @@ THREADS=""  # Number of threads
 
 while [[ $# -gt 0 ]]; do
   case $1 in
+    --mode)
+      MODE="$2"
+      if [[ "${MODE}" != "parquet" && "${MODE}" != "internal" ]]; then
+        echo "Error: Invalid mode '${MODE}'. Must be 'parquet' or 'internal'"
+        usage
+      fi
+      shift 2
+      ;;
     --iterations)
       ITERATIONS="$2"
       shift 2
@@ -87,31 +103,58 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Validate that mode is specified
+if [[ -z "${MODE}" ]]; then
+  echo "Error: --mode argument is required"
+  echo
+  usage
+fi
+
 # Set default output file if not specified
 if [[ -z "${OUTPUT_FILE}" ]]; then
-  OUTPUT_FILE="$(pwd)/tpch-sf${SCALE_FACTOR}-duckdb-results.json"
+  OUTPUT_FILE="$(pwd)/tpch-sf${SCALE_FACTOR}-${MODE}-duckdb-results.json"
 fi
 
 echo "=== DuckDB TPC-H Benchmark ==="
 echo "Scale Factor: ${SCALE_FACTOR}"
+echo "Mode: ${MODE}"
 echo "Iterations: ${ITERATIONS}"
 echo "Output File: ${OUTPUT_FILE}"
 echo
 
-# Set paths
-DATA_DIR="${MOUNT_POINT}/tpch-data/sf${SCALE_FACTOR}"
+# Set paths based on mode
 TEMP_DIR="${MOUNT_POINT}/duckdb/temp"
 
-# Check if data directory exists
-if [[ ! -d "${DATA_DIR}" ]]; then
-  echo "Error: Data directory not found: ${DATA_DIR}"
-  echo "Please run generate-tpch-data.sh first to generate the data."
-  exit 1
-fi
+if [[ "${MODE}" == "parquet" ]]; then
+  DATA_DIR="${MOUNT_POINT}/tpch-data/sf${SCALE_FACTOR}"
+  DB_FILE=""
 
-echo ">>> Data directory: ${DATA_DIR}"
-echo ">>> Temp directory (for spill): ${TEMP_DIR}"
-echo
+  # Check if data directory exists
+  if [[ ! -d "${DATA_DIR}" ]]; then
+    echo "Error: Data directory not found: ${DATA_DIR}"
+    echo "Please run generate-tpch-data.sh first to generate the data."
+    exit 1
+  fi
+
+  echo ">>> Data directory: ${DATA_DIR}"
+  echo ">>> Temp directory (for spill): ${TEMP_DIR}"
+  echo
+else  # internal mode
+  DATA_DIR=""
+  DB_FILE="${MOUNT_POINT}/duckdb/tpch-sf${SCALE_FACTOR}.db"
+
+  # Check if database file exists
+  if [[ ! -f "${DB_FILE}" ]]; then
+    echo "Error: Database file not found: ${DB_FILE}"
+    echo "Please run download-tpch-db.sh first to download the database file."
+    exit 1
+  fi
+
+  echo ">>> Database file: ${DB_FILE}"
+  echo ">>> Database size: $(du -h "${DB_FILE}" | cut -f1)"
+  echo ">>> Temp directory (for spill): ${TEMP_DIR}"
+  echo
+fi
 
 # Create temp directory if it doesn't exist
 mkdir -p "${TEMP_DIR}"
@@ -228,8 +271,14 @@ fi
 echo ">>> Running benchmark..."
 echo
 
-# Build Python command
-PYTHON_CMD="python3 ${BENCHMARK_SCRIPT} --data-dir ${DATA_DIR} --queries-dir ${QUERIES_DIR} --temp-dir ${TEMP_DIR} --iterations ${ITERATIONS} --output ${OUTPUT_FILE}"
+# Build Python command based on mode
+PYTHON_CMD="python3 ${BENCHMARK_SCRIPT} --queries-dir ${QUERIES_DIR} --temp-dir ${TEMP_DIR} --iterations ${ITERATIONS} --output ${OUTPUT_FILE} --mode ${MODE}"
+
+if [[ "${MODE}" == "parquet" ]]; then
+  PYTHON_CMD="${PYTHON_CMD} --data-dir ${DATA_DIR}"
+else
+  PYTHON_CMD="${PYTHON_CMD} --db-file ${DB_FILE}"
+fi
 
 # Add query arguments if specified
 for query in "${QUERY_ARGS[@]}"; do
