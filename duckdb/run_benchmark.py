@@ -6,7 +6,7 @@ import sys
 import os
 import glob
 
-def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_run, memory_limit_mb, threads, mode, db_file):
+def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_run, memory_limit_mb, threads, mode, db_file, timestamp):
     # Create DuckDB connection based on mode
     if mode == 'internal':
         if not db_file or not os.path.exists(db_file):
@@ -62,6 +62,7 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
         query_numbers = list(range(1, 23))  # All 22 TPC-H queries
     
     results = {
+        'timestamp': timestamp,
         'engine': 'duckdb',
         'duckdb-version': duckdb.__version__,
         'mode': mode,
@@ -154,6 +155,7 @@ if __name__ == '__main__':
     parser.add_argument('--threads', type=int)
     parser.add_argument('--mode', choices=['parquet', 'internal'], required=True,
                         help='Benchmark mode: parquet (use parquet files) or internal (use DuckDB database file)')
+    parser.add_argument('--timestamp', required=True, help='Timestamp for the benchmark run')
 
     args = parser.parse_args()
 
@@ -164,5 +166,5 @@ if __name__ == '__main__':
         parser.error("--db-file is required when using internal mode")
 
     main(args.data_dir, args.queries_dir, args.temp_dir, args.iterations,
-         args.output, args.queries, args.memory_limit_mb, args.threads, args.mode, args.db_file)
+         args.output, args.queries, args.memory_limit_mb, args.threads, args.mode, args.db_file, args.timestamp)
 

@@ -22,10 +22,16 @@ Required Options:
 
 Optional Arguments:
   --iterations N           Number of iterations to run (default: 3)
-  --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-<mode>-results.json)
+  --output FILE            Output JSON file name (will be saved in results-<mode>/ directory)
   --query N                Run only specific query number (can be specified multiple times)
   --memory-limit MB        Memory limit in MB (e.g., --memory-limit 10240 for 10GB)
   --threads N              Number of threads to use (default: all available cores)
+
+Results:
+  All results are saved to: results-<mode>/
+  - Existing files in the directory are deleted before each run
+  - Results JSON includes timestamp of the benchmark run
+  - Query execution plans are saved alongside results
 
 Examples:
   $0 1 --mode parquet                     # Run all queries on SF1 parquet data
@@ -110,10 +116,24 @@ if [[ -z "${MODE}" ]]; then
   usage
 fi
 
-# Create results directory with mode and timestamp
-TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
-RESULTS_DIR="$(pwd)/results-${MODE}-${TIMESTAMP}"
+# Create results directory with mode (no timestamp in folder name)
+RESULTS_DIR="$(pwd)/results-${MODE}"
+
+# If results directory exists and has files, delete them
+if [[ -d "${RESULTS_DIR}" ]]; then
+  FILE_COUNT=$(find "${RESULTS_DIR}" -type f | wc -l)
+  if [[ ${FILE_COUNT} -gt 0 ]]; then
+    echo ">>> Cleaning existing results directory: ${RESULTS_DIR}"
+    echo ">>> Removing ${FILE_COUNT} existing file(s)..."
+    rm -f "${RESULTS_DIR}"/*
+  fi
+fi
+
+# Create results directory
 mkdir -p "${RESULTS_DIR}"
+
+# Generate timestamp for results
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
 
 # Set default output file if not specified
 if [[ -z "${OUTPUT_FILE}" ]]; then
@@ -282,7 +302,7 @@ echo ">>> Running benchmark..."
 echo
 
 # Build Python command based on mode
-PYTHON_CMD="python3 ${BENCHMARK_SCRIPT} --queries-dir ${QUERIES_DIR} --temp-dir ${TEMP_DIR} --iterations ${ITERATIONS} --output ${OUTPUT_FILE} --mode ${MODE}"
+PYTHON_CMD="python3 ${BENCHMARK_SCRIPT} --queries-dir ${QUERIES_DIR} --temp-dir ${TEMP_DIR} --iterations ${ITERATIONS} --output ${OUTPUT_FILE} --mode ${MODE} --timestamp \"${TIMESTAMP}\""
 
 if [[ "${MODE}" == "parquet" ]]; then
   PYTHON_CMD="${PYTHON_CMD} --data-dir ${DATA_DIR}"
@@ -310,5 +330,6 @@ eval "${PYTHON_CMD}"
 
 echo
 echo ">>> Benchmark complete!"
-echo ">>> Results saved to: ${OUTPUT_FILE}"
+echo ">>> Results directory: ${RESULTS_DIR}"
+echo ">>> Results file: ${OUTPUT_FILE}"
 
