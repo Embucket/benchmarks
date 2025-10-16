@@ -110,15 +110,25 @@ if [[ -z "${MODE}" ]]; then
   usage
 fi
 
+# Create results directory with mode and timestamp
+TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+RESULTS_DIR="$(pwd)/results-${MODE}-${TIMESTAMP}"
+mkdir -p "${RESULTS_DIR}"
+
 # Set default output file if not specified
 if [[ -z "${OUTPUT_FILE}" ]]; then
-  OUTPUT_FILE="$(pwd)/tpch-sf${SCALE_FACTOR}-${MODE}-duckdb-results.json"
+  OUTPUT_FILE="${RESULTS_DIR}/tpch-sf${SCALE_FACTOR}-${MODE}-results.json"
+else
+  # If user specified output file, move it to results directory but keep the filename
+  OUTPUT_BASENAME=$(basename "${OUTPUT_FILE}")
+  OUTPUT_FILE="${RESULTS_DIR}/${OUTPUT_BASENAME}"
 fi
 
 echo "=== DuckDB TPC-H Benchmark ==="
 echo "Scale Factor: ${SCALE_FACTOR}"
 echo "Mode: ${MODE}"
 echo "Iterations: ${ITERATIONS}"
+echo "Results Directory: ${RESULTS_DIR}"
 echo "Output File: ${OUTPUT_FILE}"
 echo
 
