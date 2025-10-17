@@ -299,12 +299,18 @@ echo
 
 # Check for Python DuckDB package
 echo ">>> Checking for Python DuckDB package..."
-if ! python3 -c "import duckdb" &> /dev/null; then
+if ! python3 -c "import duckdb" 2>/dev/null; then
   echo ">>> Python DuckDB package not found. Installing..."
-  pip3 install duckdb --break-system-packages --quiet
-  echo ">>> Python DuckDB package installed successfully"
+  pip3 install duckdb --break-system-packages
+
+  # Verify installation
+  if ! python3 -c "import duckdb; print(f'DuckDB {duckdb.__version__} installed successfully')" 2>/dev/null; then
+    echo "Error: Failed to install Python DuckDB package"
+    exit 1
+  fi
 else
-  echo ">>> Python DuckDB package already installed"
+  DUCKDB_VERSION=$(python3 -c "import duckdb; print(duckdb.__version__)" 2>/dev/null)
+  echo ">>> Python DuckDB package already installed (version ${DUCKDB_VERSION})"
 fi
 
 echo
