@@ -16,8 +16,9 @@ Arguments:
   scale_factor    The TPC-H scale factor (e.g., 1, 10, 100, 1000)
 
 Required Options:
-  --mode MODE              Benchmark mode: 'parquet' or 'internal'
+  --mode MODE              Benchmark mode: 'parquet', 'parquet-s3', or 'internal'
                            - parquet: Use parquet files from ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
+                           - parquet-s3: Use parquet files from S3 (s3://embucket-testdata/tpch/<scale_factor>)
                            - internal: Use DuckDB database file from ${MOUNT_POINT}/duckdb/tpch-sf<scale_factor>.db
 
 Optional Arguments:
@@ -39,8 +40,10 @@ Examples:
   $0 100 --mode parquet --query 1 --query 6  # Run only queries 1 and 6 on SF100 parquet data
   $0 1000 --mode internal                 # Run on SF1000 using internal database file
   $0 1000 --mode parquet --memory-limit 190000  # Run on SF1000 parquet with 190GB memory limit
+  $0 1 --mode parquet-s3                  # Run all queries on SF1 parquet data from S3
 
 Parquet mode uses data from: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
+Parquet-S3 mode uses data from: s3://embucket-testdata/tpch/<scale_factor>
 Internal mode uses database from: ${MOUNT_POINT}/duckdb/tpch-sf<scale_factor>.db
 Temp files will be written to: ${MOUNT_POINT}/duckdb/temp/
 EOF
@@ -76,8 +79,8 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --mode)
       MODE="$2"
-      if [[ "${MODE}" != "parquet" && "${MODE}" != "internal" ]]; then
-        echo "Error: Invalid mode '${MODE}'. Must be 'parquet' or 'internal'"
+      if [[ "${MODE}" != "parquet" && "${MODE}" != "parquet-s3" && "${MODE}" != "internal" ]]; then
+        echo "Error: Invalid mode '${MODE}'. Must be 'parquet', 'parquet-s3', or 'internal'"
         usage
       fi
       shift 2
@@ -207,6 +210,13 @@ if [[ "${MODE}" == "parquet" ]]; then
   fi
 
   echo ">>> Data directory: ${DATA_DIR}"
+  echo ">>> Temp directory (for spill): ${TEMP_DIR}"
+  echo
+elif [[ "${MODE}" == "parquet-s3" ]]; then
+  DATA_DIR="s3://embucket-testdata/tpch/${SCALE_FACTOR}"
+  DB_FILE=""
+
+  echo ">>> S3 data path: ${DATA_DIR}"
   echo ">>> Temp directory (for spill): ${TEMP_DIR}"
   echo
 else  # internal mode
@@ -344,7 +354,7 @@ echo
 # Build Python command based on mode
 PYTHON_CMD="python3 ${BENCHMARK_SCRIPT} --queries-dir ${QUERIES_DIR} --temp-dir ${TEMP_DIR} --iterations ${ITERATIONS} --output ${OUTPUT_FILE} --mode ${MODE} --timestamp \"${TIMESTAMP}\""
 
-if [[ "${MODE}" == "parquet" ]]; then
+if [[ "${MODE}" == "parquet" || "${MODE}" == "parquet-s3" ]]; then
   PYTHON_CMD="${PYTHON_CMD} --data-dir ${DATA_DIR}"
 else
   PYTHON_CMD="${PYTHON_CMD} --db-file ${DB_FILE}"

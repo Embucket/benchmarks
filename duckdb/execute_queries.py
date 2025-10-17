@@ -16,13 +16,20 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
 
         print(f"✓ Using internal database file: {db_file}")
         conn = duckdb.connect(db_file, read_only=True)
-    else:  # parquet mode
+    elif mode == 'parquet':
         if not data_dir or not os.path.exists(data_dir):
             print(f"Error: Data directory not found: {data_dir}")
             print("Please run generate-tpch-data.sh first to generate the data.")
             sys.exit(1)
 
         print(f"✓ Using parquet files from: {data_dir}")
+        conn = duckdb.connect(':memory:')
+    else:  # parquet-s3 mode
+        if not data_dir:
+            print(f"Error: S3 path is required for parquet-s3 mode")
+            sys.exit(1)
+
+        print(f"✓ Using parquet files from S3: {data_dir}")
         conn = duckdb.connect(':memory:')
 
     # Configure temp directory
@@ -43,11 +50,19 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
 
     print()
 
-    # Register Parquet files as tables (only for parquet mode)
+    # Register Parquet files as tables (for parquet and parquet-s3 modes)
     if mode == 'parquet':
         tables = ['customer', 'lineitem', 'nation', 'orders', 'part', 'partsupp', 'region', 'supplier']
         for table in tables:
             table_path = os.path.join(data_dir, table, '*.parquet')
+            conn.execute(f"CREATE VIEW {table} AS SELECT * FROM read_parquet('{table_path}')")
+            print(f"✓ Registered table: {table}")
+        print()
+    elif mode == 'parquet-s3':
+        tables = ['customer', 'lineitem', 'nation', 'orders', 'part', 'partsupp', 'region', 'supplier']
+        for table in tables:
+            # S3 path format: s3://bucket/path/table/*.parquet
+            table_path = f"{data_dir}/{table}/*.parquet"
             conn.execute(f"CREATE VIEW {table} AS SELECT * FROM read_parquet('{table_path}')")
             print(f"✓ Registered table: {table}")
         print()
@@ -66,7 +81,7 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
         'engine': 'duckdb',
         'duckdb-version': duckdb.__version__,
         'mode': mode,
-        'data_path': data_dir if mode == 'parquet' else db_file,
+        'data_path': data_dir if mode in ['parquet', 'parquet-s3'] else db_file,
         'temp_dir': temp_dir,
         'iterations': iterations,
         'memory_limit_mb': memory_limit_mb,
@@ -144,7 +159,7 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data-dir', help='Directory containing parquet files (required for parquet mode)')
+    parser.add_argument('--data-dir', help='Directory containing parquet files (required for parquet mode) or S3 path (required for parquet-s3 mode)')
     parser.add_argument('--db-file', help='Path to DuckDB database file (required for internal mode)')
     parser.add_argument('--queries-dir', required=True)
     parser.add_argument('--temp-dir', required=True)
@@ -153,8 +168,8 @@ if __name__ == '__main__':
     parser.add_argument('--query', action='append', type=int, dest='queries')
     parser.add_argument('--memory-limit', type=int, dest='memory_limit_mb')
     parser.add_argument('--threads', type=int)
-    parser.add_argument('--mode', choices=['parquet', 'internal'], required=True,
-                        help='Benchmark mode: parquet (use parquet files) or internal (use DuckDB database file)')
+    parser.add_argument('--mode', choices=['parquet', 'parquet-s3', 'internal'], required=True,
+                        help='Benchmark mode: parquet (use local parquet files), parquet-s3 (use S3 parquet files), or internal (use DuckDB database file)')
     parser.add_argument('--timestamp', required=True, help='Timestamp for the benchmark run')
 
     args = parser.parse_args()
@@ -162,6 +177,8 @@ if __name__ == '__main__':
     # Validate mode-specific requirements
     if args.mode == 'parquet' and not args.data_dir:
         parser.error("--data-dir is required when using parquet mode")
+    if args.mode == 'parquet-s3' and not args.data_dir:
+        parser.error("--data-dir (S3 path) is required when using parquet-s3 mode")
     if args.mode == 'internal' and not args.db_file:
         parser.error("--db-file is required when using internal mode")
 
