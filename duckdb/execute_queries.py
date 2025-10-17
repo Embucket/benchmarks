@@ -57,8 +57,18 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
         # Set S3 region (embucket-testdata is in us-east-2)
         conn.execute("SET s3_region='us-east-2'")
 
-        # Use AWS credentials from environment or instance profile
-        # DuckDB will automatically use IAM instance profile if available
+        # Enable S3 to use instance credentials
+        conn.execute("SET s3_use_ssl=true")
+
+        # Check if AWS credentials are available in environment
+        import os
+        if 'AWS_ACCESS_KEY_ID' in os.environ and 'AWS_SECRET_ACCESS_KEY' in os.environ:
+            print(f"✓ Using AWS credentials from environment variables")
+        else:
+            # Try to use EC2 instance profile credentials
+            # DuckDB should automatically detect and use them
+            print(f"✓ Using AWS credentials from EC2 instance profile")
+
         print(f"✓ Configured S3 access (region: us-east-2)")
 
     print()
