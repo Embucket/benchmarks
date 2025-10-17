@@ -32,7 +32,7 @@ def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") ->
     result_files = []
 
     # Search in duckdb results directories (now organized by EC2 instance type)
-    for mode in ['internal', 'parquet']:
+    for mode in ['internal', 'parquet', 'parquet-s3']:
         results_base = os.path.join(base_dir, 'duckdb', f'results-{mode}')
         if os.path.exists(results_base):
             # Search in all EC2 instance type subdirectories

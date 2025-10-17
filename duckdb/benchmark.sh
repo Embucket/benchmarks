@@ -423,7 +423,8 @@ echo ">>> Adding EC2 metadata to results..."
 EC2_METADATA_SCRIPT="${SCRIPT_DIR}/../add_ec2_metadata.py"
 
 if [[ -f "${EC2_METADATA_SCRIPT}" ]]; then
-  python3 "${EC2_METADATA_SCRIPT}" "${OUTPUT_FILE}"
+  # Run from /tmp to avoid duckdb import conflicts
+  (cd /tmp && python3 "${EC2_METADATA_SCRIPT}" "${OUTPUT_FILE}")
 else
   echo "⚠ Warning: EC2 metadata script not found: ${EC2_METADATA_SCRIPT}"
   echo "  Skipping EC2 metadata collection"
