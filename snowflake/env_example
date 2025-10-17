@@ -1,0 +1,10 @@
+# Snowflake credentials
+SNOWFLAKE_USER=your_username
+SNOWFLAKE_PASSWORD=your_password
+SNOWFLAKE_ACCOUNT=your_account_identifier
+SNOWFLAKE_DATABASE=TPCH_DB  # Your working database for creating views
+SNOWFLAKE_SCHEMA=PUBLIC     # Your working schema for creating views
+SNOWFLAKE_WAREHOUSE=BENCHMARK_WH
+
+# Warehouse configuration
+SNOWFLAKE_WAREHOUSE_SIZE=MEDIUM  # Options: XSMALL, SMALL, MEDIUM, LARGE, XLARGE, etc.
