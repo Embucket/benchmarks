@@ -131,8 +131,8 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
     elif mode == 'parquet-s3':
         tables = ['customer', 'lineitem', 'nation', 'orders', 'part', 'partsupp', 'region', 'supplier']
         for table in tables:
-            # S3 path format: s3://bucket/path/table/*.parquet
-            table_path = f"{data_dir}/{table}/*.parquet"
+            # S3 path format: s3://bucket/path/table.parquet (single file per table)
+            table_path = f"{data_dir}/{table}.parquet"
             conn.execute(f"CREATE VIEW {table} AS SELECT * FROM read_parquet('{table_path}')")
             print(f"✓ Registered table: {table}")
         print()
