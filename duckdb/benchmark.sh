@@ -300,17 +300,26 @@ echo
 # Check for Python DuckDB package
 echo ">>> Checking for Python DuckDB package..."
 set +e  # Temporarily disable exit on error for the check
-python3 -c "import duckdb" 2>/dev/null
+# Change to /tmp to avoid importing the local duckdb directory
+(cd /tmp && python3 -c "import duckdb" 2>/dev/null)
 CHECK_RESULT=$?
 set -e  # Re-enable exit on error
 
 if [[ ${CHECK_RESULT} -ne 0 ]]; then
   echo ">>> Python DuckDB package not found. Installing..."
+
+  # Check if pip is available
+  if ! command -v pip3 &> /dev/null; then
+    echo ">>> pip3 not found. Installing pip..."
+    sudo apt-get update -qq
+    sudo apt-get install -y python3-pip
+  fi
+
   pip3 install duckdb --break-system-packages
 
   # Verify installation
   set +e
-  VERIFY_OUTPUT=$(python3 -c "import duckdb; print(duckdb.__version__)" 2>&1)
+  VERIFY_OUTPUT=$(cd /tmp && python3 -c "import duckdb; print(duckdb.__version__)" 2>&1)
   VERIFY_RESULT=$?
   set -e
 
@@ -323,7 +332,7 @@ if [[ ${CHECK_RESULT} -ne 0 ]]; then
   fi
 else
   set +e
-  DUCKDB_VERSION=$(python3 -c "import duckdb; print(duckdb.__version__)" 2>/dev/null)
+  DUCKDB_VERSION=$(cd /tmp && python3 -c "import duckdb; print(duckdb.__version__)" 2>/dev/null)
   set -e
   if [[ -z "${DUCKDB_VERSION}" ]]; then
     DUCKDB_VERSION="unknown"
@@ -400,7 +409,8 @@ if [[ -n "${THREADS}" ]]; then
 fi
 
 # Run the benchmark
-eval "${PYTHON_CMD}"
+# Change to /tmp to avoid importing the local duckdb directory
+(cd /tmp && eval "${PYTHON_CMD}")
 
 echo
 echo ">>> Benchmark complete!"
