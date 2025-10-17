@@ -300,7 +300,7 @@ echo
 # Check for Python DuckDB package
 echo ">>> Checking for Python DuckDB package..."
 set +e  # Temporarily disable exit on error for the check
-timeout 5 python3 -c "import duckdb" 2>/dev/null
+python3 -c "import duckdb" 2>/dev/null
 CHECK_RESULT=$?
 set -e  # Re-enable exit on error
 
@@ -310,19 +310,20 @@ if [[ ${CHECK_RESULT} -ne 0 ]]; then
 
   # Verify installation
   set +e
-  timeout 5 python3 -c "import duckdb; print(f'DuckDB {duckdb.__version__} installed successfully')" 2>/dev/null
+  VERIFY_OUTPUT=$(python3 -c "import duckdb; print(duckdb.__version__)" 2>&1)
   VERIFY_RESULT=$?
   set -e
 
   if [[ ${VERIFY_RESULT} -eq 0 ]]; then
-    echo ">>> Installation verified"
+    echo ">>> Python DuckDB package installed successfully (version ${VERIFY_OUTPUT})"
   else
-    echo "Error: Failed to install or verify Python DuckDB package"
+    echo "Error: Failed to install Python DuckDB package"
+    echo "Error output: ${VERIFY_OUTPUT}"
     exit 1
   fi
 else
   set +e
-  DUCKDB_VERSION=$(timeout 5 python3 -c "import duckdb; print(duckdb.__version__)" 2>/dev/null)
+  DUCKDB_VERSION=$(python3 -c "import duckdb; print(duckdb.__version__)" 2>/dev/null)
   set -e
   if [[ -z "${DUCKDB_VERSION}" ]]; then
     DUCKDB_VERSION="unknown"
