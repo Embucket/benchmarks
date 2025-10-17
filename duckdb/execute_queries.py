@@ -50,6 +50,9 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
 
     # Configure S3 access for parquet-s3 mode
     if mode == 'parquet-s3':
+        import urllib.request
+        import urllib.error
+
         # Install and load httpfs extension for S3 access
         conn.execute("INSTALL httpfs")
         conn.execute("LOAD httpfs")
@@ -61,13 +64,57 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
         conn.execute("SET s3_use_ssl=true")
 
         # Check if AWS credentials are available in environment
-        import os
         if 'AWS_ACCESS_KEY_ID' in os.environ and 'AWS_SECRET_ACCESS_KEY' in os.environ:
+            conn.execute(f"SET s3_access_key_id='{os.environ['AWS_ACCESS_KEY_ID']}'")
+            conn.execute(f"SET s3_secret_access_key='{os.environ['AWS_SECRET_ACCESS_KEY']}'")
+            if 'AWS_SESSION_TOKEN' in os.environ:
+                conn.execute(f"SET s3_session_token='{os.environ['AWS_SESSION_TOKEN']}'")
             print(f"✓ Using AWS credentials from environment variables")
         else:
-            # Try to use EC2 instance profile credentials
-            # DuckDB should automatically detect and use them
-            print(f"✓ Using AWS credentials from EC2 instance profile")
+            # Fetch credentials from EC2 instance metadata
+            try:
+                # Get IMDSv2 token
+                token_url = 'http://169.254.169.254/latest/api/token'
+                token_request = urllib.request.Request(
+                    token_url,
+                    headers={'X-aws-ec2-metadata-token-ttl-seconds': '21600'},
+                    method='PUT'
+                )
+                with urllib.request.urlopen(token_request, timeout=2) as response:
+                    token = response.read().decode('utf-8')
+
+                # Get IAM role name
+                role_url = 'http://169.254.169.254/latest/meta-data/iam/security-credentials/'
+                role_request = urllib.request.Request(
+                    role_url,
+                    headers={'X-aws-ec2-metadata-token': token}
+                )
+                with urllib.request.urlopen(role_request, timeout=2) as response:
+                    role_name = response.read().decode('utf-8').strip()
+
+                # Get credentials
+                creds_url = f'http://169.254.169.254/latest/meta-data/iam/security-credentials/{role_name}'
+                creds_request = urllib.request.Request(
+                    creds_url,
+                    headers={'X-aws-ec2-metadata-token': token}
+                )
+                with urllib.request.urlopen(creds_request, timeout=2) as response:
+                    import json
+                    creds = json.loads(response.read().decode('utf-8'))
+
+                # Set credentials in DuckDB
+                conn.execute(f"SET s3_access_key_id='{creds['AccessKeyId']}'")
+                conn.execute(f"SET s3_secret_access_key='{creds['SecretAccessKey']}'")
+                conn.execute(f"SET s3_session_token='{creds['Token']}'")
+                print(f"✓ Using AWS credentials from EC2 instance profile ({role_name})")
+            except Exception as e:
+                print(f"⚠ Warning: Could not fetch EC2 instance credentials: {e}")
+                print(f"  No IAM role attached to EC2 instance")
+                print(f"  To fix this:")
+                print(f"    1. Attach an IAM role with S3 read permissions to this EC2 instance, OR")
+                print(f"    2. Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables, OR")
+                print(f"    3. Make the S3 bucket publicly accessible")
+                print(f"  Attempting to proceed with anonymous access (will fail if bucket is not public)...")
 
         print(f"✓ Configured S3 access (region: us-east-2)")
 
