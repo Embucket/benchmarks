@@ -291,7 +291,7 @@ fi
 echo
 
 # Use the Python benchmark script from the duckdb directory
-BENCHMARK_SCRIPT="${SCRIPT_DIR}/run_benchmark.py"
+BENCHMARK_SCRIPT="${SCRIPT_DIR}/execute_queries.py"
 
 if [[ ! -f "${BENCHMARK_SCRIPT}" ]]; then
   echo "Error: Benchmark script not found: ${BENCHMARK_SCRIPT}"
@@ -332,4 +332,17 @@ echo
 echo ">>> Benchmark complete!"
 echo ">>> Results directory: ${RESULTS_DIR}"
 echo ">>> Results file: ${OUTPUT_FILE}"
+
+# Add EC2 metadata to results
+echo
+echo ">>> Adding EC2 metadata to results..."
+EC2_METADATA_SCRIPT="${SCRIPT_DIR}/../add_ec2_metadata.py"
+
+if [[ -f "${EC2_METADATA_SCRIPT}" ]]; then
+  python3 "${EC2_METADATA_SCRIPT}" "${OUTPUT_FILE}"
+else
+  echo "⚠ Warning: EC2 metadata script not found: ${EC2_METADATA_SCRIPT}"
+  echo "  Skipping EC2 metadata collection"
+  echo "  Please add 'ec2_instance_type' and 'usd_per_hour' manually to the result file"
+fi
 

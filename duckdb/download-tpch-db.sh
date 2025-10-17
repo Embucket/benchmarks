@@ -104,5 +104,5 @@ echo ">>> Database file: ${DB_FILE}"
 echo ">>> File size: $(du -h "${DB_FILE}" | cut -f1)"
 echo
 echo "You can now run benchmarks using the 'internal' mode:"
-echo "  ./run-tpch-benchmark.sh ${SCALE_FACTOR} --mode internal"
+echo "  ./benchmark.sh ${SCALE_FACTOR} --mode internal"
 

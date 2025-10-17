@@ -283,6 +283,20 @@ echo ">>> Results saved to: ${OUTPUT_FILE}"
 echo ">>> Full path: $(realpath "${OUTPUT_FILE}" 2>/dev/null || echo "${OUTPUT_FILE}")"
 echo
 
+# Add EC2 metadata to results
+echo ">>> Adding EC2 metadata to results..."
+EC2_METADATA_SCRIPT="${SCRIPT_DIR}/../add_ec2_metadata.py"
+
+if [[ -f "${EC2_METADATA_SCRIPT}" ]]; then
+  python3 "${EC2_METADATA_SCRIPT}" "${OUTPUT_FILE}"
+else
+  echo "⚠ Warning: EC2 metadata script not found: ${EC2_METADATA_SCRIPT}"
+  echo "  Skipping EC2 metadata collection"
+  echo "  Please add 'ec2_instance_type' and 'usd_per_hour' manually to the result file"
+fi
+
+echo
+
 # Display summary if jq is available
 if command -v jq &> /dev/null; then
   echo ">>> Summary of results:"
