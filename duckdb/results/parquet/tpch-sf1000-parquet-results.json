@@ -1,6 +1,7 @@
 {
   "timestamp": "2025-10-16 22:59:13",
   "ec2_instance_type": "r6gd.metal",
+  "usd_per_hour": 3.686,
   "engine": "duckdb",
   "duckdb-version": "1.4.1",
   "mode": "parquet",
