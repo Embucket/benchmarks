@@ -179,8 +179,8 @@ else
   echo "✓ Detected EC2 instance type: ${EC2_INSTANCE_TYPE}"
 fi
 
-# Create results directory with EC2 instance type
-RESULTS_DIR="$(pwd)/results/${EC2_INSTANCE_TYPE}"
+# Create results directory with mode and EC2 instance type (same structure as DuckDB)
+RESULTS_DIR="$(pwd)/results-${MODE}/${EC2_INSTANCE_TYPE}"
 mkdir -p "${RESULTS_DIR}"
 
 # Set default output file to results directory if not specified
