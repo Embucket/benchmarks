@@ -48,6 +48,19 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
     else:
         print(f"✓ Using default threads")
 
+    # Configure S3 access for parquet-s3 mode
+    if mode == 'parquet-s3':
+        # Install and load httpfs extension for S3 access
+        conn.execute("INSTALL httpfs")
+        conn.execute("LOAD httpfs")
+
+        # Set S3 region (embucket-testdata is in us-east-2)
+        conn.execute("SET s3_region='us-east-2'")
+
+        # Use AWS credentials from environment or instance profile
+        # DuckDB will automatically use IAM instance profile if available
+        print(f"✓ Configured S3 access (region: us-east-2)")
+
     print()
 
     # Register Parquet files as tables (for parquet and parquet-s3 modes)
