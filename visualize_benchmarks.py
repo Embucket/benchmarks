@@ -19,25 +19,43 @@ import numpy as np
 def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") -> List[Tuple[str, str]]:
     """
     Find all result JSON files for a given benchmark and scale factor.
-    
+
     Args:
         benchmark: Benchmark name (e.g., 'tpch')
         scale_factor: Scale factor (e.g., 1000 for sf1000)
         base_dir: Base directory to search from
-    
+
     Returns:
         List of tuples (system_name, file_path)
     """
     pattern = f"{benchmark}-sf{scale_factor}-*-results.json"
     result_files = []
-    
-    # Search in duckdb results directories
+
+    # Search in duckdb results directories (now organized by EC2 instance type)
     for mode in ['internal', 'parquet']:
-        search_path = os.path.join(base_dir, 'duckdb', 'results', mode, pattern)
-        for file_path in glob.glob(search_path):
-            system_name = f"duckdb-{mode}"
-            result_files.append((system_name, file_path))
-    
+        results_base = os.path.join(base_dir, 'duckdb', f'results-{mode}')
+        if os.path.exists(results_base):
+            # Search in all EC2 instance type subdirectories
+            for ec2_type_dir in os.listdir(results_base):
+                ec2_type_path = os.path.join(results_base, ec2_type_dir)
+                if os.path.isdir(ec2_type_path):
+                    search_path = os.path.join(ec2_type_path, pattern)
+                    for file_path in glob.glob(search_path):
+                        system_name = f"duckdb-{mode}-{ec2_type_dir}"
+                        result_files.append((system_name, file_path))
+
+    # Search in datafusion results directories (organized by EC2 instance type)
+    datafusion_results_base = os.path.join(base_dir, 'datafusion', 'results')
+    if os.path.exists(datafusion_results_base):
+        # Search in all EC2 instance type subdirectories
+        for ec2_type_dir in os.listdir(datafusion_results_base):
+            ec2_type_path = os.path.join(datafusion_results_base, ec2_type_dir)
+            if os.path.isdir(ec2_type_path):
+                search_path = os.path.join(ec2_type_path, pattern)
+                for file_path in glob.glob(search_path):
+                    system_name = f"datafusion-{ec2_type_dir}"
+                    result_files.append((system_name, file_path))
+
     return result_files
 
 

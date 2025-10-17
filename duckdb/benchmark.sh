@@ -116,8 +116,48 @@ if [[ -z "${MODE}" ]]; then
   usage
 fi
 
-# Create results directory with mode (no timestamp in folder name)
-RESULTS_DIR="$(pwd)/results-${MODE}"
+# Fetch EC2 instance type for directory organization
+echo ">>> Detecting EC2 instance type..."
+EC2_INSTANCE_TYPE=$(python3 -c "
+import urllib.request
+import urllib.error
+
+try:
+    # IMDSv2 requires a token
+    token_url = 'http://169.254.169.254/latest/api/token'
+    token_request = urllib.request.Request(
+        token_url,
+        headers={'X-aws-ec2-metadata-token-ttl-seconds': '21600'},
+        method='PUT'
+    )
+
+    with urllib.request.urlopen(token_request, timeout=2) as response:
+        token = response.read().decode('utf-8')
+
+    # Use token to get instance type
+    metadata_url = 'http://169.254.169.254/latest/meta-data/instance-type'
+    metadata_request = urllib.request.Request(
+        metadata_url,
+        headers={'X-aws-ec2-metadata-token': token}
+    )
+
+    with urllib.request.urlopen(metadata_request, timeout=2) as response:
+        instance_type = response.read().decode('utf-8').strip()
+
+    print(instance_type)
+except:
+    print('unknown')
+" 2>/dev/null || echo "unknown")
+
+if [[ "${EC2_INSTANCE_TYPE}" == "unknown" ]]; then
+  echo "⚠ Warning: Could not detect EC2 instance type. Using 'unknown' as directory name."
+  echo "  Results will be saved to: results-${MODE}/unknown/"
+else
+  echo "✓ Detected EC2 instance type: ${EC2_INSTANCE_TYPE}"
+fi
+
+# Create results directory with mode and EC2 instance type
+RESULTS_DIR="$(pwd)/results-${MODE}/${EC2_INSTANCE_TYPE}"
 
 # If results directory exists and has files, delete them
 if [[ -d "${RESULTS_DIR}" ]]; then
