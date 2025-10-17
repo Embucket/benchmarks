@@ -53,7 +53,14 @@ def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") ->
             if os.path.isdir(ec2_type_path):
                 search_path = os.path.join(ec2_type_path, pattern)
                 for file_path in glob.glob(search_path):
-                    system_name = f"datafusion-{ec2_type_dir}"
+                    # Extract mode from filename (e.g., tpch-sf1000-parquet-results.json -> parquet)
+                    # or tpch-sf1000-parquet-s3-results.json -> parquet-s3
+                    filename = os.path.basename(file_path)
+                    # Remove benchmark name, scale factor, and -results.json
+                    # Pattern: tpch-sf1000-MODE-results.json
+                    parts = filename.replace(f'{benchmark}-sf{scale_factor}-', '').replace('-results.json', '')
+                    mode = parts if parts else 'parquet'
+                    system_name = f"datafusion-{mode}-{ec2_type_dir}"
                     result_files.append((system_name, file_path))
 
     return result_files

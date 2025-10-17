@@ -31,7 +31,7 @@ from datetime import datetime
 import json
 import time
 
-def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None, memory_limit_mb: int | None = None, prefer_hash_join: bool = False, max_temp_dir_size_gb: int = 1000):
+def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None, memory_limit_mb: int | None = None, prefer_hash_join: bool = False, max_temp_dir_size_gb: int = 1000, mode: str = "parquet"):
 
     # Increase file descriptor limit to handle large Parquet datasets
     try:
@@ -179,25 +179,98 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     print(f"  Disk space: {free / (1024**3):.1f} GB free / {total / (1024**3):.1f} GB total")
     print()
 
-    for table in table_names:
-        # Try different possible file patterns
-        # tpchgen-cli might create files like table.parquet or table/*.parquet
-        possible_paths = [
-            f"{data_path}/{table}.parquet",
-            f"{data_path}/{table}",
-            f"{data_path}/{table}/*.parquet",
-        ]
+    # Configure S3 access for parquet-s3 mode
+    if mode == 'parquet-s3':
+        print(f"Configuring S3 access for parquet-s3 mode...")
+        try:
+            # Set S3 region
+            ctx.sql("SET datafusion.execution.object_store.s3.region = 'us-east-2'")
+            print(f"✓ Set S3 region to us-east-2")
 
-        registered = False
-        for path in possible_paths:
-            if os.path.exists(path.replace("/*.parquet", "")):
+            # Check if AWS credentials are available in environment
+            if 'AWS_ACCESS_KEY_ID' in os.environ and 'AWS_SECRET_ACCESS_KEY' in os.environ:
+                print(f"✓ Using AWS credentials from environment variables")
+            else:
+                # Fetch credentials from EC2 instance metadata
+                import urllib.request
+                import urllib.error
                 try:
-                    print(f"Registering table {table} using path {path}")
-                    ctx.register_parquet(table, path)
-                    registered = True
-                    break
+                    # Get IMDSv2 token
+                    token_url = 'http://169.254.169.254/latest/api/token'
+                    token_request = urllib.request.Request(
+                        token_url,
+                        headers={'X-aws-ec2-metadata-token-ttl-seconds': '21600'},
+                        method='PUT'
+                    )
+                    with urllib.request.urlopen(token_request, timeout=2) as response:
+                        token = response.read().decode('utf-8')
+
+                    # Get IAM role name
+                    role_url = 'http://169.254.169.254/latest/meta-data/iam/security-credentials/'
+                    role_request = urllib.request.Request(
+                        role_url,
+                        headers={'X-aws-ec2-metadata-token': token}
+                    )
+                    with urllib.request.urlopen(role_request, timeout=2) as response:
+                        role_name = response.read().decode('utf-8').strip()
+
+                    # Get credentials
+                    creds_url = f'http://169.254.169.254/latest/meta-data/iam/security-credentials/{role_name}'
+                    creds_request = urllib.request.Request(
+                        creds_url,
+                        headers={'X-aws-ec2-metadata-token': token}
+                    )
+                    with urllib.request.urlopen(creds_request, timeout=2) as response:
+                        creds = json.loads(response.read().decode('utf-8'))
+
+                    # Set credentials as environment variables for DataFusion to use
+                    os.environ['AWS_ACCESS_KEY_ID'] = creds['AccessKeyId']
+                    os.environ['AWS_SECRET_ACCESS_KEY'] = creds['SecretAccessKey']
+                    os.environ['AWS_SESSION_TOKEN'] = creds['Token']
+                    print(f"✓ Using AWS credentials from EC2 instance profile ({role_name})")
                 except Exception as e:
-                    print(f"  Failed to register {path}: {e}")
+                    print(f"⚠ Warning: Could not fetch EC2 instance credentials: {e}")
+                    print(f"  No IAM role attached to EC2 instance")
+                    print(f"  To fix this:")
+                    print(f"    1. Attach an IAM role with S3 read permissions to this EC2 instance, OR")
+                    print(f"    2. Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables")
+                    print(f"  Attempting to proceed with anonymous access (will fail if bucket is not public)...")
+
+            print(f"✓ Configured S3 access")
+        except Exception as e:
+            print(f"✗ Could not configure S3 access: {e}")
+        print()
+
+    for table in table_names:
+        if mode == 'parquet-s3':
+            # For S3 mode, use direct S3 path (single file per table)
+            path = f"{data_path}/{table}.parquet"
+            try:
+                print(f"Registering table {table} using S3 path {path}")
+                ctx.register_parquet(table, path)
+                registered = True
+            except Exception as e:
+                print(f"  Failed to register {path}: {e}")
+                registered = False
+        else:
+            # Try different possible file patterns for local files
+            # tpchgen-cli might create files like table.parquet or table/*.parquet
+            possible_paths = [
+                f"{data_path}/{table}.parquet",
+                f"{data_path}/{table}",
+                f"{data_path}/{table}/*.parquet",
+            ]
+
+            registered = False
+            for path in possible_paths:
+                if os.path.exists(path.replace("/*.parquet", "")):
+                    try:
+                        print(f"Registering table {table} using path {path}")
+                        ctx.register_parquet(table, path)
+                        registered = True
+                        break
+                    except Exception as e:
+                        print(f"  Failed to register {path}: {e}")
                     continue
 
         if not registered:
@@ -379,11 +452,13 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="DataFusion benchmark derived from TPC-H / TPC-DS")
     parser.add_argument("--benchmark", required=True, help="Benchmark to run (tpch or tpcds)")
-    parser.add_argument("--data", required=True, help="Path to data files")
+    parser.add_argument("--data", required=True, help="Path to data files (local path or S3 path)")
     parser.add_argument("--queries", required=True, help="Path to query files")
     parser.add_argument("--iterations", type=int, default=3, help="Number of iterations to run (default: 3)")
     parser.add_argument("--output", default=None, help="Output JSON file (default: auto-generated)")
     parser.add_argument("--temp-dir", required=True, help="Temporary directory for DataFusion spill operations")
+    parser.add_argument("--mode", type=str, default="parquet", choices=["parquet", "parquet-s3"],
+                        help="Data source mode: 'parquet' for local files, 'parquet-s3' for S3 (default: parquet)")
     parser.add_argument("--query", type=int, action='append', dest='queries_to_run',
                         help="Specific query number to run (can be specified multiple times, e.g., --query 1 --query 18)")
     parser.add_argument("--memory-limit", type=int, dest='memory_limit_mb',
@@ -400,5 +475,5 @@ if __name__ == "__main__":
         current_time_millis = int(datetime.now().timestamp() * 1000)
         args.output = f"datafusion-python-{args.benchmark}-{current_time_millis}.json"
 
-    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir, args.queries_to_run, args.memory_limit_mb, args.prefer_hash_join, args.max_temp_dir_size_gb)
+    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir, args.queries_to_run, args.memory_limit_mb, args.prefer_hash_join, args.max_temp_dir_size_gb, args.mode)
 

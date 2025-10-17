@@ -19,8 +19,9 @@ Arguments:
   scale_factor    The TPC-H scale factor to benchmark (must match generated data)
 
 Options:
+  --mode MODE              Data source mode: 'parquet' (local files) or 'parquet-s3' (S3) (default: parquet)
   --iterations N           Number of iterations to run (default: 3)
-  --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-results.json)
+  --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-<mode>-results.json)
   --query N                Run only specific query number (can be specified multiple times)
   --memory-limit MB        Memory limit in MB (forces spilling, e.g., --memory-limit 122880 for 120GB)
   --memory-limit-gb GB     Memory limit in GB (forces spilling, e.g., --memory-limit-gb 120 for 120GB)
@@ -28,16 +29,21 @@ Options:
   --max-temp-dir-size GB   Maximum temp directory size in GB (default: 1000GB = 1TB)
 
 Examples:
-  $0 1                           # Run all queries on SF1 data
-  $0 100 --iterations 5          # Run all queries on SF100 data with 5 iterations
-  $0 10 --output my-results.json # Run all queries and save to custom file
-  $0 1 --query 18                       # Run only query 18 on SF1 data (sort-merge join)
-  $0 1 --query 1 --query 18                # Run only queries 1 and 18 on SF1 data
-  $0 1 --query 18 --memory-limit 1024      # Run query 18 with 1GB memory limit (forces spilling)
-  $0 1000 --memory-limit-gb 120            # Run all queries with 120GB memory limit
-  $0 1000 --hash-join                      # Run all queries using hash join instead of sort-merge join
+  $0 1                                # Run all queries on SF1 local data
+  $0 1 --mode parquet-s3              # Run all queries on SF1 data from S3
+  $0 100 --iterations 5               # Run all queries on SF100 data with 5 iterations
+  $0 10 --output my-results.json      # Run all queries and save to custom file
+  $0 1 --query 18                     # Run only query 18 on SF1 data (sort-merge join)
+  $0 1 --query 1 --query 18           # Run only queries 1 and 18 on SF1 data
+  $0 1 --query 18 --memory-limit 1024 # Run query 18 with 1GB memory limit (forces spilling)
+  $0 1000 --memory-limit-gb 120       # Run all queries with 120GB memory limit
+  $0 1000 --hash-join                 # Run all queries using hash join instead of sort-merge join
 
-The script expects data to be at: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
+For local mode (parquet):
+  The script expects data to be at: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
+
+For S3 mode (parquet-s3):
+  The script uses data from: s3://embucket-testdata/tpch/<scale_factor>/
 EOF
   exit 1
 }
@@ -60,6 +66,7 @@ if ! [[ "${SCALE_FACTOR}" =~ ^[0-9]+$ ]] || [[ "${SCALE_FACTOR}" -le 0 ]]; then
 fi
 
 # Parse optional arguments
+MODE="parquet"  # Default mode
 ITERATIONS=3
 OUTPUT_FILE=""  # Will be set to absolute path later
 QUERY_ARGS=()  # Array to store --query arguments
@@ -70,6 +77,10 @@ MAX_TEMP_DIR_SIZE="1000"  # Max temp directory size in GB (default 1TB)
 
 while [[ $# -gt 0 ]]; do
   case $1 in
+    --mode)
+      MODE="$2"
+      shift 2
+      ;;
     --iterations)
       ITERATIONS="$2"
       shift 2
@@ -104,6 +115,12 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# Validate mode
+if [[ "${MODE}" != "parquet" && "${MODE}" != "parquet-s3" ]]; then
+  echo "Error: Invalid mode '${MODE}'. Must be 'parquet' or 'parquet-s3'"
+  usage
+fi
 
 # Convert GB to MB if --memory-limit-gb is specified
 if [[ -n "${MEMORY_LIMIT_GB}" ]]; then
@@ -160,7 +177,7 @@ mkdir -p "${RESULTS_DIR}"
 
 # Set default output file to results directory if not specified
 if [[ -z "${OUTPUT_FILE}" ]]; then
-  OUTPUT_FILE="${RESULTS_DIR}/tpch-sf${SCALE_FACTOR}-results.json"
+  OUTPUT_FILE="${RESULTS_DIR}/tpch-sf${SCALE_FACTOR}-${MODE}-results.json"
 else
   # If user specified output file, move it to results directory but keep the filename
   OUTPUT_BASENAME=$(basename "${OUTPUT_FILE}")
@@ -169,26 +186,35 @@ fi
 
 echo "=== DataFusion TPC-H Benchmark ==="
 echo "Scale Factor: ${SCALE_FACTOR}"
+echo "Mode: ${MODE}"
 echo "Iterations: ${ITERATIONS}"
 echo "Results Directory: ${RESULTS_DIR}"
 echo "Output File: ${OUTPUT_FILE}"
 echo
 
-# Set paths
-DATA_DIR="${MOUNT_POINT}/tpch-data/sf${SCALE_FACTOR}"
+# Set paths based on mode
 BENCHMARK_REPO_DIR="${MOUNT_POINT}/datafusion/datafusion-benchmarks"
 TEMP_DIR="${MOUNT_POINT}/datafusion/temp"
 
-# Check if data directory exists
-if [[ ! -d "${DATA_DIR}" ]]; then
-  echo "Error: Data directory not found: ${DATA_DIR}"
-  echo "Please run generate-tpch-data.sh first to generate the data."
-  exit 1
+if [[ "${MODE}" == "parquet-s3" ]]; then
+  DATA_DIR="s3://embucket-testdata/tpch/${SCALE_FACTOR}"
+  echo ">>> S3 data path: ${DATA_DIR}"
+  echo ">>> Temp directory (for spill): ${TEMP_DIR}"
+else
+  DATA_DIR="${MOUNT_POINT}/tpch-data/sf${SCALE_FACTOR}"
+
+  # Check if data directory exists for local mode
+  if [[ ! -d "${DATA_DIR}" ]]; then
+    echo "Error: Data directory not found: ${DATA_DIR}"
+    echo "Please run generate-tpch-data.sh first to generate the data."
+    exit 1
+  fi
+
+  echo ">>> Data directory: ${DATA_DIR}"
+  echo ">>> Benchmark repository: ${BENCHMARK_REPO_DIR}"
+  echo ">>> Temp directory (for spill): ${TEMP_DIR}"
 fi
 
-echo ">>> Data directory: ${DATA_DIR}"
-echo ">>> Benchmark repository: ${BENCHMARK_REPO_DIR}"
-echo ">>> Temp directory (for spill): ${TEMP_DIR}"
 echo
 
 # Create temp directory for DataFusion spill operations
@@ -322,6 +348,9 @@ fi
 # Add max temp directory size (always set, default 1TB)
 CMD_ARGS+=(--max-temp-dir-size "${MAX_TEMP_DIR_SIZE}")
 echo ">>> Max temp directory size: ${MAX_TEMP_DIR_SIZE} GB"
+
+# Add mode parameter
+CMD_ARGS+=(--mode "${MODE}")
 
 # Run the benchmark with specified parameters (using python from venv and our patched script)
 "${VENV_DIR}/bin/python" tpcbench-patched.py "${CMD_ARGS[@]}"
