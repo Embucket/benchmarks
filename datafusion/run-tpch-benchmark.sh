@@ -11,15 +11,17 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # Usage function
 usage() {
   cat <<EOF
-Usage: $0 <scale_factor> [options]
+Usage: $0 <scale_factor> --mode <MODE> [options]
 
 Run DataFusion TPC-H benchmark on generated data.
 
 Arguments:
   scale_factor    The TPC-H scale factor to benchmark (must match generated data)
 
-Options:
-  --mode MODE              Data source mode: 'parquet' (local files) or 'parquet-s3' (S3) (default: parquet)
+Required Options:
+  --mode MODE              Data source mode: 'parquet' (local files) or 'parquet-s3' (S3)
+
+Optional Arguments:
   --iterations N           Number of iterations to run (default: 3)
   --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-<mode>-results.json)
   --query N                Run only specific query number (can be specified multiple times)
@@ -29,15 +31,15 @@ Options:
   --max-temp-dir-size GB   Maximum temp directory size in GB (default: 1000GB = 1TB)
 
 Examples:
-  $0 1                                # Run all queries on SF1 local data
-  $0 1 --mode parquet-s3              # Run all queries on SF1 data from S3
-  $0 100 --iterations 5               # Run all queries on SF100 data with 5 iterations
-  $0 10 --output my-results.json      # Run all queries and save to custom file
-  $0 1 --query 18                     # Run only query 18 on SF1 data (sort-merge join)
-  $0 1 --query 1 --query 18           # Run only queries 1 and 18 on SF1 data
-  $0 1 --query 18 --memory-limit 1024 # Run query 18 with 1GB memory limit (forces spilling)
-  $0 1000 --memory-limit-gb 120       # Run all queries with 120GB memory limit
-  $0 1000 --hash-join                 # Run all queries using hash join instead of sort-merge join
+  $0 1 --mode parquet                         # Run all queries on SF1 local data
+  $0 1 --mode parquet-s3                      # Run all queries on SF1 data from S3
+  $0 100 --mode parquet --iterations 5        # Run all queries on SF100 data with 5 iterations
+  $0 10 --mode parquet --output my-results.json      # Run all queries and save to custom file
+  $0 1 --mode parquet --query 18              # Run only query 18 on SF1 data (sort-merge join)
+  $0 1 --mode parquet --query 1 --query 18    # Run only queries 1 and 18 on SF1 data
+  $0 1 --mode parquet --query 18 --memory-limit 1024 # Run query 18 with 1GB memory limit (forces spilling)
+  $0 1000 --mode parquet --memory-limit-gb 120       # Run all queries with 120GB memory limit
+  $0 1000 --mode parquet --hash-join          # Run all queries using hash join instead of sort-merge join
 
 For local mode (parquet):
   The script expects data to be at: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
@@ -66,7 +68,7 @@ if ! [[ "${SCALE_FACTOR}" =~ ^[0-9]+$ ]] || [[ "${SCALE_FACTOR}" -le 0 ]]; then
 fi
 
 # Parse optional arguments
-MODE="parquet"  # Default mode
+MODE=""  # Required - no default
 ITERATIONS=3
 OUTPUT_FILE=""  # Will be set to absolute path later
 QUERY_ARGS=()  # Array to store --query arguments
@@ -116,7 +118,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Validate mode
+# Validate mode is provided
+if [[ -z "${MODE}" ]]; then
+  echo "Error: --mode is required"
+  usage
+fi
+
+# Validate mode value
 if [[ "${MODE}" != "parquet" && "${MODE}" != "parquet-s3" ]]; then
   echo "Error: Invalid mode '${MODE}'. Must be 'parquet' or 'parquet-s3'"
   usage
