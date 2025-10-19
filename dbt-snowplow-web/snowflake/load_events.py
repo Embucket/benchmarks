@@ -138,6 +138,26 @@ def manage_warehouse(conn, warehouse_name, action):
         print(f"⚠ Warning: Could not {action} warehouse: {e}")
 
 
+def drop_schemas(conn):
+    """Drop the specified schemas."""
+    database = os.getenv("SNOWFLAKE_DATABASE", "dbt_snowplow_web")
+    schemas_to_drop = ['PUBLIC_DERIVED', 'PUBLIC_SCRATCH', 'PUBLIC_SNOWPLOW_MANIFEST']
+    
+    cursor = conn.cursor()
+    
+    # Ensure we're in the correct database context
+    cursor.execute(f"USE DATABASE {database}")
+    
+    for schema in schemas_to_drop:
+        try:
+            print(f"Dropping schema {database}.{schema}...")
+            cursor.execute(f"DROP SCHEMA IF EXISTS {database}.{schema} CASCADE")
+            print(f"✓ Schema {database}.{schema} dropped successfully")
+        except Exception as e:
+            print(f"⚠ Warning: Could not drop schema {database}.{schema}: {e}")
+    cursor.close()
+
+
 def print_usage():
     """Print usage information."""
     print("Usage:")
@@ -147,14 +167,18 @@ def print_usage():
     print("  CSV_FILE       CSV file to load (e.g., events.csv, events_incr_1.csv)")
     print()
     print("Options:")
-    print("  true/false     Enable incremental mode")
-    print("  1/2            Run number for incremental mode")
+    print("  is_incremental=true   Skip dropping schemas (preserve existing data)")
+    print("  true/false           Enable incremental mode")
+    print("  1/2                  Run number for incremental mode")
+    print()
+    print("Schema Management:")
+    print("  - By default, drops PUBLIC_DERIVED, PUBLIC_SCRATCH, PUBLIC_SNOWPLOW_MANIFEST schemas")
+    print("  - Use is_incremental=true to skip schema dropping")
     print()
     print("Examples:")
-    print("  python events.py events.csv")
-    print("  python events.py events_incr_1.csv")
-    print("  python events.py true 1          # Uses events_incr_1.csv")
-    print("  python events.py true 2          # Uses events_incr_2.csv")
+    print("  python load_events.py events.csv                    # Full run, drops schemas")
+    print("  python load_events.py events.csv is_incremental=true # Incremental run, keeps schemas")
+    print("  python load_events.py events_incr_1.csv             # Load specific file")
 
 
 def main():
@@ -170,6 +194,9 @@ def main():
         if arg in ['-h', '--help']:
             print_usage()
             return
+        elif arg.startswith('is_incremental='):
+            # Handle is_incremental=true format
+            is_incremental = arg.split('=')[1].lower() == 'true'
         elif arg in ['true', 'false']:
             is_incremental = (arg == 'true')
         elif arg in ['1', '2']:
@@ -217,6 +244,13 @@ def main():
         manage_warehouse(conn, warehouse_name, 'resume')
         
         print("✓ Connected to Snowflake successfully")
+        
+        # Drop schemas unless this is an incremental run
+        if not is_incremental:
+            print("Full run: Dropping existing schemas...")
+            drop_schemas(conn)
+        else:
+            print("Incremental run: Skipping schema drop")
         
         # Execute SQL script
         print("Executing SQL script...")
