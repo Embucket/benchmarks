@@ -15,6 +15,9 @@ Usage: $0 <scale_factor> --mode <MODE> [options]
 
 Run DataFusion TPC-H benchmark on generated data.
 
+Note: DataFusion spilling to disk does not work properly. All queries must fit in RAM.
+      If there is insufficient RAM, queries will fail.
+
 Arguments:
   scale_factor    The TPC-H scale factor to benchmark (must match generated data)
 
@@ -25,10 +28,7 @@ Optional Arguments:
   --iterations N           Number of iterations to run (default: 3)
   --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-<mode>-results.json)
   --query N                Run only specific query number (can be specified multiple times)
-  --memory-limit MB        Memory limit in MB (forces spilling, e.g., --memory-limit 122880 for 120GB)
-  --memory-limit-gb GB     Memory limit in GB (forces spilling, e.g., --memory-limit-gb 120 for 120GB)
   --hash-join              Enable hash join preference (default: sort-merge join)
-  --max-temp-dir-size GB   Maximum temp directory size in GB (default: 1000GB = 1TB)
 
 Examples:
   $0 1 --mode parquet                         # Run all queries on SF1 local data
@@ -37,8 +37,6 @@ Examples:
   $0 10 --mode parquet --output my-results.json      # Run all queries and save to custom file
   $0 1 --mode parquet --query 18              # Run only query 18 on SF1 data (sort-merge join)
   $0 1 --mode parquet --query 1 --query 18    # Run only queries 1 and 18 on SF1 data
-  $0 1 --mode parquet --query 18 --memory-limit 1024 # Run query 18 with 1GB memory limit (forces spilling)
-  $0 1000 --mode parquet --memory-limit-gb 120       # Run all queries with 120GB memory limit
   $0 1000 --mode parquet --hash-join          # Run all queries using hash join instead of sort-merge join
 
 For local mode (parquet):
@@ -72,10 +70,7 @@ MODE=""  # Required - no default
 ITERATIONS=3
 OUTPUT_FILE=""  # Will be set to absolute path later
 QUERY_ARGS=()  # Array to store --query arguments
-MEMORY_LIMIT=""  # Memory limit in MB
-MEMORY_LIMIT_GB=""  # Memory limit in GB
-PREFER_HASH_JOIN="false"  # Default to sort-merge join (better spilling support)
-MAX_TEMP_DIR_SIZE="1000"  # Max temp directory size in GB (default 1TB)
+PREFER_HASH_JOIN="false"  # Default to sort-merge join
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -95,21 +90,9 @@ while [[ $# -gt 0 ]]; do
       QUERY_ARGS+=("--query" "$2")
       shift 2
       ;;
-    --memory-limit)
-      MEMORY_LIMIT="$2"
-      shift 2
-      ;;
-    --memory-limit-gb)
-      MEMORY_LIMIT_GB="$2"
-      shift 2
-      ;;
     --hash-join)
       PREFER_HASH_JOIN="true"
       shift 1
-      ;;
-    --max-temp-dir-size)
-      MAX_TEMP_DIR_SIZE="$2"
-      shift 2
       ;;
     *)
       echo "Error: Unknown option $1"
@@ -128,15 +111,6 @@ fi
 if [[ "${MODE}" != "parquet" && "${MODE}" != "parquet-s3" ]]; then
   echo "Error: Invalid mode '${MODE}'. Must be 'parquet' or 'parquet-s3'"
   usage
-fi
-
-# Convert GB to MB if --memory-limit-gb is specified
-if [[ -n "${MEMORY_LIMIT_GB}" ]]; then
-  if [[ -n "${MEMORY_LIMIT}" ]]; then
-    echo "Error: Cannot specify both --memory-limit and --memory-limit-gb"
-    exit 1
-  fi
-  MEMORY_LIMIT=$((MEMORY_LIMIT_GB * 1024))
 fi
 
 # Fetch EC2 instance type for directory organization
@@ -202,12 +176,10 @@ echo
 
 # Set paths based on mode
 BENCHMARK_REPO_DIR="${MOUNT_POINT}/datafusion/datafusion-benchmarks"
-TEMP_DIR="${MOUNT_POINT}/datafusion/temp"
 
 if [[ "${MODE}" == "parquet-s3" ]]; then
   DATA_DIR="s3://embucket-testdata/tpch/${SCALE_FACTOR}"
   echo ">>> S3 data path: ${DATA_DIR}"
-  echo ">>> Temp directory (for spill): ${TEMP_DIR}"
 else
   DATA_DIR="${MOUNT_POINT}/tpch-data/sf${SCALE_FACTOR}"
 
@@ -220,14 +192,9 @@ else
 
   echo ">>> Data directory: ${DATA_DIR}"
   echo ">>> Benchmark repository: ${BENCHMARK_REPO_DIR}"
-  echo ">>> Temp directory (for spill): ${TEMP_DIR}"
 fi
 
 echo
-
-# Create temp directory for DataFusion spill operations
-echo ">>> Creating temp directory for DataFusion spill operations..."
-mkdir -p "${TEMP_DIR}"
 
 # Clone or update DataFusion benchmarks repository
 if [[ -d "${BENCHMARK_REPO_DIR}" ]]; then
@@ -331,18 +298,11 @@ CMD_ARGS=(
   --queries "${BENCHMARK_REPO_DIR}/tpch/queries"
   --iterations "${ITERATIONS}"
   --output "${OUTPUT_FILE}"
-  --temp-dir "${TEMP_DIR}"
 )
 
 # Add query arguments if specified
 if [[ ${#QUERY_ARGS[@]} -gt 0 ]]; then
   CMD_ARGS+=("${QUERY_ARGS[@]}")
-fi
-
-# Add memory limit if specified
-if [[ -n "${MEMORY_LIMIT}" ]]; then
-  CMD_ARGS+=(--memory-limit "${MEMORY_LIMIT}")
-  echo ">>> Memory limit: ${MEMORY_LIMIT} MB"
 fi
 
 # Add prefer-hash-join setting
@@ -352,10 +312,6 @@ if [[ "${PREFER_HASH_JOIN}" == "true" ]]; then
 else
   echo ">>> Join strategy: Sort-merge join (default)"
 fi
-
-# Add max temp directory size (always set, default 1TB)
-CMD_ARGS+=(--max-temp-dir-size "${MAX_TEMP_DIR_SIZE}")
-echo ">>> Max temp directory size: ${MAX_TEMP_DIR_SIZE} GB"
 
 # Add mode parameter
 CMD_ARGS+=(--mode "${MODE}")
