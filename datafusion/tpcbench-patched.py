@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Modified version of tpcbench.py that configures DataFusion to use local SSD for spill
+# Modified version of tpcbench.py - spilling disabled (DataFusion spilling does not work properly)
 
 import argparse
 import os
@@ -31,7 +31,7 @@ from datetime import datetime
 import json
 import time
 
-def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, temp_dir: str, queries_to_run: list[int] | None = None, memory_limit_mb: int | None = None, prefer_hash_join: bool = False, max_temp_dir_size_gb: int = 1000, mode: str = "parquet"):
+def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, queries_to_run: list[int] | None = None, prefer_hash_join: bool = False, mode: str = "parquet"):
 
     # Increase file descriptor limit to handle large Parquet datasets
     try:
@@ -56,66 +56,12 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     else:
         raise ValueError("invalid benchmark")
 
-    # Create SessionContext with custom temp directory for spill
-    print(f"Configuring DataFusion to use temp directory: {temp_dir}")
+    # Create SessionContext without spilling (spilling does not work properly in DataFusion)
+    print(f"Configuring DataFusion without spilling (all queries must fit in RAM)")
+    print(f"Using unbounded memory pool (no memory limit)")
 
-    # Set Python's temp directory to use the same location
-    # This prevents Python/Arrow from filling up the root filesystem
-    os.environ['TMPDIR'] = temp_dir
-    os.environ['TEMP'] = temp_dir
-    os.environ['TMP'] = temp_dir
-    tempfile.tempdir = temp_dir
-    print(f"✓ Set Python temp directory to: {temp_dir}")
-
-    # Clean temp directory before starting
-    if os.path.exists(temp_dir):
-        print(f"Cleaning temp directory: {temp_dir}")
-        try:
-            # Remove all files and subdirectories
-            for item in os.listdir(temp_dir):
-                item_path = os.path.join(temp_dir, item)
-                if os.path.isfile(item_path) or os.path.islink(item_path):
-                    os.unlink(item_path)
-                elif os.path.isdir(item_path):
-                    shutil.rmtree(item_path)
-            print(f"✓ Temp directory cleaned")
-        except Exception as e:
-            print(f"✗ WARNING: Could not clean temp directory: {e}")
-
-    # Create temp directory if it doesn't exist
-    os.makedirs(temp_dir, exist_ok=True)
-
-    # Verify temp directory is writable
-    test_file = os.path.join(temp_dir, ".test_write")
-    try:
-        with open(test_file, 'w') as f:
-            f.write("test")
-        os.remove(test_file)
-        print(f"✓ Temp directory is writable: {temp_dir}")
-    except Exception as e:
-        print(f"✗ WARNING: Temp directory is not writable: {e}")
-        raise
-
-    # Create RuntimeEnv with temp directory and optional memory limit
-    # Use RuntimeEnvBuilder (new API, replaces deprecated RuntimeConfig)
-
-    # Configure the temp directory for spilling
-    runtime_env = RuntimeEnvBuilder().with_temp_file_path(temp_dir)
-
-    # Set memory pool with limit if specified
-    if memory_limit_mb:
-        memory_limit_bytes = memory_limit_mb * 1024 * 1024
-        print(f"Setting memory limit: {memory_limit_mb} MB ({memory_limit_bytes:,} bytes)")
-        # Use greedy memory pool - tracks actual usage instead of pessimistic reservations
-        # FairSpillPool can over-reserve memory (reserve 500GB but only use 100GB)
-        # GreedyMemoryPool tracks actual allocations and allows better memory utilization
-        runtime_env = runtime_env.with_greedy_memory_pool(memory_limit_bytes)
-        print(f"Using GreedyMemoryPool (tracks actual usage, not reservations)")
-    else:
-        print("Using unbounded memory pool (no memory limit)")
-
-    # Create SessionContext with the runtime environment
-    ctx = SessionContext(runtime=runtime_env)
+    # Create SessionContext with default runtime environment
+    ctx = SessionContext()
 
     # Set batch size - smaller batches use less memory but may be slower
     # Default is 8192. Larger values (32768) use more memory per batch
@@ -158,25 +104,6 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     except Exception as e:
         print(f"✗ Could not enable coalesce_batches: {e}")
 
-    # Reduce sort spill reservation to allow more aggressive spilling
-    # try:
-    #     ctx.sql("SET datafusion.execution.sort_spill_reservation_bytes = 1048576")  # 1MB instead of default 10MB
-    #     print(f"✓ Set sort_spill_reservation_bytes = 1MB")
-    # except Exception as e:
-    #     print(f"✗ Could not set sort_spill_reservation_bytes: {e}")
-
-    # Set max temp directory size (default 1TB)
-    # DataFusion expects a string with units like "1000G" or "1T"
-    try:
-        ctx.sql(f"SET datafusion.runtime.max_temp_directory_size = '{max_temp_dir_size_gb}G'")
-        print(f"✓ Set max_temp_directory_size = {max_temp_dir_size_gb} GB")
-    except Exception as e:
-        print(f"✗ Could not set max_temp_directory_size: {e}")
-
-    # Verify temp directory disk space
-    total, used, free = shutil.disk_usage(temp_dir)
-    print(f"✓ Temp directory configured at: {temp_dir}")
-    print(f"  Disk space: {free / (1024**3):.1f} GB free / {total / (1024**3):.1f} GB total")
     print()
 
     # Configure S3 access for parquet-s3 mode
@@ -288,11 +215,8 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         'benchmark': benchmark,
         'data_path': data_path,
         'query_path': query_path,
-        'temp_dir': temp_dir,
         'iterations': iterations,
-        'memory_limit_mb': memory_limit_mb,
-        'prefer_hash_join': prefer_hash_join,
-        'max_temp_dir_size_gb': max_temp_dir_size_gb
+        'prefer_hash_join': prefer_hash_join
     }
 
     # Determine which queries to run
@@ -316,16 +240,7 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                 # each file can contain multiple queries
                 queries = text.split(";")
 
-                # Check temp directory before query
-                temp_files_before = []
-                for root, dirs, files in os.walk(temp_dir):
-                    for f in files:
-                        temp_files_before.append(os.path.join(root, f))
-
-                print(f"Temp files before query: {len(temp_files_before)}")
-
                 start_time = time.time()
-                max_temp_size = 0
 
                 for sql in queries:
                     sql = sql.strip()
@@ -343,15 +258,6 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                         else:
                             # For queries with DDL statements, execute normally
                             df = ctx.sql(sql)
-
-                        # Check temp directory during execution (before collect)
-                        temp_size_during = sum(
-                            os.path.getsize(os.path.join(root, f))
-                            for root, dirs, files in os.walk(temp_dir)
-                            for f in files
-                            if os.path.exists(os.path.join(root, f))
-                        )
-                        max_temp_size = max(max_temp_size, temp_size_during)
 
                         rows = df.collect()
 
@@ -404,30 +310,7 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
                 end_time = time.time()
                 elapsed = end_time - start_time
 
-                # Check temp directory after query
-                temp_files_after = []
-                total_size = 0
-                for root, dirs, files in os.walk(temp_dir):
-                    for f in files:
-                        fp = os.path.join(root, f)
-                        if os.path.exists(fp):
-                            temp_files_after.append(fp)
-                            total_size += os.path.getsize(fp)
-
-                temp_files_created = len(temp_files_after) - len(temp_files_before)
-                new_files = set(temp_files_after) - set(temp_files_before)
-
-                size_mb = total_size / (1024 * 1024)
-                max_size_mb = max_temp_size / (1024 * 1024)
-
                 print(f"Query {query} took {elapsed:.2f} seconds")
-                print(f"  Temp files created: {temp_files_created}, Total temp size: {size_mb:.2f} MB")
-                print(f"  Max temp size during execution: {max_size_mb:.2f} MB")
-
-                if new_files:
-                    print(f"  New temp files:")
-                    for f in list(new_files)[:5]:  # Show first 5
-                        print(f"    - {f}")
 
                 # Store timings for each iteration
                 if query not in results:
@@ -450,24 +333,19 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         f.write(str_json)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="DataFusion benchmark derived from TPC-H / TPC-DS")
+    parser = argparse.ArgumentParser(description="DataFusion benchmark derived from TPC-H / TPC-DS (spilling disabled)")
     parser.add_argument("--benchmark", required=True, help="Benchmark to run (tpch or tpcds)")
     parser.add_argument("--data", required=True, help="Path to data files (local path or S3 path)")
     parser.add_argument("--queries", required=True, help="Path to query files")
     parser.add_argument("--iterations", type=int, default=3, help="Number of iterations to run (default: 3)")
     parser.add_argument("--output", default=None, help="Output JSON file (default: auto-generated)")
-    parser.add_argument("--temp-dir", required=True, help="Temporary directory for DataFusion spill operations")
     parser.add_argument("--mode", type=str, default="parquet", choices=["parquet", "parquet-s3"],
                         help="Data source mode: 'parquet' for local files, 'parquet-s3' for S3 (default: parquet)")
     parser.add_argument("--query", type=int, action='append', dest='queries_to_run',
                         help="Specific query number to run (can be specified multiple times, e.g., --query 1 --query 18)")
-    parser.add_argument("--memory-limit", type=int, dest='memory_limit_mb',
-                        help="Memory limit in MB (forces spilling when exceeded, e.g., --memory-limit 122880 for 120GB)")
     parser.add_argument("--prefer-hash-join", dest='prefer_hash_join',
                         action='store_true', default=False,
                         help="Prefer hash join over sort-merge join (default: False)")
-    parser.add_argument("--max-temp-dir-size", type=int, dest='max_temp_dir_size_gb', default=1000,
-                        help="Maximum temp directory size in GB (default: 1000GB = 1TB)")
     args = parser.parse_args()
 
     # Generate default output filename if not specified
@@ -475,5 +353,5 @@ if __name__ == "__main__":
         current_time_millis = int(datetime.now().timestamp() * 1000)
         args.output = f"datafusion-python-{args.benchmark}-{current_time_millis}.json"
 
-    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.temp_dir, args.queries_to_run, args.memory_limit_mb, args.prefer_hash_join, args.max_temp_dir_size_gb, args.mode)
+    main(args.benchmark, args.data, args.queries, args.iterations, args.output, args.queries_to_run, args.prefer_hash_join, args.mode)
 
