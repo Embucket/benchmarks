@@ -232,9 +232,23 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
         print(f"\n=== Iteration {iteration + 1}/{iterations} ===\n")
 
         for query in queries_list:
-            # read text file
-            path = f"{query_path}/q{query}.sql"
-            print(f"Reading query {query} using path {path}")
+            # Check if this is query 21 and use replacement query if available
+            if query == 21:
+                replacement_path = f"{query_path}/21_query_replacement.sql"
+                if os.path.exists(replacement_path):
+                    path = replacement_path
+                    print(f"{'='*80}")
+                    print(f"⚠️  USING OPTIMIZED REPLACEMENT QUERY FOR Q21")
+                    print(f"   Original query uses too much memory for DataFusion")
+                    print(f"   Using replacement query from: {replacement_path}")
+                    print(f"{'='*80}")
+                else:
+                    path = f"{query_path}/q{query}.sql"
+                    print(f"Reading query {query} using path {path}")
+            else:
+                path = f"{query_path}/q{query}.sql"
+                print(f"Reading query {query} using path {path}")
+
             with open(path, "r") as f:
                 text = f.read()
                 # each file can contain multiple queries
