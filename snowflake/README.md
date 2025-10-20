@@ -1,4 +1,5 @@
 # Snowflake TPC-H Benchmark
+TPC-H queries were taken from [Apache DataFusion](https://github.com/apache/datafusion/tree/main/benchmarks/queries) repository with minor syntax changes for queries 4, 15, 20, and 22 to run on Snowflake. Data is read from Snowflake's sample database: SNOWFLAKE_SAMPLE_DATA.TPCH_SF{N}.
 
 Scripts to run and measure TPC-H query performance on **Snowflake** with control over warehouse size, iteration count, and query selection.
 

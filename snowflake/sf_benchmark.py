@@ -26,7 +26,10 @@ def get_tpch_queries(queries_dir):
     queries = []
 
     # Find all SQL files in the queries directory
-    query_files = sorted(glob.glob(os.path.join(queries_dir, "q*.sql")))
+    query_files = glob.glob(os.path.join(queries_dir, "q*.sql"))
+
+    # Custom sort to handle numeric ordering correctly
+    query_files.sort(key=lambda x: int(re.search(r'q(\d+)', os.path.basename(x)).group(1)))
 
     for query_file in query_files:
         query_name = os.path.basename(query_file).replace(".sql", "")
