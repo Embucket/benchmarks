@@ -1,0 +1,7 @@
+.env
+logs/
+env/
+dbt-snowplow-web/
+events.csv
+events_incr_1.csv
+events_incr_2.csv
