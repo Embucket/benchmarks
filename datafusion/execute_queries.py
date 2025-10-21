@@ -127,8 +127,9 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
         for sql in queries:
             sql_upper = sql.upper().strip()
 
-            # Wrap SELECT queries in EXPLAIN ANALYZE
-            if sql_upper.startswith('SELECT'):
+            # Wrap SELECT/WITH queries in EXPLAIN ANALYZE
+            # WITH is used for CTEs (Common Table Expressions) and should also be wrapped
+            if sql_upper.startswith('SELECT') or sql_upper.startswith('WITH'):
                 f.write(f"EXPLAIN ANALYZE {sql}")
                 if not sql.rstrip().endswith(';'):
                     f.write(';')
