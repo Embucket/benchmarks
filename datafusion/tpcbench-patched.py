@@ -67,8 +67,8 @@ def main(benchmark: str, data_path: str, query_path: str, iterations: int, outpu
     # Default is 8192. Larger values (32768) use more memory per batch
     # With limited memory, use smaller batches to reduce memory pressure
     try:
-        ctx.sql("SET datafusion.execution.batch_size = 32768")
-        print(f"✓ Set batch_size = 32768")
+        ctx.sql("SET datafusion.execution.batch_size = 8192")
+        print(f"✓ Set batch_size = 8192")
     except Exception as e:
         print(f"✗ Could not set batch_size: {e}")
 
