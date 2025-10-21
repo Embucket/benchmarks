@@ -44,8 +44,8 @@ def get_tpch_queries(queries_dir):
     return queries
 
 
-def create_snowflake_connection(tpch_scale_factor):
-    """Create connection to Snowflake."""
+def create_snowflake_connection(tpch_scale_factor, warehouse_size=None):
+    """Create connection to Snowflake and recreate warehouse if size is specified."""
     # Read credentials from environment variables
     user = os.environ.get("SNOWFLAKE_USER")
     password = os.environ.get("SNOWFLAKE_PASSWORD")
@@ -61,18 +61,31 @@ def create_snowflake_connection(tpch_scale_factor):
         sys.exit(1)
 
     print(f"Connecting to Snowflake account: {account}")
-    print(f"Using warehouse: {warehouse}")
 
+    # First connect without specifying a warehouse to be able to create/replace it
     conn = sf.connect(
         user=user,
         password=password,
         account=account,
-        warehouse=warehouse,
         database=database,
         schema=schema if schema else "PUBLIC"
     )
 
     cursor = conn.cursor()
+
+    # Create or replace the warehouse
+    try:
+        print(f"Creating or replacing warehouse '{warehouse}' with size '{warehouse_size}'")
+        cursor.execute(f"""
+            CREATE OR REPLACE WAREHOUSE {warehouse}
+            WITH WAREHOUSE_SIZE = {warehouse_size}
+        """)
+        print(f"Successfully created warehouse '{warehouse}' with size '{warehouse_size}'")
+    except Exception as e:
+        print(f"Warning: Failed to create or replace warehouse: {warehouse} with size: {warehouse_size} : {e}")
+
+    cursor.execute(f"USE WAREHOUSE {warehouse}")
+    print(f"Using warehouse: {warehouse}")
 
     # Use Snowflake sample data
     tpch_db = f"SNOWFLAKE_SAMPLE_DATA"
@@ -89,9 +102,11 @@ def create_snowflake_connection(tpch_scale_factor):
     return conn, cursor
 
 
-def main(queries_dir, temp_dir, iterations, output_file, queries_to_run, timestamp, tpch_scale_factor):
-    # Get benchmark configuration from environment variables
-    warehouse_size = os.environ["SNOWFLAKE_WAREHOUSE_SIZE"]
+def main(queries_dir, iterations, output_file, queries_to_run, timestamp, tpch_scale_factor, warehouse_size_arg=None):
+    warehouse_size = warehouse_size_arg if warehouse_size_arg else os.environ.get("SNOWFLAKE_WAREHOUSE_SIZE")
+    if not warehouse_size:
+        print("Error: Missing Snowflake warehouse size. Provide it via --warehouse-size or SNOWFLAKE_WAREHOUSE_SIZE env var")
+        sys.exit(1)
 
     # Create results dictionary
     results = {
@@ -104,7 +119,7 @@ def main(queries_dir, temp_dir, iterations, output_file, queries_to_run, timesta
     }
 
     # Create connection with the scale factor
-    sf_conn, sf_cursor = create_snowflake_connection(tpch_scale_factor)
+    sf_conn, sf_cursor = create_snowflake_connection(tpch_scale_factor, warehouse_size)
 
     # Load queries
     all_queries = get_tpch_queries(queries_dir)
@@ -255,16 +270,37 @@ def main(queries_dir, temp_dir, iterations, output_file, queries_to_run, timesta
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run TPC-H benchmark on Snowflake")
-    parser.add_argument('--queries-dir', required=True, help='Directory containing SQL query files')
-    parser.add_argument('--temp-dir', default='/tmp', help='Temporary directory')
+    parser.add_argument('--queries-dir', default='tpch_queries', help='Directory containing SQL query files')
     parser.add_argument('--iterations', type=int, default=3, help='Number of iterations per query')
-    parser.add_argument('--output', required=True, help='Output JSON file path')
+    parser.add_argument('--output', required=True, help='Base output directory path')
     parser.add_argument('--query', action='append', type=int, dest='queries', help='Specific query number to run')
-    parser.add_argument('--scale-factor', type=int, help='TPC-H scale factor (e.g., 1, 10, 100)')
+    parser.add_argument('--scale-factor', type=int, required=True, help='TPC-H scale factor (e.g., 1, 10, 100)')
     parser.add_argument('--timestamp', help='Timestamp for the benchmark run',
-                      default=time.strftime('%Y-%m-%d_%H:%M:%S'))
+                        default=time.strftime('%Y-%m-%d_%H:%M:%S'))
+    parser.add_argument('--warehouse-size', help='Snowflake warehouse size (e.g., XSMALL, SMALL, MEDIUM, etc)')
 
     args = parser.parse_args()
 
-    main(args.queries_dir, args.temp_dir, args.iterations,
-         args.output, args.queries, args.timestamp, args.scale_factor)
+    # Get warehouse size
+    warehouse_size = args.warehouse_size if args.warehouse_size else os.environ.get("SNOWFLAKE_WAREHOUSE_SIZE")
+    if not warehouse_size:
+        print(
+            "Error: Missing Snowflake warehouse size. Provide it via --warehouse-size or SNOWFLAKE_WAREHOUSE_SIZE env var")
+        sys.exit(1)
+
+    # Construct standard filename based on scale factor
+    filename = f"tpch_sf{args.scale_factor}_results.json"
+
+    # Create output directory with warehouse size as subdirectory
+    output_dir = os.path.join(args.output, warehouse_size.upper())
+    output_path = os.path.join(output_dir, filename)
+
+    # Ensure directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    print(f"Output will be saved to: {output_path}")
+
+    main(args.queries_dir, args.iterations,
+         output_path, args.queries, args.timestamp, args.scale_factor, args.warehouse_size)
+
+
