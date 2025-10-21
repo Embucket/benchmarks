@@ -102,58 +102,68 @@ def create_config_script(prefer_hash_join=False):
 def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
     """
     Execute a query using datafusion-cli.
-    
+
     Args:
         query_sql: The SQL query to execute
         setup_sql: SQL commands to run before the query (table registration, config)
         timeout: Maximum execution time in seconds
-    
+
     Returns:
         Tuple of (execution_time, success, error_message)
     """
-    # Create a temporary file with the complete SQL script
+    # Create a temporary file with setup commands (table registration, config)
     with tempfile.NamedTemporaryFile(mode='w', suffix='.sql', delete=False) as f:
-        # Write setup commands
         f.write(setup_sql)
-        f.write("\n\n")
-        
-        # Write the query with timing
-        f.write("\\timing on\n")
-        f.write(query_sql)
-        f.write("\n")
-        
-        temp_file = f.name
-    
+        setup_file = f.name
+
+    # Create a temporary file for the query
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.sql', delete=False) as f:
+        # Split query by semicolons to handle multi-statement queries
+        queries = [q.strip() for q in query_sql.split(';') if q.strip()]
+
+        for sql in queries:
+            f.write(sql)
+            if not sql.rstrip().endswith(';'):
+                f.write(';')
+            f.write("\n")
+
+        query_file = f.name
+
     try:
         start_time = time.time()
-        
-        # Execute datafusion-cli with the script
+
+        # Execute datafusion-cli with:
+        # 1. -r flag to run setup file (table registration)
+        # 2. -f flag to run query file
+        # 3. --format json to force materialization of results
+        # This ensures the query actually executes fully
         result = subprocess.run(
-            ['datafusion-cli', '-f', temp_file],
+            ['datafusion-cli', '-r', setup_file, '-f', query_file, '--format', 'json'],
             capture_output=True,
             text=True,
             timeout=timeout,
             env=os.environ.copy()  # Pass through environment variables (for AWS credentials)
         )
-        
+
         end_time = time.time()
         execution_time = end_time - start_time
-        
+
         # Check if execution was successful
         if result.returncode != 0:
             error_msg = result.stderr if result.stderr else result.stdout
             return execution_time, False, error_msg
-        
+
         return execution_time, True, None
-        
+
     except subprocess.TimeoutExpired:
         return timeout, False, f"Query timed out after {timeout} seconds"
     except Exception as e:
         return 0, False, str(e)
     finally:
-        # Clean up temporary file
+        # Clean up temporary files
         try:
-            os.unlink(temp_file)
+            os.unlink(setup_file)
+            os.unlink(query_file)
         except:
             pass
 
