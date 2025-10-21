@@ -143,6 +143,10 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
         temp_file = f.name
 
     try:
+        # Debug: print the temp file path so we can inspect it
+        print(f"  Executing SQL file: {temp_file}")
+        print(f"  You can inspect it with: cat {temp_file}")
+
         start_time = time.time()
 
         # Execute datafusion-cli with EXPLAIN ANALYZE
@@ -157,6 +161,8 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
         end_time = time.time()
         wall_clock_time = end_time - start_time
 
+        print(f"  Wall clock time: {wall_clock_time:.2f}s")
+
         # Check if execution was successful
         if result.returncode != 0:
             error_msg = result.stderr if result.stderr else result.stdout
@@ -167,6 +173,11 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
         execution_time = wall_clock_time  # Default to wall clock time
 
         if result.stdout:
+            # Debug: print first 500 chars of output
+            print(f"  Output preview (first 500 chars):")
+            print(f"  {result.stdout[:500]}")
+            print()
+
             # Look for execution time in EXPLAIN ANALYZE output
             # Pattern: "total_time=XXXms" or "Execution Time: XXX ms"
             time_patterns = [
@@ -178,6 +189,7 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
                 time_match = re.search(pattern, result.stdout, re.IGNORECASE)
                 if time_match:
                     execution_time = float(time_match.group(1)) / 1000.0  # Convert ms to seconds
+                    print(f"  Parsed execution time from EXPLAIN ANALYZE: {execution_time:.2f}s")
                     break
 
         return execution_time, True, None
