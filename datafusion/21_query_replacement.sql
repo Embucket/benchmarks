@@ -1,7 +1,3 @@
--- TPC-H Query 21 - Optimized Replacement for DataFusion
--- This is a memory-optimized version of the original TPC-H Q21
--- The original query uses too much memory and cannot run on DataFusion
--- 
 WITH failed_orders AS (
 
     SELECT o_orderkey
@@ -68,9 +64,5 @@ ORDER BY
     numwait DESC,
     s_name
 LIMIT 100;
--- 
--- Original query purpose: Suppliers Who Kept Orders Waiting Query
--- This query identifies suppliers who had orders that were received late
--- and were the only supplier to fail to meet the committed delivery date
 
 
