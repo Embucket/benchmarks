@@ -89,7 +89,6 @@ def create_config_script(prefer_hash_join=False):
     """
     config_commands = [
         "SET datafusion.execution.target_partitions = '32';",
-        "SET datafusion.optimizer.prefer_hash_join = false;",
     ]
     return "\n".join(config_commands)
 
