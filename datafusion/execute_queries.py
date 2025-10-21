@@ -209,11 +209,11 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
             pass
 
 
-def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file, 
+def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
                   queries_to_run=None, prefer_hash_join=False, mode='parquet'):
     """
     Run the TPC-H benchmark using datafusion-cli.
-    
+
     Args:
         benchmark: 'tpch' or 'tpcds'
         data_dir: Path to data directory
@@ -295,6 +295,17 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
                     print(f"{'='*80}")
                 else:
                     query_file = os.path.join(queries_dir, f"q{query_num}.sql")
+            # Check if this is query 18 and use replacement query if available
+            elif query_num == 18:
+                replacement_path = os.path.join(os.path.dirname(__file__), "18_query_replacement.sql")
+                if os.path.exists(replacement_path):
+                    query_file = replacement_path
+                    print(f"{'='*80}")
+                    print(f"⚠️  USING OPTIMIZED REPLACEMENT QUERY FOR Q18")
+                    print(f"   Using replacement query from: {replacement_path}")
+                    print(f"{'='*80}")
+                else:
+                    query_file = os.path.join(queries_dir, f"q{query_num}.sql")
             else:
                 query_file = os.path.join(queries_dir, f"q{query_num}.sql")
             
@@ -371,7 +382,7 @@ def main():
                        help="Specific query number to run (can be specified multiple times)")
     parser.add_argument("--prefer-hash-join", action='store_true',
                        help="Prefer hash join over sort-merge join")
-    
+
     args = parser.parse_args()
     
     # Validate datafusion-cli is available
