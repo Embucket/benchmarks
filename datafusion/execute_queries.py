@@ -112,7 +112,6 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
         Tuple of (execution_time, success, error_message)
     """
     # Create a single temporary file with both setup and query
-    # Use EXPLAIN ANALYZE to get accurate execution time from DataFusion
     with tempfile.NamedTemporaryFile(mode='w', suffix='.sql', delete=False) as f:
         # Write setup commands (table registration, config)
         f.write("-- Setup: Table registration and configuration\n")
@@ -120,17 +119,15 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
         f.write("\n\n")
 
         # Write the query wrapped in EXPLAIN ANALYZE
-        f.write("-- Query execution with EXPLAIN ANALYZE for accurate timing\n")
+        f.write("-- Query execution with EXPLAIN ANALYZE\n")
 
         # Split query by semicolons to handle multi-statement queries
         queries = [q.strip() for q in query_sql.split(';') if q.strip()]
 
-        # For TPC-H queries, we typically have a single SELECT statement
-        # Wrap it in EXPLAIN ANALYZE to get execution metrics
-        for i, sql in enumerate(queries):
+        for sql in queries:
             sql_upper = sql.upper().strip()
 
-            # Only use EXPLAIN ANALYZE for SELECT queries
+            # Wrap SELECT queries in EXPLAIN ANALYZE
             if sql_upper.startswith('SELECT'):
                 f.write(f"EXPLAIN ANALYZE {sql}")
                 if not sql.rstrip().endswith(';'):
@@ -148,14 +145,13 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
     try:
         start_time = time.time()
 
-        # Execute datafusion-cli
-        # EXPLAIN ANALYZE will force full execution and give us timing info
+        # Execute datafusion-cli with EXPLAIN ANALYZE
         result = subprocess.run(
             ['datafusion-cli', '-f', temp_file],
             capture_output=True,
             text=True,
             timeout=timeout,
-            env=os.environ.copy()  # Pass through environment variables (for AWS credentials)
+            env=os.environ.copy()
         )
 
         end_time = time.time()
@@ -166,19 +162,23 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
             error_msg = result.stderr if result.stderr else result.stdout
             return wall_clock_time, False, error_msg
 
-        # Try to parse execution time from EXPLAIN ANALYZE output
-        # EXPLAIN ANALYZE output contains "Execution Time: X.XXX ms"
+        # Parse execution time from EXPLAIN ANALYZE output
         import re
         execution_time = wall_clock_time  # Default to wall clock time
 
         if result.stdout:
-            # Look for "Execution Time" or "Total Execution Time" in the output
-            time_match = re.search(r'(?:Total )?Execution Time:\s+([\d.]+)\s*ms', result.stdout, re.IGNORECASE)
-            if time_match:
-                execution_time = float(time_match.group(1)) / 1000.0  # Convert ms to seconds
-                print(f"  DataFusion reported execution time: {execution_time:.2f}s")
-            else:
-                print(f"  Using wall-clock time: {wall_clock_time:.2f}s (couldn't parse EXPLAIN ANALYZE output)")
+            # Look for execution time in EXPLAIN ANALYZE output
+            # Pattern: "total_time=XXXms" or "Execution Time: XXX ms"
+            time_patterns = [
+                r'total_time=(\d+(?:\.\d+)?)ms',
+                r'(?:Total )?Execution Time:\s+([\d.]+)\s*ms',
+            ]
+
+            for pattern in time_patterns:
+                time_match = re.search(pattern, result.stdout, re.IGNORECASE)
+                if time_match:
+                    execution_time = float(time_match.group(1)) / 1000.0  # Convert ms to seconds
+                    break
 
         return execution_time, True, None
 
