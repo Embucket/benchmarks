@@ -28,7 +28,11 @@ def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") ->
     Returns:
         List of tuples (system_name, file_path)
     """
-    pattern = f"{benchmark}_sf{scale_factor}_results.json"
+    # Define patterns to search for both naming conventions
+    patterns = [
+        f"{benchmark}_sf{scale_factor}_results.json",  # underscore format
+        f"{benchmark}-sf{scale_factor}*-results.json"  # hyphen format
+    ]
     result_files = []
 
     # Search in duckdb results directories
@@ -39,37 +43,59 @@ def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") ->
             for ec2_type_dir in os.listdir(results_base):
                 ec2_type_path = os.path.join(results_base, ec2_type_dir)
                 if os.path.isdir(ec2_type_path):
-                    search_path = os.path.join(ec2_type_path, pattern)
-                    for file_path in glob.glob(search_path):
-                        system_name = f"duckdb-{mode}-{ec2_type_dir}"
-                        result_files.append((system_name, file_path))
+                    for pattern in patterns:
+                        search_path = os.path.join(ec2_type_path, pattern)
+                        for file_path in glob.glob(search_path):
+                            file_name = os.path.basename(file_path)
+                            # Determine system name based on filename format
+                            if '-' in file_name:
+                                # For hyphen format, extract mode from filename if present
+                                parts = file_name.split('-')
+                                if len(parts) >= 4:  # Has mode in filename
+                                    file_mode = parts[2]  # Extract mode from filename
+                                    system_name = f"duckdb-{file_mode}-{ec2_type_dir}"
+                                else:
+                                    system_name = f"duckdb-{mode}-{ec2_type_dir}"
+                            else:
+                                system_name = f"duckdb-{mode}-{ec2_type_dir}"
+                            result_files.append((system_name, file_path))
 
-    # Search in datafusion results directories
+    # Search in datafusion results directories with similar pattern handling
     for mode in ['parquet', 'parquet-s3']:
         datafusion_results_base = os.path.join(base_dir, 'datafusion', f'results-{mode}')
         if os.path.exists(datafusion_results_base):
-            # Search in all EC2 instance type subdirectories
             for ec2_type_dir in os.listdir(datafusion_results_base):
                 ec2_type_path = os.path.join(datafusion_results_base, ec2_type_dir)
                 if os.path.isdir(ec2_type_path):
-                    search_path = os.path.join(ec2_type_path, pattern)
-                    for file_path in glob.glob(search_path):
-                        system_name = f"datafusion-{mode}-{ec2_type_dir}"
-                        result_files.append((system_name, file_path))
+                    for pattern in patterns:
+                        search_path = os.path.join(ec2_type_path, pattern)
+                        for file_path in glob.glob(search_path):
+                            file_name = os.path.basename(file_path)
+                            if '-' in file_name:
+                                parts = file_name.split('-')
+                                if len(parts) >= 4:
+                                    file_mode = parts[2]
+                                    system_name = f"datafusion-{file_mode}-{ec2_type_dir}"
+                                else:
+                                    system_name = f"datafusion-{mode}-{ec2_type_dir}"
+                            else:
+                                system_name = f"datafusion-{mode}-{ec2_type_dir}"
+                            result_files.append((system_name, file_path))
 
     # Search in snowflake results directories
     snowflake_results_base = os.path.join(base_dir, 'snowflake', 'results')
     if os.path.exists(snowflake_results_base):
-        # Search in all warehouse size subdirectories
         for warehouse_dir in os.listdir(snowflake_results_base):
             warehouse_path = os.path.join(snowflake_results_base, warehouse_dir)
             if os.path.isdir(warehouse_path):
-                search_path = os.path.join(warehouse_path, pattern)
-                for file_path in glob.glob(search_path):
-                    system_name = f"snowflake-{warehouse_dir}"
-                    result_files.append((system_name, file_path))
+                for pattern in patterns:
+                    search_path = os.path.join(warehouse_path, pattern)
+                    for file_path in glob.glob(search_path):
+                        system_name = f"snowflake-{warehouse_dir}"
+                        result_files.append((system_name, file_path))
 
     return result_files
+
 
 
 
