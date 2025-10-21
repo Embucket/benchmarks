@@ -87,8 +87,11 @@ def create_config_script(prefer_hash_join=False):
     Returns:
         String containing SQL SET commands
     """
-    # Set target partitions to 32 for better parallelism
-    return "SET datafusion.execution.target_partitions = '32';"
+    config_commands = [
+        "SET datafusion.execution.target_partitions = '32';",
+        "SET datafusion.optimizer.prefer_hash_join = false;",
+    ]
+    return "\n".join(config_commands)
 
 
 def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
