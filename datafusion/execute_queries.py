@@ -103,7 +103,7 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
         timeout: Maximum execution time in seconds
 
     Returns:
-        Tuple of (execution_time, success, error_message)
+        Tuple of (execution_time, success, error_message, explain_output)
     """
     # Create a single temporary file with both setup and query
     with tempfile.NamedTemporaryFile(mode='w', suffix='.sql', delete=False) as f:
@@ -168,11 +168,12 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
         # Check if execution was successful
         if result.returncode != 0:
             error_msg = result.stderr if result.stderr else result.stdout
-            return wall_clock_time, False, error_msg
+            return wall_clock_time, False, error_msg, None
 
         # Parse execution time from EXPLAIN ANALYZE output
         import re
         execution_time = wall_clock_time  # Default to wall clock time
+        explain_output = result.stdout  # Capture the full EXPLAIN ANALYZE output
 
         if result.stdout:
             # Debug: print first 500 chars of output
@@ -194,12 +195,12 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
                     print(f"  Parsed execution time from EXPLAIN ANALYZE: {execution_time:.2f}s")
                     break
 
-        return execution_time, True, None
+        return execution_time, True, None, explain_output
 
     except subprocess.TimeoutExpired:
-        return timeout, False, f"Query timed out after {timeout} seconds"
+        return timeout, False, f"Query timed out after {timeout} seconds", None
     except Exception as e:
-        return 0, False, str(e)
+        return 0, False, str(e), None
     finally:
         # Clean up temporary file
         try:
@@ -280,7 +281,7 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
         print(f"\n{'='*80}")
         print(f"Iteration {iteration + 1}/{iterations}")
         print(f"{'='*80}\n")
-        
+
         for query_num in queries_list:
             # Check if this is query 21 and use replacement query if available
             if query_num == 21:
@@ -307,11 +308,11 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
                     query_file = os.path.join(queries_dir, f"q{query_num}.sql")
             else:
                 query_file = os.path.join(queries_dir, f"q{query_num}.sql")
-            
+
             if not os.path.exists(query_file):
                 print(f"⚠️  Warning: Query file not found: {query_file}")
                 continue
-            
+
             print(f"Running query {query_num}...")
 
             # Read query SQL
@@ -319,11 +320,22 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
                 query_sql = f.read()
 
             # Execute query
-            execution_time, success, error_msg = execute_query_with_cli(query_sql, setup_sql)
-            
+            execution_time, success, error_msg, explain_output = execute_query_with_cli(query_sql, setup_sql)
+
             if success:
                 print(f"✓ Query {query_num} completed in {execution_time:.2f} seconds")
-                
+
+                # Save EXPLAIN ANALYZE output to file (only on first iteration)
+                if iteration == 0 and explain_output:
+                    output_dir = os.path.dirname(output_file) if output_file else "."
+                    plan_file = os.path.join(output_dir, f"query_{query_num}_plan.txt")
+                    with open(plan_file, 'w') as f:
+                        f.write(f"DataFusion EXPLAIN ANALYZE - Query {query_num}\n")
+                        f.write("=" * 80 + "\n\n")
+                        f.write(explain_output)
+                        f.write("\n" + "=" * 80 + "\n")
+                    print(f"  ✓ Query plan saved to: {plan_file}")
+
                 # Store timing
                 if query_num not in results:
                     results[query_num] = []
@@ -334,7 +346,7 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
                 if query_num not in results:
                     results[query_num] = []
                 results[query_num].append(None)
-            
+
             print()
     
     # Calculate statistics
