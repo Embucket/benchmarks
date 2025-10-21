@@ -31,7 +31,7 @@ from datetime import datetime
 import json
 import time
 
-def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, queries_to_run: list[int] | None = None, prefer_hash_join: bool = False, mode: str = "parquet"):
+def main(benchmark: str, data_path: str, query_path: str, iterations: int, output_file: str, queries_to_run: list[int] | None = None, prefer_hash_join: bool = True, mode: str = "parquet"):
 
     # Increase file descriptor limit to handle large Parquet datasets
     try:
