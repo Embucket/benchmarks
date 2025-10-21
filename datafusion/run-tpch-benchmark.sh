@@ -13,10 +13,10 @@ usage() {
   cat <<EOF
 Usage: $0 <scale_factor> --mode <MODE> [options]
 
-Run DataFusion TPC-H benchmark on generated data.
+Run DataFusion TPC-H benchmark on generated data using datafusion-cli.
 
-Note: DataFusion spilling to disk does not work properly. All queries must fit in RAM.
-      If there is insufficient RAM, queries will fail.
+Note: This script uses datafusion-cli instead of the Python datafusion library
+      to avoid memory issues with certain queries (especially query 21).
 
 Arguments:
   scale_factor    The TPC-H scale factor to benchmark (must match generated data)
@@ -196,7 +196,19 @@ fi
 
 echo
 
-# Clone or update DataFusion benchmarks repository
+# Check if datafusion-cli is installed
+if ! command -v datafusion-cli &> /dev/null; then
+  echo "Error: datafusion-cli is not installed"
+  echo "Please install it with: cargo install datafusion-cli"
+  exit 1
+fi
+
+echo ">>> Checking datafusion-cli version..."
+datafusion-cli --version
+
+echo
+
+# Clone or update DataFusion benchmarks repository (for query files)
 if [[ -d "${BENCHMARK_REPO_DIR}" ]]; then
   echo ">>> DataFusion benchmarks repository already exists"
   echo ">>> Updating repository..."
@@ -211,91 +223,16 @@ fi
 
 echo
 
-# Install Python dependencies
-echo ">>> Installing Python dependencies..."
-if ! command -v python3 &> /dev/null; then
-  echo "Error: python3 is not installed"
-  exit 1
-fi
-
-# Get Python version for the venv package
-PYTHON_VERSION=$(python3 --version | awk '{print $2}' | cut -d. -f1,2)
-
-# Install python3-venv if not available
-echo ">>> Ensuring python3-venv is installed..."
-sudo apt-get update
-sudo apt-get install -y python3-venv python${PYTHON_VERSION}-venv
-
-# Create virtual environment if it doesn't exist
-VENV_DIR="${BENCHMARK_REPO_DIR}/venv"
-if [[ ! -d "${VENV_DIR}" ]] || [[ ! -f "${VENV_DIR}/bin/python" ]]; then
-  echo ">>> Creating Python virtual environment..."
-  # Remove broken venv if it exists
-  rm -rf "${VENV_DIR}"
-  python3 -m venv "${VENV_DIR}"
-
-  # Verify creation
-  if [[ ! -f "${VENV_DIR}/bin/activate" ]]; then
-    echo "Error: Failed to create virtual environment"
-    exit 1
-  fi
-  echo ">>> Virtual environment created successfully"
-else
-  echo ">>> Virtual environment already exists"
-fi
-
-# Activate virtual environment
-echo ">>> Activating virtual environment..."
-source "${VENV_DIR}/bin/activate"
-
-# Install requirements
-if [[ -f requirements.txt ]]; then
-  echo ">>> Installing requirements from requirements.txt..."
-  pip install -r requirements.txt
-else
-  echo "Warning: requirements.txt not found, installing datafusion manually"
-  pip install datafusion
-fi
-
-echo
-
-# Copy our patched benchmark script
-echo ">>> Copying patched benchmark script..."
-cp "${SCRIPT_DIR}/tpcbench-patched.py" "${BENCHMARK_REPO_DIR}/runners/datafusion-python/"
-
-# Increase file descriptor limit for this session
-CURRENT_LIMIT=$(ulimit -n)
-if [[ ${CURRENT_LIMIT} -lt 65536 ]]; then
-  echo ">>> Increasing file descriptor limit from ${CURRENT_LIMIT} to 65536..."
-  ulimit -n 65536 2>/dev/null || {
-    echo "⚠ Warning: Could not increase file descriptor limit to 65536"
-    echo "  Current limit: $(ulimit -n)"
-    echo "  You may encounter 'Too many open files' errors with large datasets"
-    echo ""
-    echo "  To fix permanently, run:"
-    echo "    echo '* soft nofile 65536' | sudo tee -a /etc/security/limits.conf"
-    echo "    echo '* hard nofile 65536' | sudo tee -a /etc/security/limits.conf"
-    echo "  Then log out and log back in."
-    echo ""
-  }
-  echo "✓ File descriptor limit: $(ulimit -n)"
-else
-  echo "✓ File descriptor limit already sufficient: ${CURRENT_LIMIT}"
-fi
-echo
-
 # Run the benchmark
 echo ">>> Running TPC-H benchmark..."
 echo ">>> This may take a while depending on the scale factor and number of iterations..."
 echo
 
-cd "${BENCHMARK_REPO_DIR}/runners/datafusion-python"
-
 # Build the command with optional parameters
 CMD_ARGS=(
   --benchmark tpch
-  --data "${DATA_DIR}"
-  --queries "${BENCHMARK_REPO_DIR}/tpch/queries"
+  --data-dir "${DATA_DIR}"
+  --queries-dir "${BENCHMARK_REPO_DIR}/tpch/queries"
   --iterations "${ITERATIONS}"
   --output "${OUTPUT_FILE}"
 )
@@ -316,8 +253,8 @@ fi
 # Add mode parameter
 CMD_ARGS+=(--mode "${MODE}")
 
-# Run the benchmark with specified parameters (using python from venv and our patched script)
-"${VENV_DIR}/bin/python" tpcbench-patched.py "${CMD_ARGS[@]}"
+# Run the benchmark with our execute_queries.py script
+python3 "${SCRIPT_DIR}/execute_queries.py" "${CMD_ARGS[@]}"
 
 echo
 echo ">>> Benchmark complete!"
