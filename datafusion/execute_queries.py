@@ -85,41 +85,10 @@ def create_config_script(prefer_hash_join=False):
         prefer_hash_join: Whether to prefer hash joins over sort-merge joins
 
     Returns:
-        String containing SQL SET commands (empty for default settings)
+        String containing SQL SET commands
     """
-    # Return empty string - use completely default datafusion-cli execution
-    return ""
-
-
-def find_tables_in_query(query_sql, all_table_names):
-    """
-    Find which tables are referenced in a SQL query.
-
-    Args:
-        query_sql: The SQL query text
-        all_table_names: List of all possible table names
-
-    Returns:
-        Set of table names found in the query
-    """
-    import re
-
-    # Convert query to uppercase for case-insensitive matching
-    query_upper = query_sql.upper()
-
-    # Remove comments
-    query_upper = re.sub(r'--[^\n]*', '', query_upper)
-
-    # Find tables referenced in the query
-    tables_found = set()
-    for table in all_table_names:
-        # Look for table name as a whole word (not part of another word)
-        # Match patterns like: FROM table, JOIN table, INTO table, etc.
-        pattern = r'\b' + table.upper() + r'\b'
-        if re.search(pattern, query_upper):
-            tables_found.add(table)
-
-    return tables_found
+    # Set target partitions to 32 for better parallelism
+    return "SET datafusion.execution.target_partitions = '32';"
 
 
 def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
@@ -270,8 +239,11 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
     else:
         raise ValueError(f"Invalid benchmark: {benchmark}")
 
-    # Configuration SQL (empty for default settings)
+    # Create setup SQL (table registration + configuration)
+    print("Creating table registration script...")
+    table_registration_sql = create_table_registration_script(data_dir, mode, table_names)
     config_sql = create_config_script(prefer_hash_join)
+    setup_sql = config_sql + "\n\n" + table_registration_sql
 
     print("Configuration:")
     print(f"  Mode: {mode}")
@@ -332,14 +304,6 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
             # Read query SQL
             with open(query_file, 'r') as f:
                 query_sql = f.read()
-
-            # Find which tables are used in this query
-            tables_used = find_tables_in_query(query_sql, table_names)
-            print(f"  Tables used: {sorted(tables_used)}")
-
-            # Create table registration SQL for only the tables used in this query
-            table_registration_sql = create_table_registration_script(data_dir, mode, sorted(tables_used))
-            setup_sql = config_sql + "\n\n" + table_registration_sql
 
             # Execute query
             execution_time, success, error_msg = execute_query_with_cli(query_sql, setup_sql)
