@@ -111,34 +111,47 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
     Returns:
         Tuple of (execution_time, success, error_message)
     """
-    # Create a temporary file with setup commands (table registration, config)
+    # Create a single temporary file with both setup and query
+    # Use EXPLAIN ANALYZE to get accurate execution time from DataFusion
     with tempfile.NamedTemporaryFile(mode='w', suffix='.sql', delete=False) as f:
+        # Write setup commands (table registration, config)
+        f.write("-- Setup: Table registration and configuration\n")
         f.write(setup_sql)
-        setup_file = f.name
+        f.write("\n\n")
 
-    # Create a temporary file for the query
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.sql', delete=False) as f:
+        # Write the query wrapped in EXPLAIN ANALYZE
+        f.write("-- Query execution with EXPLAIN ANALYZE for accurate timing\n")
+
         # Split query by semicolons to handle multi-statement queries
         queries = [q.strip() for q in query_sql.split(';') if q.strip()]
 
-        for sql in queries:
-            f.write(sql)
-            if not sql.rstrip().endswith(';'):
-                f.write(';')
-            f.write("\n")
+        # For TPC-H queries, we typically have a single SELECT statement
+        # Wrap it in EXPLAIN ANALYZE to get execution metrics
+        for i, sql in enumerate(queries):
+            sql_upper = sql.upper().strip()
 
-        query_file = f.name
+            # Only use EXPLAIN ANALYZE for SELECT queries
+            if sql_upper.startswith('SELECT'):
+                f.write(f"EXPLAIN ANALYZE {sql}")
+                if not sql.rstrip().endswith(';'):
+                    f.write(';')
+                f.write("\n")
+            else:
+                # For non-SELECT statements (CREATE VIEW, etc.), execute normally
+                f.write(sql)
+                if not sql.rstrip().endswith(';'):
+                    f.write(';')
+                f.write("\n")
+
+        temp_file = f.name
 
     try:
         start_time = time.time()
 
-        # Execute datafusion-cli with:
-        # 1. -r flag to run setup file (table registration)
-        # 2. -f flag to run query file
-        # 3. --format json to force materialization of results
-        # This ensures the query actually executes fully
+        # Execute datafusion-cli
+        # EXPLAIN ANALYZE will force full execution and give us timing info
         result = subprocess.run(
-            ['datafusion-cli', '-r', setup_file, '-f', query_file, '--format', 'json'],
+            ['datafusion-cli', '-f', temp_file],
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -146,12 +159,26 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
         )
 
         end_time = time.time()
-        execution_time = end_time - start_time
+        wall_clock_time = end_time - start_time
 
         # Check if execution was successful
         if result.returncode != 0:
             error_msg = result.stderr if result.stderr else result.stdout
-            return execution_time, False, error_msg
+            return wall_clock_time, False, error_msg
+
+        # Try to parse execution time from EXPLAIN ANALYZE output
+        # EXPLAIN ANALYZE output contains "Execution Time: X.XXX ms"
+        import re
+        execution_time = wall_clock_time  # Default to wall clock time
+
+        if result.stdout:
+            # Look for "Execution Time" or "Total Execution Time" in the output
+            time_match = re.search(r'(?:Total )?Execution Time:\s+([\d.]+)\s*ms', result.stdout, re.IGNORECASE)
+            if time_match:
+                execution_time = float(time_match.group(1)) / 1000.0  # Convert ms to seconds
+                print(f"  DataFusion reported execution time: {execution_time:.2f}s")
+            else:
+                print(f"  Using wall-clock time: {wall_clock_time:.2f}s (couldn't parse EXPLAIN ANALYZE output)")
 
         return execution_time, True, None
 
@@ -160,10 +187,9 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
     except Exception as e:
         return 0, False, str(e)
     finally:
-        # Clean up temporary files
+        # Clean up temporary file
         try:
-            os.unlink(setup_file)
-            os.unlink(query_file)
+            os.unlink(temp_file)
         except:
             pass
 
