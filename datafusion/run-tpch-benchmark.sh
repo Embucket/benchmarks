@@ -28,16 +28,14 @@ Optional Arguments:
   --iterations N           Number of iterations to run (default: 3)
   --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-<mode>-results.json)
   --query N                Run only specific query number (can be specified multiple times)
-  --hash-join              Enable hash join preference (default: sort-merge join)
 
 Examples:
   $0 1 --mode parquet                         # Run all queries on SF1 local data
   $0 1 --mode parquet-s3                      # Run all queries on SF1 data from S3
   $0 100 --mode parquet --iterations 5        # Run all queries on SF100 data with 5 iterations
   $0 10 --mode parquet --output my-results.json      # Run all queries and save to custom file
-  $0 1 --mode parquet --query 18              # Run only query 18 on SF1 data (sort-merge join)
+  $0 1 --mode parquet --query 18              # Run only query 18 on SF1 data
   $0 1 --mode parquet --query 1 --query 18    # Run only queries 1 and 18 on SF1 data
-  $0 1000 --mode parquet --hash-join          # Run all queries using hash join instead of sort-merge join
 
 For local mode (parquet):
   The script expects data to be at: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
@@ -70,7 +68,6 @@ MODE=""  # Required - no default
 ITERATIONS=3
 OUTPUT_FILE=""  # Will be set to absolute path later
 QUERY_ARGS=()  # Array to store --query arguments
-PREFER_HASH_JOIN="false"  # Default to sort-merge join
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -89,10 +86,6 @@ while [[ $# -gt 0 ]]; do
     --query)
       QUERY_ARGS+=("--query" "$2")
       shift 2
-      ;;
-    --hash-join)
-      PREFER_HASH_JOIN="true"
-      shift 1
       ;;
     *)
       echo "Error: Unknown option $1"
@@ -240,14 +233,6 @@ CMD_ARGS=(
 # Add query arguments if specified
 if [[ ${#QUERY_ARGS[@]} -gt 0 ]]; then
   CMD_ARGS+=("${QUERY_ARGS[@]}")
-fi
-
-# Add prefer-hash-join setting
-if [[ "${PREFER_HASH_JOIN}" == "true" ]]; then
-  CMD_ARGS+=(--prefer-hash-join)
-  echo ">>> Join strategy: Hash join"
-else
-  echo ">>> Join strategy: Sort-merge join (default)"
 fi
 
 # Add mode parameter

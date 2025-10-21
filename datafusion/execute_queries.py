@@ -80,23 +80,15 @@ def create_table_registration_script(data_dir, mode, table_names):
 def create_config_script(prefer_hash_join=False):
     """
     Create a SQL script with DataFusion configuration settings.
-    
+
     Args:
         prefer_hash_join: Whether to prefer hash joins over sort-merge joins
-    
+
     Returns:
-        String containing SQL SET commands
+        String containing SQL SET commands (empty for default settings)
     """
-    config_commands = [
-        f"SET datafusion.optimizer.prefer_hash_join = {str(prefer_hash_join).lower()};",
-        "SET datafusion.execution.target_partitions = 32;",
-        "SET datafusion.execution.coalesce_batches = true;",
-    ]
-    
-    # S3 configuration (will be ignored if not using S3)
-    config_commands.append("SET datafusion.execution.object_store.s3.region = 'us-east-2';")
-    
-    return "\n".join(config_commands)
+    # Return empty string - use completely default datafusion-cli execution
+    return ""
 
 
 def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
