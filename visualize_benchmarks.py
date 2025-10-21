@@ -46,18 +46,7 @@ def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") ->
                     for pattern in patterns:
                         search_path = os.path.join(ec2_type_path, pattern)
                         for file_path in glob.glob(search_path):
-                            file_name = os.path.basename(file_path)
-                            # Determine system name based on filename format
-                            if '-' in file_name:
-                                # For hyphen format, extract mode from filename if present
-                                parts = file_name.split('-')
-                                if len(parts) >= 4:  # Has mode in filename
-                                    file_mode = parts[2]  # Extract mode from filename
-                                    system_name = f"duckdb-{file_mode}-{ec2_type_dir}"
-                                else:
-                                    system_name = f"duckdb-{mode}-{ec2_type_dir}"
-                            else:
-                                system_name = f"duckdb-{mode}-{ec2_type_dir}"
+                            system_name = f"duckdb-{mode}-{ec2_type_dir}"
                             result_files.append((system_name, file_path))
 
     # Search in datafusion results directories with similar pattern handling
@@ -70,16 +59,7 @@ def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") ->
                     for pattern in patterns:
                         search_path = os.path.join(ec2_type_path, pattern)
                         for file_path in glob.glob(search_path):
-                            file_name = os.path.basename(file_path)
-                            if '-' in file_name:
-                                parts = file_name.split('-')
-                                if len(parts) >= 4:
-                                    file_mode = parts[2]
-                                    system_name = f"datafusion-{file_mode}-{ec2_type_dir}"
-                                else:
-                                    system_name = f"datafusion-{mode}-{ec2_type_dir}"
-                            else:
-                                system_name = f"datafusion-{mode}-{ec2_type_dir}"
+                            system_name = f"datafusion-{mode}-{ec2_type_dir}"
                             result_files.append((system_name, file_path))
 
     # Search in snowflake results directories
