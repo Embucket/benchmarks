@@ -10,10 +10,10 @@ calculates averages of multiple runs, and generates comparison charts.
 import json
 import os
 import glob
-from pathlib import Path
 from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
+import argparse
 
 
 def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") -> List[Tuple[str, str]]:
@@ -28,10 +28,14 @@ def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") ->
     Returns:
         List of tuples (system_name, file_path)
     """
-    pattern = f"{benchmark}-sf{scale_factor}-*-results.json"
+    # Define patterns to search for both naming conventions
+    patterns = [
+        f"{benchmark}_sf{scale_factor}_results.json",  # underscore format
+        f"{benchmark}-sf{scale_factor}*-results.json"  # hyphen format
+    ]
     result_files = []
 
-    # Search in duckdb results directories (now organized by EC2 instance type)
+    # Search in duckdb results directories
     for mode in ['internal', 'parquet', 'parquet-s3']:
         results_base = os.path.join(base_dir, 'duckdb', f'results-{mode}')
         if os.path.exists(results_base):
@@ -39,63 +43,111 @@ def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") ->
             for ec2_type_dir in os.listdir(results_base):
                 ec2_type_path = os.path.join(results_base, ec2_type_dir)
                 if os.path.isdir(ec2_type_path):
-                    search_path = os.path.join(ec2_type_path, pattern)
-                    for file_path in glob.glob(search_path):
-                        system_name = f"duckdb-{mode}-{ec2_type_dir}"
-                        result_files.append((system_name, file_path))
+                    for pattern in patterns:
+                        search_path = os.path.join(ec2_type_path, pattern)
+                        for file_path in glob.glob(search_path):
+                            system_name = f"duckdb-{mode}-{ec2_type_dir}"
+                            result_files.append((system_name, file_path))
 
-    # Search in datafusion results directories (same structure as DuckDB: results-{mode}/{ec2_instance_type})
+    # Search in datafusion results directories with similar pattern handling
     for mode in ['parquet', 'parquet-s3']:
         datafusion_results_base = os.path.join(base_dir, 'datafusion', f'results-{mode}')
         if os.path.exists(datafusion_results_base):
-            # Search in all EC2 instance type subdirectories
             for ec2_type_dir in os.listdir(datafusion_results_base):
                 ec2_type_path = os.path.join(datafusion_results_base, ec2_type_dir)
                 if os.path.isdir(ec2_type_path):
-                    search_path = os.path.join(ec2_type_path, pattern)
+                    for pattern in patterns:
+                        search_path = os.path.join(ec2_type_path, pattern)
+                        for file_path in glob.glob(search_path):
+                            system_name = f"datafusion-{mode}-{ec2_type_dir}"
+                            result_files.append((system_name, file_path))
+
+    # Search in snowflake results directories
+    snowflake_results_base = os.path.join(base_dir, 'snowflake', 'results')
+    if os.path.exists(snowflake_results_base):
+        for warehouse_dir in os.listdir(snowflake_results_base):
+            warehouse_path = os.path.join(snowflake_results_base, warehouse_dir)
+            if os.path.isdir(warehouse_path):
+                for pattern in patterns:
+                    search_path = os.path.join(warehouse_path, pattern)
                     for file_path in glob.glob(search_path):
-                        system_name = f"datafusion-{mode}-{ec2_type_dir}"
+                        system_name = f"snowflake-{warehouse_dir}"
                         result_files.append((system_name, file_path))
 
     return result_files
 
 
+
+
 def load_and_process_results(file_path: str) -> Dict:
     """
     Load a result JSON file and calculate averages for each query.
-    
+
     Args:
         file_path: Path to the result JSON file
-    
+
     Returns:
         Dictionary with metadata and averaged query results
     """
     with open(file_path, 'r') as f:
         data = json.load(f)
-    
+
     # Extract metadata
     metadata = {
         'timestamp': data.get('timestamp'),
-        'ec2_instance_type': data.get('ec2_instance_type'),
-        'usd_per_hour': data.get('usd_per_hour'),
+        'ec2_instance_type': data.get('ec2_instance_type',
+                                      data.get('snowflake-warehouse-size', 'unknown')),
+        'usd_per_hour': data.get('usd_per_hour', calculate_snowflake_cost(data)),
         'engine': data.get('engine'),
         'mode': data.get('mode'),
         'iterations': data.get('iterations', 3)
     }
-    
+
     # Calculate averages for each query
     query_averages = {}
+
     for key, value in data.items():
-        # Query results are stored with numeric keys
-        if key.isdigit():
+        # Handle snowflake query format (query_X)
+        if key.startswith('query_') and isinstance(value, dict) and 'avg_time' in value:
+            query_num = int(key.split('_')[1])
+            query_averages[query_num] = value['avg_time']
+        # Handle standard numeric keys
+        elif key.isdigit():
             query_num = int(key)
             if isinstance(value, list) and len(value) > 0:
                 query_averages[query_num] = np.mean(value)
-    
+
     return {
         'metadata': metadata,
         'query_averages': query_averages
     }
+
+
+def calculate_snowflake_cost(data: Dict) -> float:
+    """
+    Calculate the per-hour cost for a Snowflake warehouse.
+
+    Args:
+        data: The loaded JSON data containing Snowflake metadata
+
+    Returns:
+        Estimated USD per hour for the Snowflake warehouse
+    """
+    # Get the warehouse size or use a default value
+    warehouse_size = data.get('snowflake-warehouse-size', 'X-SMALL').upper()
+
+    # Approximate hourly costs for different Snowflake warehouse sizes
+    # Based on general pricing tiers (adjust as needed)
+    costs = {
+        'X-SMALL': 1.0,  # Base unit for comparison
+        'SMALL': 2.0,  # 2x X-SMALL
+        'MEDIUM': 4.0,  # 4x X-SMALL
+        'LARGE': 8.0,  # 8x X-SMALL
+    }
+
+    # Return the cost for the given warehouse size or a default value
+    base_cost = 2.0  # Approximate base cost per hour for X-SMALL warehouse
+    return base_cost * costs.get(warehouse_size, 1.0)
 
 
 def calculate_costs(duration_seconds: float, usd_per_hour: float) -> float:
@@ -243,83 +295,97 @@ def create_total_bar_chart(data: Dict[str, Dict], title: str, ylabel: str,
     plt.close()
 
 
-def main():
+def main(benchmark, scale_factor, output_dir, base_dir):
     """Main function to generate all visualizations."""
-    # Configuration
-    benchmark = 'tpch'
-    scale_factor = 1000
-    output_dir = 'visualizations'
-    
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
-    
+
     # Find and load result files
-    print(f"Searching for {benchmark.upper()} SF{scale_factor} results...")
-    result_files = find_result_files(benchmark, scale_factor)
-    
+    print(f"Searching for {benchmark.upper()} SF{scale_factor} results in {base_dir}...")
+    result_files = find_result_files(benchmark, scale_factor, base_dir)
+
     if not result_files:
         print(f"No result files found for {benchmark.upper()} SF{scale_factor}")
         return
-    
+
     print(f"Found {len(result_files)} result file(s):")
     for system_name, file_path in result_files:
         print(f"  - {system_name}: {file_path}")
-    
+
     # Load and process all results
     all_data = {}
     for system_name, file_path in result_files:
         print(f"\nProcessing {system_name}...")
         all_data[system_name] = load_and_process_results(file_path)
-        
+
         # Print summary
         metadata = all_data[system_name]['metadata']
         query_count = len(all_data[system_name]['query_averages'])
         print(f"  EC2 Type: {metadata['ec2_instance_type']}")
         print(f"  USD/hour: ${metadata['usd_per_hour']}")
         print(f"  Queries: {query_count}")
-    
+
     # Generate charts
     print("\nGenerating visualizations...")
-    
+
     # Chart 1: Duration of each query across systems
+    duration_chart_path = os.path.join(output_dir, f'{benchmark}_sf{scale_factor}_query_duration.png')
     create_bar_chart(
         all_data,
         title=f'{benchmark.upper()} SF{scale_factor} - Query Duration Comparison',
         ylabel='Duration (seconds)',
-        filename=os.path.join(output_dir, f'{benchmark}_sf{scale_factor}_query_duration.png'),
+        filename=duration_chart_path,
         is_cost=False
     )
-    
+
     # Chart 2: Total sum of duration across systems
+    total_duration_path = os.path.join(output_dir, f'{benchmark}_sf{scale_factor}_total_duration.png')
     create_total_bar_chart(
         all_data,
         title=f'{benchmark.upper()} SF{scale_factor} - Total Duration Comparison',
         ylabel='Total Duration (seconds)',
-        filename=os.path.join(output_dir, f'{benchmark}_sf{scale_factor}_total_duration.png'),
+        filename=total_duration_path,
         is_cost=False
     )
-    
+
     # Chart 3: Cost of each query across systems
+    query_cost_path = os.path.join(output_dir, f'{benchmark}_sf{scale_factor}_query_cost.png')
     create_bar_chart(
         all_data,
         title=f'{benchmark.upper()} SF{scale_factor} - Query Cost Comparison',
         ylabel='Cost (USD)',
-        filename=os.path.join(output_dir, f'{benchmark}_sf{scale_factor}_query_cost.png'),
+        filename=query_cost_path,
         is_cost=True
     )
-    
+
     # Chart 4: Total cost across systems
+    total_cost_path = os.path.join(output_dir, f'{benchmark}_sf{scale_factor}_total_cost.png')
     create_total_bar_chart(
         all_data,
         title=f'{benchmark.upper()} SF{scale_factor} - Total Cost Comparison',
         ylabel='Total Cost (USD)',
-        filename=os.path.join(output_dir, f'{benchmark}_sf{scale_factor}_total_cost.png'),
+        filename=total_cost_path,
         is_cost=True
     )
-    
+
     print(f"\nAll visualizations saved to '{output_dir}/' directory")
 
 
 if __name__ == '__main__':
-    main()
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Generate benchmark visualizations')
+    parser.add_argument('--benchmark', default='tpch', help='Benchmark name (e.g., tpch)')
+    parser.add_argument('--scale-factor', type=int, default=10, help='Scale factor (e.g., 10 for sf10)')
+    parser.add_argument('--output-dir', default='visualizations', help='Output directory for charts')
+    parser.add_argument('--base-dir', default='.',
+                        help='Base directory where benchmark results are stored')
+
+    args = parser.parse_args()
+
+    main(
+        args.benchmark,
+        args.scale_factor,
+        args.output_dir,
+        args.base_dir
+    )
 
