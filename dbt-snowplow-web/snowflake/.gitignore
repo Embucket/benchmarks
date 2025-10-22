@@ -1,7 +1,21 @@
+# Environment and credentials
 .env
-logs/
+
+# Python virtual environment
 env/
+
+# Logs
+logs/
+
+# Cloned dbt-snowplow-web repository
 dbt-snowplow-web/
-events.csv
-events_incr_1.csv
-events_incr_2.csv
+
+# Generated data files
+events_yesterday.csv
+events_today.csv
+events_combined.csv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo

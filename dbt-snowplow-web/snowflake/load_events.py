@@ -161,76 +161,117 @@ def drop_schemas(conn):
 def print_usage():
     """Print usage information."""
     print("Usage:")
-    print("  python events.py [CSV_FILE] [options]")
-    print()
-    print("Arguments:")
-    print("  CSV_FILE       CSV file to load (e.g., events.csv, events_incr_1.csv)")
+    print("  python load_events.py [OPTIONS]")
     print()
     print("Options:")
-    print("  is_incremental=true   Skip dropping schemas (preserve existing data)")
-    print("  true/false           Enable incremental mode")
-    print("  1/2                  Run number for incremental mode")
+    print("  --yesterday          Load only events_yesterday.csv (first run)")
+    print("  --combined           Load both events_yesterday.csv and events_today.csv (second run)")
     print()
     print("Schema Management:")
-    print("  - By default, drops PUBLIC_DERIVED, PUBLIC_SCRATCH, PUBLIC_SNOWPLOW_MANIFEST schemas")
-    print("  - Use is_incremental=true to skip schema dropping")
+    print("  - First run (--yesterday): Drops PUBLIC_DERIVED, PUBLIC_SCRATCH, PUBLIC_SNOWPLOW_MANIFEST schemas")
+    print("  - Second run (--combined): Preserves existing schemas (incremental mode)")
     print()
     print("Examples:")
-    print("  python load_events.py events.csv                    # Full run, drops schemas")
-    print("  python load_events.py events.csv is_incremental=true # Incremental run, keeps schemas")
-    print("  python load_events.py events_incr_1.csv             # Load specific file")
+    print("  python load_events.py --yesterday    # First run: load yesterday's data")
+    print("  python load_events.py --combined     # Second run: load combined data incrementally")
+
+
+def load_multiple_files(conn, files):
+    """Load multiple CSV files into Snowflake without creating a combined file."""
+    cursor = conn.cursor()
+
+    # Create stage (this will drop any existing stage and its files)
+    cursor.execute("CREATE OR REPLACE STAGE my_stage")
+
+    total_rows_loaded = 0
+
+    for file in files:
+        print(f"Uploading {file} to stage...")
+        cursor.execute(f"PUT file://{file} @my_stage")
+
+        print(f"Loading {file} into events table...")
+        result = cursor.execute(f"""
+            COPY INTO events
+            FROM @my_stage/{file}
+            FILE_FORMAT = (
+                TYPE = 'CSV'
+                FIELD_DELIMITER = ','
+                RECORD_DELIMITER = '\\n'
+                SKIP_HEADER = 1
+                FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+                ESCAPE_UNENCLOSED_FIELD = NONE
+                ESCAPE = NONE
+                ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
+                REPLACE_INVALID_CHARACTERS = TRUE
+                DATE_FORMAT = 'AUTO'
+                TIMESTAMP_FORMAT = 'AUTO'
+                BINARY_FORMAT = 'HEX'
+                TRIM_SPACE = TRUE
+            )
+            ON_ERROR = 'CONTINUE'
+        """)
+
+        # Get row count from COPY result
+        # Result format: (file, status, rows_parsed, rows_loaded, error_limit, errors_seen, first_error, first_error_line, first_error_character, first_error_column_name)
+        copy_result = result.fetchone()
+        if copy_result:
+            rows_loaded = int(copy_result[3])  # Fourth column is rows_loaded
+            total_rows_loaded += rows_loaded
+            print(f"✓ Loaded {rows_loaded:,} rows from {file}")
+
+    # Clean up: Remove all files from stage to avoid storage costs
+    print("Cleaning up stage files...")
+    cursor.execute("REMOVE @my_stage")
+    print("✓ Stage files removed")
+
+    cursor.close()
+    print(f"✓ Total rows loaded: {total_rows_loaded:,}")
+    return total_rows_loaded
 
 
 def main():
     """Main function to load events data into Snowflake."""
-    # Parse simple command line arguments for input file
-    input_file = None
-    is_incremental = False
-    run_number = 1
-    
-    # Simple argument parsing
+    # Parse command line arguments
+    mode = None
+
     args = sys.argv[1:]
     for arg in args:
         if arg in ['-h', '--help']:
             print_usage()
             return
-        elif arg.startswith('is_incremental='):
-            # Handle is_incremental=true format
-            is_incremental = arg.split('=')[1].lower() == 'true'
-        elif arg in ['true', 'false']:
-            is_incremental = (arg == 'true')
-        elif arg in ['1', '2']:
-            run_number = int(arg)
-        elif arg.endswith('.csv'):
-            input_file = arg
-    
-    # Determine input file based on incremental flag and run number
-    if not input_file:
-        if is_incremental:
-            if run_number == 1:
-                input_file = 'events_incr_1.csv'
-                print("Incremental run - First run - using events_incr_1.csv")
-            else:  # run_number == 2
-                input_file = 'events_incr_2.csv'
-                print("Incremental run - Second run - using events_incr_2.csv")
-        else:
-            input_file = 'events.csv'
-            print("First run - using events.csv")
-    else:
-        print(f"Using specified file: {input_file}")
+        elif arg == '--yesterday':
+            mode = 'yesterday'
+        elif arg == '--combined':
+            mode = 'combined'
+
+    if not mode:
+        print("Error: Must specify either --yesterday or --combined")
+        print()
+        print_usage()
+        sys.exit(1)
+
+    # Determine files and incremental mode based on run type
+    if mode == 'yesterday':
+        input_files = ['events_yesterday.csv']
+        is_incremental = False
+        print("First run: Loading yesterday's data only")
+    else:  # mode == 'combined'
+        input_files = ['events_yesterday.csv', 'events_today.csv']
+        is_incremental = True
+        print("Second run: Loading combined data (yesterday + today) in memory")
     
     print(f"=== Loading Snowplow Events Data into Snowflake Database ===")
-    
+
     # Configuration
     script_dir = Path(__file__).parent
-    events_file = Path(input_file)
     sql_script = script_dir / "create.sql"
-    
+
     # Check if required files exist
-    if not events_file.exists():
-        print(f"Error: {events_file} not found")
-        sys.exit(1)
-    
+    for file in input_files:
+        if not Path(file).exists():
+            print(f"Error: {file} not found")
+            sys.exit(1)
+
     if not sql_script.exists():
         print(f"Error: {sql_script} not found")
         sys.exit(1)
@@ -251,11 +292,15 @@ def main():
             drop_schemas(conn)
         else:
             print("Incremental run: Skipping schema drop")
-        
-        # Execute SQL script
-        print("Executing SQL script...")
-        execute_sql_script(conn, sql_script, events_file.name)
-        
+
+        # Execute SQL script to create table structure (without loading data)
+        print("Creating table structure...")
+        execute_sql_script(conn, sql_script, None)
+
+        # Load data files
+        print("Loading data files...")
+        load_multiple_files(conn, input_files)
+
         # Verify data load
         print("Verifying data load...")
         verify_data_load(conn)
