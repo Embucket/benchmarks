@@ -1,0 +1,521 @@
+Snowflake Query Plan - Query 12
+================================================================================
+
+RAW RESULT:
+{
+  "plan_json": {
+    "GlobalStats": {
+      "bytesAssigned": 80300837888,
+      "partitionsAssigned": 4939,
+      "partitionsTotal": 13578
+    },
+    "Operations": [
+      [
+        {
+          "expressions": [
+            "LINEITEM.L_SHIPMODE",
+            "SUM(SUM_INTERNAL(SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), COUNT(*)))",
+            "SUM(SUM_INTERNAL(SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0)), COUNT(*)))"
+          ],
+          "id": 0,
+          "operation": "Result"
+        },
+        {
+          "expressions": [
+            "LINEITEM.L_SHIPMODE ASC NULLS LAST"
+          ],
+          "id": 1,
+          "operation": "Sort",
+          "parentOperators": [
+            0
+          ]
+        },
+        {
+          "expressions": [
+            "aggExprs: [SUM(SUM_INTERNAL(SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), COUNT(*))), SUM(SUM_INTERNAL(SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0)), COUNT(*)))]",
+            "groupKeys: [LINEITEM.L_SHIPMODE]"
+          ],
+          "id": 2,
+          "operation": "Aggregate",
+          "parentOperators": [
+            1
+          ]
+        },
+        {
+          "expressions": [
+            "aggExprs: [SUM_INTERNAL(SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), COUNT(*)), SUM_INTERNAL(SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0)), COUNT(*))]",
+            "groupKeys: [LINEITEM.L_SHIPMODE]"
+          ],
+          "id": 3,
+          "operation": "Aggregate",
+          "parentOperators": [
+            2
+          ]
+        },
+        {
+          "expressions": [
+            "joinKey: (LINEITEM.L_ORDERKEY = ORDERS.O_ORDERKEY)"
+          ],
+          "id": 4,
+          "operation": "InnerJoin",
+          "parentOperators": [
+            3
+          ]
+        },
+        {
+          "expressions": [
+            "aggExprs: [COUNT(*)]",
+            "groupKeys: [LINEITEM.L_SHIPMODE, LINEITEM.L_ORDERKEY]"
+          ],
+          "id": 5,
+          "operation": "Aggregate",
+          "parentOperators": [
+            4
+          ]
+        },
+        {
+          "expressions": [
+            "(LINEITEM.L_SHIPMODE IN 'MAIL' IN 'SHIP') AND (LINEITEM.L_COMMITDATE < LINEITEM.L_RECEIPTDATE) AND (LINEITEM.L_SHIPDATE < LINEITEM.L_COMMITDATE) AND (LINEITEM.L_RECEIPTDATE >= '1994-01-01') AND (LINEITEM.L_RECEIPTDATE < '1995-01-01')"
+          ],
+          "id": 6,
+          "operation": "Filter",
+          "parentOperators": [
+            5
+          ]
+        },
+        {
+          "bytesAssigned": 28101479424,
+          "expressions": [
+            "L_ORDERKEY",
+            "L_SHIPDATE",
+            "L_COMMITDATE",
+            "L_RECEIPTDATE",
+            "L_SHIPMODE"
+          ],
+          "id": 7,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            6
+          ],
+          "partitionsAssigned": 1697,
+          "partitionsTotal": 10336
+        },
+        {
+          "expressions": [
+            "aggExprs: [SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0))]",
+            "groupKeys: [ORDERS.O_ORDERKEY]"
+          ],
+          "id": 8,
+          "operation": "Aggregate",
+          "parentOperators": [
+            4
+          ]
+        },
+        {
+          "expressions": [
+            "joinKey: (LINEITEM.L_ORDERKEY = ORDERS.O_ORDERKEY)"
+          ],
+          "id": 9,
+          "operation": "JoinFilter",
+          "parentOperators": [
+            8
+          ]
+        },
+        {
+          "bytesAssigned": 52199358464,
+          "expressions": [
+            "O_ORDERKEY",
+            "O_ORDERPRIORITY"
+          ],
+          "id": 10,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.ORDERS"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            9
+          ],
+          "partitionsAssigned": 3242,
+          "partitionsTotal": 3242
+        }
+      ]
+    ]
+  },
+  "plan_text": "GlobalStats:\n\tbytesAssigned=80300837888\n\tpartitionsAssigned=4939\n\tpartitionsTotal=13578\nOperations:\n1:0     ->Result  LINEITEM.L_SHIPMODE, SUM(SUM_INTERNAL(SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), COUNT(*))), SUM(SUM_INTERNAL(SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0)), COUNT(*)))  \n1:1          ->Sort  LINEITEM.L_SHIPMODE ASC NULLS LAST  \n1:2               ->Aggregate  aggExprs: [SUM(SUM_INTERNAL(SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), COUNT(*))), SUM(SUM_INTERNAL(SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0)), COUNT(*)))], groupKeys: [LINEITEM.L_SHIPMODE]  \n1:3                    ->Aggregate  aggExprs: [SUM_INTERNAL(SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), COUNT(*)), SUM_INTERNAL(SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0)), COUNT(*))], groupKeys: [LINEITEM.L_SHIPMODE]  \n1:4                         ->InnerJoin  joinKey: (LINEITEM.L_ORDERKEY = ORDERS.O_ORDERKEY)  \n1:5                              ->Aggregate  aggExprs: [COUNT(*)], groupKeys: [LINEITEM.L_SHIPMODE, LINEITEM.L_ORDERKEY]  \n1:6                                   ->Filter  (LINEITEM.L_SHIPMODE IN 'MAIL' IN 'SHIP') AND (LINEITEM.L_COMMITDATE < LINEITEM.L_RECEIPTDATE) AND (LINEITEM.L_SHIPDATE < LINEITEM.L_COMMITDATE) AND (LINEITEM.L_RECEIPTDATE >= '1994-01-01') AND (LINEITEM.L_RECEIPTDATE < '1995-01-01')  \n1:7                                        ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM  L_ORDERKEY, L_SHIPDATE, L_COMMITDATE, L_RECEIPTDATE, L_SHIPMODE  {partitionsTotal=10336, partitionsAssigned=1697, bytesAssigned=28101479424}\n1:8                              ->Aggregate  aggExprs: [SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0))], groupKeys: [ORDERS.O_ORDERKEY]  \n1:9                                   ->JoinFilter  joinKey: (LINEITEM.L_ORDERKEY = ORDERS.O_ORDERKEY)  \n1:10                                        ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.ORDERS  O_ORDERKEY, O_ORDERPRIORITY  {partitionsTotal=3242, partitionsAssigned=3242, bytesAssigned=52199358464}\n",
+  "query_id": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+  "stats": [
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "expressions": [
+          "LINEITEM.L_SHIPMODE",
+          "SUM(SUM_INTERNAL(SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), COUNT(*)))",
+          "SUM(SUM_INTERNAL(SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0)), COUNT(*)))"
+        ]
+      },
+      "OPERATOR_ID": 0,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 2,
+        "network": {
+          "network_bytes": 4991
+        }
+      },
+      "OPERATOR_TYPE": "Result",
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "sort_keys": [
+          "LINEITEM.L_SHIPMODE ASC NULLS LAST"
+        ]
+      },
+      "OPERATOR_ID": 1,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 2,
+        "network": {
+          "network_bytes": 4718
+        },
+        "output_rows": 2
+      },
+      "OPERATOR_TYPE": "Sort",
+      "PARENT_OPERATORS": [
+        0
+      ],
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [
+          "SUM(SUM_INTERNAL(SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), COUNT(*)))",
+          "SUM(SUM_INTERNAL(SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0)), COUNT(*)))"
+        ],
+        "grouping_keys": [
+          "LINEITEM.L_SHIPMODE"
+        ]
+      },
+      "OPERATOR_ID": 2,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 128,
+        "network": {
+          "network_bytes": 676
+        },
+        "output_rows": 2
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        1
+      ],
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 4.488542404913773e-03,
+        "processing": 4.488542404913773e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [
+          "SUM_INTERNAL(SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0)), COUNT(*))",
+          "SUM_INTERNAL(SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0)), COUNT(*))"
+        ],
+        "grouping_keys": [
+          "LINEITEM.L_SHIPMODE"
+        ]
+      },
+      "OPERATOR_ID": 3,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 31162898,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 128
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        2
+      ],
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 5.020080321285141e-02,
+        "overall_percentage": 1.406803685329553e-01,
+        "processing": 6.874557051736357e-02,
+        "synchronization": 2.173399480274037e-02
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "equality_join_condition": "(LINEITEM.L_ORDERKEY = ORDERS.O_ORDERKEY)",
+        "join_type": "INNER"
+      },
+      "OPERATOR_ID": 4,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 89665372,
+        "network": {
+          "network_bytes": 3636404
+        },
+        "output_rows": 31162898
+      },
+      "OPERATOR_TYPE": "Join",
+      "PARENT_OPERATORS": [
+        3
+      ],
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 4.370422867942357e-03,
+        "overall_percentage": 1.334750767776990e-02,
+        "processing": 7.323411292227734e-03,
+        "synchronization": 1.653673517599811e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [
+          "COUNT(*)"
+        ],
+        "grouping_keys": [
+          "LINEITEM.L_SHIPMODE",
+          "LINEITEM.L_ORDERKEY"
+        ]
+      },
+      "OPERATOR_ID": 5,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 31162904,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 31162898
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        4
+      ],
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 1.181195369714151e-04,
+        "processing": 1.181195369714151e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "filter_condition": "(LINEITEM.L_SHIPMODE IN 'MAIL' IN 'SHIP') AND (LINEITEM.L_COMMITDATE < LINEITEM.L_RECEIPTDATE) AND (LINEITEM.L_SHIPDATE < LINEITEM.L_COMMITDATE) AND (LINEITEM.L_RECEIPTDATE >= '1994-01-01') AND (LINEITEM.L_RECEIPTDATE < '1995-01-01')"
+      },
+      "OPERATOR_ID": 6,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 31162904,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 31162904
+      },
+      "OPERATOR_TYPE": "Filter",
+      "PARENT_OPERATORS": [
+        5
+      ],
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "local_disk_io": 6.850933144342074e-03,
+        "overall_percentage": 2.738010866997401e-01,
+        "processing": 3.945192534845263e-02,
+        "remote_disk_io": 2.264351523742027e-01,
+        "synchronization": 1.063075832742736e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "L_ORDERKEY",
+          "L_SHIPDATE",
+          "L_COMMITDATE",
+          "L_RECEIPTDATE",
+          "L_SHIPMODE"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM"
+      },
+      "OPERATOR_ID": 7,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 6237607664,
+          "percentage_scanned_from_cache": 0.8674,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 994373
+        },
+        "output_rows": 31162904,
+        "pruning": {
+          "partitions_scanned": 1697,
+          "partitions_total": 10336
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        6
+      ],
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 8.622726198913300e-03,
+        "processing": 8.504606661941885e-03,
+        "synchronization": 1.181195369714151e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [
+          "SUM(CASE_FLATTENED(ORDERS.O_ORDERPRIORITY IN '1-URGENT' IN '2-HIGH', 1, 0))",
+          "SUM(CASE_FLATTENED((ORDERS.O_ORDERPRIORITY <> '1-URGENT') AND (ORDERS.O_ORDERPRIORITY <> '2-HIGH'), 1, 0))"
+        ],
+        "grouping_keys": [
+          "ORDERS.O_ORDERKEY"
+        ]
+      },
+      "OPERATOR_ID": 8,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 58502474,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 58502474
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        4
+      ],
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 3.260099220411056e-02,
+        "processing": 3.212851405622490e-02,
+        "synchronization": 4.724781478856602e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "join_id": "4"
+      },
+      "OPERATOR_ID": 9,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 58502474,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 58502474
+      },
+      "OPERATOR_TYPE": "JoinFilter",
+      "PARENT_OPERATORS": [
+        8
+      ],
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "local_disk_io": 1.511930073234113e-02,
+        "overall_percentage": 5.053153791637137e-01,
+        "processing": 2.704937396645405e-02,
+        "remote_disk_io": 4.622017481691472e-01,
+        "synchronization": 9.449562957713207e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "O_ORDERKEY",
+          "O_ORDERPRIORITY"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.ORDERS"
+      },
+      "OPERATOR_ID": 10,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 6893352416,
+          "percentage_scanned_from_cache": 0.6677,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 989013
+        },
+        "output_rows": 58502474,
+        "pruning": {
+          "partitions_scanned": 3242,
+          "partitions_total": 3242
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        9
+      ],
+      "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+      "STEP_ID": 1
+    }
+  ],
+  "summary": {
+    "AUTHN_EVENT_ID": 1361667844038174,
+    "BYTES_SCANNED": 0,
+    "BYTES_WRITTEN_TO_RESULT": 69,
+    "CLUSTER_NUMBER": 1,
+    "COMPILATION_TIME": 860,
+    "CREDITS_USED_CLOUD_SERVICES": 0.000136,
+    "DATABASE_NAME": "SNOWFLAKE_SAMPLE_DATA",
+    "END_TIME": "2025-10-22 07:41:41.623 -0700",
+    "EXECUTION_STATUS": "SUCCESS",
+    "EXECUTION_TIME": 3806,
+    "EXTERNAL_FUNCTION_TOTAL_INVOCATIONS": 0,
+    "EXTERNAL_FUNCTION_TOTAL_RECEIVED_BYTES": 0,
+    "EXTERNAL_FUNCTION_TOTAL_RECEIVED_ROWS": 0,
+    "EXTERNAL_FUNCTION_TOTAL_SENT_BYTES": 0,
+    "EXTERNAL_FUNCTION_TOTAL_SENT_ROWS": 0,
+    "FAULT_HANDLING_TIME": 0,
+    "INBOUND_DATA_TRANSFER_BYTES": 0,
+    "IS_CLIENT_GENERATED_STATEMENT": false,
+    "LIST_EXTERNAL_FILE_TIME": 0,
+    "OUTBOUND_DATA_TRANSFER_BYTES": 0,
+    "QUERY_ACCELERATION_BYTES_SCANNED": 0,
+    "QUERY_ACCELERATION_PARTITIONS_SCANNED": 0,
+    "QUERY_ACCELERATION_UPPER_LIMIT_SCALE_FACTOR": 0,
+    "QUERY_HASH": "cf238b77f737826db9a88fb4a91b8627",
+    "QUERY_HASH_VERSION": 2,
+    "QUERY_ID": "01bfe1d1-0003-b606-0004-d66e0337a0b2",
+    "QUERY_PARAMETERIZED_HASH": "cf238b77f737826db9a88fb4a91b8627",
+    "QUERY_PARAMETERIZED_HASH_VERSION": 1,
+    "QUERY_RETRY_TIME": 0,
+    "QUERY_TAG": "",
+    "QUERY_TEXT": "\nselect\n    l_shipmode,\n    sum(case\n            when o_orderpriority = '1-URGENT'\n                or o_orderpriority = '2-HIGH'\n                then 1\n            else 0\n        end) as high_line_count,\n    sum(case\n            when o_orderpriority <> '1-URGENT'\n                and o_orderpriority <> '2-HIGH'\n                then 1\n            else 0\n        end) as low_line_count\nfrom\n    lineitem\n        join\n    orders\n    on\n            l_orderkey = o_orderkey\nwhere\n        l_shipmode in ('MAIL', 'SHIP')\n  and l_commitdate < l_receiptdate\n  and l_shipdate < l_commitdate\n  and l_receiptdate >= date '1994-01-01'\n  and l_receiptdate < date '1995-01-01'\ngroup by\n    l_shipmode\norder by\n    l_shipmode;\n",
+    "QUERY_TYPE": "SELECT",
+    "QUEUED_OVERLOAD_TIME": 0,
+    "QUEUED_PROVISIONING_TIME": 0,
+    "QUEUED_REPAIR_TIME": 0,
+    "RELEASE_VERSION": "9.33.1",
+    "ROLE_NAME": "ACCOUNTADMIN",
+    "ROWS_INSERTED": 0,
+    "ROWS_PRODUCED": 2,
+    "ROWS_WRITTEN_TO_RESULT": 2,
+    "SCHEMA_NAME": "TPCH_SF1000",
+    "SESSION_ID": 1361667858898986,
+    "START_TIME": "2025-10-22 07:41:36.957 -0700",
+    "TOTAL_ELAPSED_TIME": 4666,
+    "TRANSACTION_BLOCKED_TIME": 0,
+    "TRANSACTION_ID": 0,
+    "USER_NAME": "YNIESTIEROV",
+    "WAREHOUSE_NAME": "BENCHMARK_WH_TPCDS",
+    "WAREHOUSE_SIZE": "Large",
+    "WAREHOUSE_TYPE": "STANDARD"
+  }
+}
+
+================================================================================

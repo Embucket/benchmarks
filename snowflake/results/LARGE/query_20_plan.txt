@@ -1,0 +1,913 @@
+Snowflake Query Plan - Query 20
+================================================================================
+
+RAW RESULT:
+{
+  "plan_json": {
+    "GlobalStats": {
+      "bytesAssigned": 69774219776,
+      "partitionsAssigned": 4293,
+      "partitionsTotal": 13058
+    },
+    "Operations": [
+      [
+        {
+          "expressions": [
+            "SUPPLIER.S_NAME",
+            "SUPPLIER.S_ADDRESS"
+          ],
+          "id": 0,
+          "operation": "Result"
+        },
+        {
+          "expressions": [
+            "SUPPLIER.S_NAME ASC NULLS LAST"
+          ],
+          "id": 1,
+          "operation": "Sort",
+          "parentOperators": [
+            0
+          ]
+        },
+        {
+          "expressions": [
+            "joinKey: (SUPPLIER.S_NATIONKEY = NATION.N_NATIONKEY)"
+          ],
+          "id": 2,
+          "operation": "InnerJoin",
+          "parentOperators": [
+            1
+          ]
+        },
+        {
+          "expressions": [
+            "joinKey: (PARTSUPP.PS_SUPPKEY = SUPPLIER.S_SUPPKEY)"
+          ],
+          "id": 3,
+          "operation": "SemiJoin",
+          "parentOperators": [
+            2
+          ]
+        },
+        {
+          "expressions": [
+            "groupKeys: [PARTSUPP.PS_SUPPKEY]"
+          ],
+          "id": 4,
+          "operation": "Aggregate",
+          "parentOperators": [
+            3
+          ]
+        },
+        {
+          "expressions": [
+            "joinKey: (PARTSUPP.PS_PARTKEY = LINEITEM.L_PARTKEY) AND (PARTSUPP.PS_SUPPKEY = LINEITEM.L_SUPPKEY)",
+            "joinFilter: (PARTSUPP.PS_AVAILQTY) > (0.5 * (SUM(LINEITEM.L_QUANTITY)))"
+          ],
+          "id": 5,
+          "operation": "SemiJoin",
+          "parentOperators": [
+            4
+          ]
+        },
+        {
+          "expressions": [
+            "joinKey: (PART.P_PARTKEY = PARTSUPP.PS_PARTKEY)"
+          ],
+          "id": 6,
+          "operation": "SemiJoin",
+          "parentOperators": [
+            5
+          ]
+        },
+        {
+          "expressions": [
+            "groupKeys: [PART.P_PARTKEY]"
+          ],
+          "id": 7,
+          "operation": "Aggregate",
+          "parentOperators": [
+            6
+          ]
+        },
+        {
+          "expressions": [
+            "STARTSWITH(PART.P_NAME, 'forest')"
+          ],
+          "id": 8,
+          "operation": "Filter",
+          "parentOperators": [
+            7
+          ]
+        },
+        {
+          "bytesAssigned": 5408342016,
+          "expressions": [
+            "P_PARTKEY",
+            "P_NAME"
+          ],
+          "id": 9,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.PART"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            8
+          ],
+          "partitionsAssigned": 342,
+          "partitionsTotal": 342
+        },
+        {
+          "expressions": [
+            "joinKey: (PART.P_PARTKEY = PARTSUPP.PS_PARTKEY)"
+          ],
+          "id": 10,
+          "operation": "JoinFilter",
+          "parentOperators": [
+            6
+          ]
+        },
+        {
+          "bytesAssigned": 37656735744,
+          "expressions": [
+            "PS_PARTKEY",
+            "PS_SUPPKEY",
+            "PS_AVAILQTY"
+          ],
+          "id": 11,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.PARTSUPP"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            10
+          ],
+          "partitionsAssigned": 2315,
+          "partitionsTotal": 2315
+        },
+        {
+          "expressions": [
+            "aggExprs: [SUM(LINEITEM.L_QUANTITY)]",
+            "groupKeys: [LINEITEM.L_PARTKEY, LINEITEM.L_SUPPKEY]"
+          ],
+          "id": 12,
+          "operation": "Aggregate",
+          "parentOperators": [
+            5
+          ]
+        },
+        {
+          "expressions": [
+            "(LINEITEM.L_SHIPDATE >= '1994-01-01') AND (LINEITEM.L_SHIPDATE < '1995-01-01')"
+          ],
+          "id": 13,
+          "operation": "Filter",
+          "parentOperators": [
+            12
+          ]
+        },
+        {
+          "expressions": [
+            "joinKey: (PARTSUPP.PS_PARTKEY = LINEITEM.L_PARTKEY) AND (PARTSUPP.PS_SUPPKEY = LINEITEM.L_SUPPKEY)",
+            "joinFilter: (PARTSUPP.PS_AVAILQTY) > (0.5 * (SUM(LINEITEM.L_QUANTITY)))"
+          ],
+          "id": 14,
+          "operation": "JoinFilter",
+          "parentOperators": [
+            13
+          ]
+        },
+        {
+          "bytesAssigned": 26018068992,
+          "expressions": [
+            "L_PARTKEY",
+            "L_SUPPKEY",
+            "L_QUANTITY",
+            "L_SHIPDATE"
+          ],
+          "id": 15,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            14
+          ],
+          "partitionsAssigned": 1571,
+          "partitionsTotal": 10336
+        },
+        {
+          "expressions": [
+            "joinKey: (PARTSUPP.PS_SUPPKEY = SUPPLIER.S_SUPPKEY)"
+          ],
+          "id": 16,
+          "operation": "JoinFilter",
+          "parentOperators": [
+            3
+          ]
+        },
+        {
+          "bytesAssigned": 691068928,
+          "expressions": [
+            "S_SUPPKEY",
+            "S_NAME",
+            "S_ADDRESS",
+            "S_NATIONKEY"
+          ],
+          "id": 17,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.SUPPLIER"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            16
+          ],
+          "partitionsAssigned": 64,
+          "partitionsTotal": 64
+        },
+        {
+          "expressions": [
+            "NATION.N_NAME = 'CANADA'"
+          ],
+          "id": 18,
+          "operation": "Filter",
+          "parentOperators": [
+            2
+          ]
+        },
+        {
+          "expressions": [
+            "joinKey: (SUPPLIER.S_NATIONKEY = NATION.N_NATIONKEY)"
+          ],
+          "id": 19,
+          "operation": "JoinFilter",
+          "parentOperators": [
+            18
+          ]
+        },
+        {
+          "bytesAssigned": 4096,
+          "expressions": [
+            "N_NATIONKEY",
+            "N_NAME"
+          ],
+          "id": 20,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.NATION"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            19
+          ],
+          "partitionsAssigned": 1,
+          "partitionsTotal": 1
+        }
+      ]
+    ]
+  },
+  "plan_text": "GlobalStats:\n\tbytesAssigned=69774219776\n\tpartitionsAssigned=4293\n\tpartitionsTotal=13058\nOperations:\n1:0     ->Result  SUPPLIER.S_NAME, SUPPLIER.S_ADDRESS  \n1:1          ->Sort  SUPPLIER.S_NAME ASC NULLS LAST  \n1:2               ->InnerJoin  joinKey: (SUPPLIER.S_NATIONKEY = NATION.N_NATIONKEY)  \n1:3                    ->SemiJoin  joinKey: (PARTSUPP.PS_SUPPKEY = SUPPLIER.S_SUPPKEY)  \n1:4                         ->Aggregate  groupKeys: [PARTSUPP.PS_SUPPKEY]  \n1:5                              ->SemiJoin  joinKey: (PARTSUPP.PS_PARTKEY = LINEITEM.L_PARTKEY) AND (PARTSUPP.PS_SUPPKEY = LINEITEM.L_SUPPKEY), joinFilter: (PARTSUPP.PS_AVAILQTY) > (0.5 * (SUM(LINEITEM.L_QUANTITY)))  \n1:6                                   ->SemiJoin  joinKey: (PART.P_PARTKEY = PARTSUPP.PS_PARTKEY)  \n1:7                                        ->Aggregate  groupKeys: [PART.P_PARTKEY]  \n1:8                                             ->Filter  STARTSWITH(PART.P_NAME, 'forest')  \n1:9                                                  ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.PART  P_PARTKEY, P_NAME  {partitionsTotal=342, partitionsAssigned=342, bytesAssigned=5408342016}\n1:10                                        ->JoinFilter  joinKey: (PART.P_PARTKEY = PARTSUPP.PS_PARTKEY)  \n1:11                                             ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.PARTSUPP  PS_PARTKEY, PS_SUPPKEY, PS_AVAILQTY  {partitionsTotal=2315, partitionsAssigned=2315, bytesAssigned=37656735744}\n1:12                                   ->Aggregate  aggExprs: [SUM(LINEITEM.L_QUANTITY)], groupKeys: [LINEITEM.L_PARTKEY, LINEITEM.L_SUPPKEY]  \n1:13                                        ->Filter  (LINEITEM.L_SHIPDATE >= '1994-01-01') AND (LINEITEM.L_SHIPDATE < '1995-01-01')  \n1:14                                             ->JoinFilter  joinKey: (PARTSUPP.PS_PARTKEY = LINEITEM.L_PARTKEY) AND (PARTSUPP.PS_SUPPKEY = LINEITEM.L_SUPPKEY), joinFilter: (PARTSUPP.PS_AVAILQTY) > (0.5 * (SUM(LINEITEM.L_QUANTITY)))  \n1:15                                                  ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM  L_PARTKEY, L_SUPPKEY, L_QUANTITY, L_SHIPDATE  {partitionsTotal=10336, partitionsAssigned=1571, bytesAssigned=26018068992}\n1:16                         ->JoinFilter  joinKey: (PARTSUPP.PS_SUPPKEY = SUPPLIER.S_SUPPKEY)  \n1:17                              ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.SUPPLIER  S_SUPPKEY, S_NAME, S_ADDRESS, S_NATIONKEY  {partitionsTotal=64, partitionsAssigned=64, bytesAssigned=691068928}\n1:18                    ->Filter  NATION.N_NAME = 'CANADA'  \n1:19                         ->JoinFilter  joinKey: (SUPPLIER.S_NATIONKEY = NATION.N_NATIONKEY)  \n1:20                              ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.NATION  N_NATIONKEY, N_NAME  {partitionsTotal=1, partitionsAssigned=1, bytesAssigned=4096}\n",
+  "query_id": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+  "stats": [
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 2.866972477064220e-04,
+        "remote_disk_io": 2.866972477064220e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "expressions": [
+          "SUPPLIER.S_NAME",
+          "SUPPLIER.S_ADDRESS"
+        ]
+      },
+      "OPERATOR_ID": 0,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 112013,
+        "io": {
+          "bytes_written_to_result": 2815286
+        },
+        "network": {
+          "network_bytes": 4991
+        }
+      },
+      "OPERATOR_TYPE": "Result",
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 8.600917431192661e-04,
+        "processing": 8.600917431192661e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "sort_keys": [
+          "SUPPLIER.S_NAME ASC NULLS LAST"
+        ]
+      },
+      "OPERATOR_ID": 1,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 112013,
+        "network": {
+          "network_bytes": 6986
+        },
+        "output_rows": 112013
+      },
+      "OPERATOR_TYPE": "Sort",
+      "PARENT_OPERATORS": [
+        0
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 2.866972477064220e-04,
+        "overall_percentage": 1.720183486238532e-03,
+        "processing": 1.146788990825688e-03,
+        "synchronization": 2.866972477064220e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "equality_join_condition": "(SUPPLIER.S_NATIONKEY = NATION.N_NATIONKEY)",
+        "join_type": "INNER"
+      },
+      "OPERATOR_ID": 2,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 2783299,
+        "network": {
+          "network_bytes": 303740
+        },
+        "output_rows": 112013
+      },
+      "OPERATOR_TYPE": "Join",
+      "PARENT_OPERATORS": [
+        1
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 2.006880733944954e-03,
+        "overall_percentage": 1.748853211009174e-02,
+        "processing": 1.118119266055046e-02,
+        "synchronization": 4.300458715596331e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "equality_join_condition": "(PARTSUPP.PS_SUPPKEY = SUPPLIER.S_SUPPKEY)",
+        "join_type": "SEMI"
+      },
+      "OPERATOR_ID": 3,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 6080531,
+        "network": {
+          "network_bytes": 345212
+        },
+        "output_rows": 2783298
+      },
+      "OPERATOR_TYPE": "Join",
+      "PARENT_OPERATORS": [
+        2
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 5.733944954128441e-03,
+        "overall_percentage": 6.594036697247707e-03,
+        "processing": 8.600917431192660e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [],
+        "grouping_keys": [
+          "PARTSUPP.PS_SUPPKEY"
+        ]
+      },
+      "OPERATOR_ID": 4,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 3289180,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 3289112
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        3
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 3.297018348623853e-02,
+        "overall_percentage": 1.075114678899083e-01,
+        "processing": 4.099770642201835e-02,
+        "synchronization": 3.354357798165138e-02
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "additional_join_condition": "(PARTSUPP.PS_AVAILQTY) > (0.5 * (SUM(LINEITEM.L_QUANTITY)))",
+        "equality_join_condition": "(PARTSUPP.PS_PARTKEY = LINEITEM.L_PARTKEY) AND (PARTSUPP.PS_SUPPKEY = LINEITEM.L_SUPPKEY)",
+        "join_type": "SEMI"
+      },
+      "OPERATOR_ID": 5,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 13291420,
+        "network": {
+          "network_bytes": 1041782
+        },
+        "output_rows": 3289180
+      },
+      "OPERATOR_TYPE": "Join",
+      "PARENT_OPERATORS": [
+        4
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 9.174311926605503e-03,
+        "overall_percentage": 3.526376146788991e-02,
+        "processing": 9.174311926605503e-03,
+        "synchronization": 1.691513761467889e-02
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "equality_join_condition": "(PART.P_PARTKEY = PARTSUPP.PS_PARTKEY)",
+        "join_type": "SEMI"
+      },
+      "OPERATOR_ID": 6,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 11293807,
+        "network": {
+          "network_bytes": 327068
+        },
+        "output_rows": 8689164
+      },
+      "OPERATOR_TYPE": "Join",
+      "PARENT_OPERATORS": [
+        5
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 2.866972477064220e-04,
+        "overall_percentage": 2.006880733944954e-03,
+        "processing": 1.720183486238532e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [],
+        "grouping_keys": [
+          "PART.P_PARTKEY"
+        ]
+      },
+      "OPERATOR_ID": 7,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 2172291,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 2172291
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        6
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "filter_condition": "STARTSWITH(PART.P_NAME, 'forest')"
+      },
+      "OPERATOR_ID": 8,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 2172291,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 2172291
+      },
+      "OPERATOR_TYPE": "Filter",
+      "PARENT_OPERATORS": [
+        7
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "local_disk_io": 9.432339449541285e-02,
+        "overall_percentage": 1.843463302752294e-01,
+        "processing": 7.798165137614679e-02,
+        "synchronization": 1.204128440366973e-02
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "P_PARTKEY",
+          "P_NAME"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.PART"
+      },
+      "OPERATOR_ID": 9,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 3001712736,
+          "percentage_scanned_from_cache": 1,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 848653
+        },
+        "output_rows": 2172291,
+        "pruning": {
+          "partitions_scanned": 342,
+          "partitions_total": 342
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        8
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 3.411697247706422e-02,
+        "processing": 3.354357798165138e-02,
+        "synchronization": 5.733944954128440e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "join_id": "6"
+      },
+      "OPERATOR_ID": 10,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 9121516,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 9121516
+      },
+      "OPERATOR_TYPE": "JoinFilter",
+      "PARENT_OPERATORS": [
+        6
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "local_disk_io": 2.540137614678899e-01,
+        "network_communication": 5.733944954128440e-04,
+        "overall_percentage": 3.113532110091743e-01,
+        "processing": 4.185779816513761e-02,
+        "remote_disk_io": 5.447247706422019e-03,
+        "synchronization": 9.461009174311927e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "PS_PARTKEY",
+          "PS_SUPPKEY",
+          "PS_AVAILQTY"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.PARTSUPP"
+      },
+      "OPERATOR_ID": 11,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 5555852800,
+          "percentage_scanned_from_cache": 0.9987,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 1201448
+        },
+        "output_rows": 9121516,
+        "pruning": {
+          "partitions_scanned": 2315,
+          "partitions_total": 2315
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        10
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 3.153669724770642e-03,
+        "overall_percentage": 2.838302752293578e-02,
+        "processing": 2.522935779816514e-02
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [
+          "SUM(LINEITEM.L_QUANTITY)"
+        ],
+        "grouping_keys": [
+          "LINEITEM.L_PARTKEY",
+          "LINEITEM.L_SUPPKEY"
+        ]
+      },
+      "OPERATOR_ID": 12,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 13773750,
+        "network": {
+          "network_bytes": 131416
+        },
+        "output_rows": 4602256
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        5
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 6.880733944954129e-03,
+        "processing": 6.880733944954129e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "filter_condition": "(LINEITEM.L_SHIPDATE >= '1994-01-01') AND (LINEITEM.L_SHIPDATE < '1995-01-01')"
+      },
+      "OPERATOR_ID": 13,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 13773750,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 13773750
+      },
+      "OPERATOR_TYPE": "Filter",
+      "PARENT_OPERATORS": [
+        12
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 4.845183486238532e-02,
+        "processing": 4.845183486238532e-02
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "join_id": "5"
+      },
+      "OPERATOR_ID": 14,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 13773750,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 13773750
+      },
+      "OPERATOR_TYPE": "JoinFilter",
+      "PARENT_OPERATORS": [
+        13
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "local_disk_io": 6.364678899082568e-02,
+        "overall_percentage": 1.267201834862385e-01,
+        "processing": 4.587155963302753e-02,
+        "remote_disk_io": 1.720183486238532e-03,
+        "synchronization": 1.548165137614679e-02
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "L_PARTKEY",
+          "L_SUPPKEY",
+          "L_QUANTITY",
+          "L_SHIPDATE"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM"
+      },
+      "OPERATOR_ID": 15,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 6743129696,
+          "percentage_scanned_from_cache": 0.9936,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 1244292
+        },
+        "output_rows": 13773750,
+        "pruning": {
+          "partitions_scanned": 1571,
+          "partitions_total": 10336
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        14
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 2.866972477064220e-04,
+        "processing": 2.866972477064220e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "join_id": "3"
+      },
+      "OPERATOR_ID": 16,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 2791419,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 2791419
+      },
+      "OPERATOR_TYPE": "JoinFilter",
+      "PARENT_OPERATORS": [
+        3
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "local_disk_io": 5.733944954128441e-04,
+        "overall_percentage": 2.580275229357798e-03,
+        "processing": 2.006880733944954e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "S_SUPPKEY",
+          "S_NAME",
+          "S_ADDRESS",
+          "S_NATIONKEY"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.SUPPLIER"
+      },
+      "OPERATOR_ID": 17,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 349015248,
+          "percentage_scanned_from_cache": 1,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 908144
+        },
+        "output_rows": 2791419,
+        "pruning": {
+          "partitions_scanned": 64,
+          "partitions_total": 64
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        16
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "filter_condition": "NATION.N_NAME = 'CANADA'"
+      },
+      "OPERATOR_ID": 18,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 1,
+        "network": {
+          "network_bytes": 338
+        },
+        "output_rows": 1
+      },
+      "OPERATOR_TYPE": "Filter",
+      "PARENT_OPERATORS": [
+        2
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "join_id": "2"
+      },
+      "OPERATOR_ID": 19,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 1,
+        "network": {
+          "network_bytes": 338
+        },
+        "output_rows": 1
+      },
+      "OPERATOR_TYPE": "JoinFilter",
+      "PARENT_OPERATORS": [
+        18
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "N_NATIONKEY",
+          "N_NAME"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.NATION"
+      },
+      "OPERATOR_ID": 20,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 4096,
+          "percentage_scanned_from_cache": 1,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 1016286
+        },
+        "output_rows": 1,
+        "pruning": {
+          "partitions_scanned": 1,
+          "partitions_total": 1
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        19
+      ],
+      "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+      "STEP_ID": 1
+    }
+  ],
+  "summary": {
+    "AUTHN_EVENT_ID": 1361667844038174,
+    "BYTES_SCANNED": 0,
+    "BYTES_WRITTEN_TO_RESULT": 2815286,
+    "CLUSTER_NUMBER": 1,
+    "COMPILATION_TIME": 626,
+    "CREDITS_USED_CLOUD_SERVICES": 0.0001,
+    "DATABASE_NAME": "SNOWFLAKE_SAMPLE_DATA",
+    "END_TIME": "2025-10-22 07:47:52.492 -0700",
+    "EXECUTION_STATUS": "SUCCESS",
+    "EXECUTION_TIME": 3384,
+    "EXTERNAL_FUNCTION_TOTAL_INVOCATIONS": 0,
+    "EXTERNAL_FUNCTION_TOTAL_RECEIVED_BYTES": 0,
+    "EXTERNAL_FUNCTION_TOTAL_RECEIVED_ROWS": 0,
+    "EXTERNAL_FUNCTION_TOTAL_SENT_BYTES": 0,
+    "EXTERNAL_FUNCTION_TOTAL_SENT_ROWS": 0,
+    "FAULT_HANDLING_TIME": 0,
+    "INBOUND_DATA_TRANSFER_BYTES": 0,
+    "IS_CLIENT_GENERATED_STATEMENT": false,
+    "LIST_EXTERNAL_FILE_TIME": 0,
+    "OUTBOUND_DATA_TRANSFER_BYTES": 0,
+    "QUERY_ACCELERATION_BYTES_SCANNED": 0,
+    "QUERY_ACCELERATION_PARTITIONS_SCANNED": 0,
+    "QUERY_ACCELERATION_UPPER_LIMIT_SCALE_FACTOR": 0,
+    "QUERY_HASH": "4f27991068c1a870615a43b2737ca0e1",
+    "QUERY_HASH_VERSION": 2,
+    "QUERY_ID": "01bfe1d7-0003-b606-0004-d66e0337a21a",
+    "QUERY_PARAMETERIZED_HASH": "e7b911ac60e94e76c00df0113eba1f34",
+    "QUERY_PARAMETERIZED_HASH_VERSION": 1,
+    "QUERY_RETRY_TIME": 0,
+    "QUERY_TAG": "",
+    "QUERY_TEXT": "SELECT\n    s_name,\n    s_address\nFROM\n    supplier,\n    nation\nWHERE\n      s_suppkey IN (\n        SELECT\n            ps_suppkey\n        FROM\n            partsupp\n        WHERE\n              ps_partkey IN (\n                SELECT\n                    p_partkey\n                FROM\n                    part\n                WHERE\n                      p_name LIKE 'forest%'\n            )\n          AND ps_availqty > (\n                SELECT\n                    0.5 * SUM(l_quantity)\n                FROM\n                    lineitem\n                WHERE\n                      l_partkey = ps_partkey\n                  AND l_suppkey = ps_suppkey\n                  AND l_shipdate >= TO_DATE('1994-01-01')                 -- CHANGED: explicit TO_DATE(...)\n                  AND l_shipdate <  DATEADD(year, 1, TO_DATE('1994-01-01')) -- CHANGED: DATE + INTERVAL → DATEADD\n            )\n    )\n  AND s_nationkey = n_nationkey\n  AND n_name = 'CANADA'\nORDER BY\n    s_name;\n",
+    "QUERY_TYPE": "SELECT",
+    "QUEUED_OVERLOAD_TIME": 0,
+    "QUEUED_PROVISIONING_TIME": 0,
+    "QUEUED_REPAIR_TIME": 0,
+    "RELEASE_VERSION": "9.33.1",
+    "ROLE_NAME": "ACCOUNTADMIN",
+    "ROWS_INSERTED": 0,
+    "ROWS_PRODUCED": 112013,
+    "ROWS_WRITTEN_TO_RESULT": 112013,
+    "SCHEMA_NAME": "TPCH_SF1000",
+    "SESSION_ID": 1361667858898986,
+    "START_TIME": "2025-10-22 07:47:48.482 -0700",
+    "TOTAL_ELAPSED_TIME": 4010,
+    "TRANSACTION_BLOCKED_TIME": 0,
+    "TRANSACTION_ID": 0,
+    "USER_NAME": "YNIESTIEROV",
+    "WAREHOUSE_NAME": "BENCHMARK_WH_TPCDS",
+    "WAREHOUSE_SIZE": "Large",
+    "WAREHOUSE_TYPE": "STANDARD"
+  }
+}
+
+================================================================================

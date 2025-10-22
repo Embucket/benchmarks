@@ -1,0 +1,509 @@
+Snowflake Query Plan - Query 4
+================================================================================
+
+RAW RESULT:
+{
+  "plan_json": {
+    "GlobalStats": {
+      "bytesAssigned": 173044837888,
+      "partitionsAssigned": 10462,
+      "partitionsTotal": 13578
+    },
+    "Operations": [
+      [
+        {
+          "expressions": [
+            "ORDERS.O_ORDERPRIORITY",
+            "COUNT(*)"
+          ],
+          "id": 0,
+          "operation": "Result"
+        },
+        {
+          "expressions": [
+            "ORDERS.O_ORDERPRIORITY ASC NULLS LAST"
+          ],
+          "id": 1,
+          "operation": "Sort",
+          "parentOperators": [
+            0
+          ]
+        },
+        {
+          "expressions": [
+            "aggExprs: [COUNT(*)]",
+            "groupKeys: [ORDERS.O_ORDERPRIORITY]"
+          ],
+          "id": 2,
+          "operation": "Aggregate",
+          "parentOperators": [
+            1
+          ]
+        },
+        {
+          "expressions": [
+            "aggExprs: [COUNT(*)]",
+            "groupKeys: [ORDERS.O_ORDERPRIORITY]"
+          ],
+          "id": 3,
+          "operation": "Aggregate",
+          "parentOperators": [
+            2
+          ]
+        },
+        {
+          "expressions": [
+            "joinKey: (ORDERS.O_ORDERKEY = LINEITEM.L_ORDERKEY)"
+          ],
+          "id": 4,
+          "operation": "SemiJoin",
+          "parentOperators": [
+            3
+          ]
+        },
+        {
+          "expressions": [
+            "aggExprs: [COUNT(*)]",
+            "groupKeys: [ORDERS.O_ORDERPRIORITY, ORDERS.O_ORDERKEY]"
+          ],
+          "id": 5,
+          "operation": "Aggregate",
+          "parentOperators": [
+            4
+          ]
+        },
+        {
+          "expressions": [
+            "(ORDERS.O_ORDERDATE >= '1993-07-01') AND (ORDERS.O_ORDERDATE < '1993-10-01')"
+          ],
+          "id": 6,
+          "operation": "Filter",
+          "parentOperators": [
+            5
+          ]
+        },
+        {
+          "bytesAssigned": 2023733248,
+          "expressions": [
+            "O_ORDERKEY",
+            "O_ORDERDATE",
+            "O_ORDERPRIORITY"
+          ],
+          "id": 7,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.ORDERS"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            6
+          ],
+          "partitionsAssigned": 126,
+          "partitionsTotal": 3242
+        },
+        {
+          "expressions": [
+            "LINEITEM.L_COMMITDATE < LINEITEM.L_RECEIPTDATE"
+          ],
+          "id": 8,
+          "operation": "Filter",
+          "parentOperators": [
+            4
+          ]
+        },
+        {
+          "expressions": [
+            "joinKey: (ORDERS.O_ORDERKEY = LINEITEM.L_ORDERKEY)"
+          ],
+          "id": 9,
+          "operation": "JoinFilter",
+          "parentOperators": [
+            8
+          ]
+        },
+        {
+          "bytesAssigned": 171021104640,
+          "expressions": [
+            "L_ORDERKEY",
+            "L_COMMITDATE",
+            "L_RECEIPTDATE"
+          ],
+          "id": 10,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            9
+          ],
+          "partitionsAssigned": 10336,
+          "partitionsTotal": 10336
+        }
+      ]
+    ]
+  },
+  "plan_text": "GlobalStats:\n\tbytesAssigned=173044837888\n\tpartitionsAssigned=10462\n\tpartitionsTotal=13578\nOperations:\n1:0     ->Result  ORDERS.O_ORDERPRIORITY, COUNT(*)  \n1:1          ->Sort  ORDERS.O_ORDERPRIORITY ASC NULLS LAST  \n1:2               ->Aggregate  aggExprs: [COUNT(*)], groupKeys: [ORDERS.O_ORDERPRIORITY]  \n1:3                    ->Aggregate  aggExprs: [COUNT(*)], groupKeys: [ORDERS.O_ORDERPRIORITY]  \n1:4                         ->SemiJoin  joinKey: (ORDERS.O_ORDERKEY = LINEITEM.L_ORDERKEY)  \n1:5                              ->Aggregate  aggExprs: [COUNT(*)], groupKeys: [ORDERS.O_ORDERPRIORITY, ORDERS.O_ORDERKEY]  \n1:6                                   ->Filter  (ORDERS.O_ORDERDATE >= '1993-07-01') AND (ORDERS.O_ORDERDATE < '1993-10-01')  \n1:7                                        ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.ORDERS  O_ORDERKEY, O_ORDERDATE, O_ORDERPRIORITY  {partitionsTotal=3242, partitionsAssigned=126, bytesAssigned=2023733248}\n1:8                              ->Filter  LINEITEM.L_COMMITDATE < LINEITEM.L_RECEIPTDATE  \n1:9                                   ->JoinFilter  joinKey: (ORDERS.O_ORDERKEY = LINEITEM.L_ORDERKEY)  \n1:10                                        ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM  L_ORDERKEY, L_COMMITDATE, L_RECEIPTDATE  {partitionsTotal=10336, partitionsAssigned=10336, bytesAssigned=171021104640}\n",
+  "query_id": "01bfe1cc-0003-b605-0004-d66e03369d12",
+  "stats": [
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "expressions": [
+          "ORDERS.O_ORDERPRIORITY",
+          "COUNT(*)"
+        ]
+      },
+      "OPERATOR_ID": 0,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 5,
+        "network": {
+          "network_bytes": 4991
+        }
+      },
+      "OPERATOR_TYPE": "Result",
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 7.732456988208004e-05,
+        "processing": 7.732456988208004e-05
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "sort_keys": [
+          "ORDERS.O_ORDERPRIORITY ASC NULLS LAST"
+        ]
+      },
+      "OPERATOR_ID": 1,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 5,
+        "network": {
+          "network_bytes": 4718
+        },
+        "output_rows": 5
+      },
+      "OPERATOR_TYPE": "Sort",
+      "PARENT_OPERATORS": [
+        0
+      ],
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [
+          "COUNT(*)"
+        ],
+        "grouping_keys": [
+          "ORDERS.O_ORDERPRIORITY"
+        ]
+      },
+      "OPERATOR_ID": 2,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 320,
+        "network": {
+          "network_bytes": 1014
+        },
+        "output_rows": 5
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        1
+      ],
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 1.275855403054321e-03,
+        "processing": 1.275855403054321e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [
+          "COUNT(*)"
+        ],
+        "grouping_keys": [
+          "ORDERS.O_ORDERPRIORITY"
+        ]
+      },
+      "OPERATOR_ID": 3,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 52593467,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 320
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        2
+      ],
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 6.881886719505123e-03,
+        "overall_percentage": 2.648366518461241e-02,
+        "processing": 1.917649333075585e-02,
+        "synchronization": 4.252851343514401e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "equality_join_condition": "(ORDERS.O_ORDERKEY = LINEITEM.L_ORDERKEY)",
+        "join_type": "SEMI"
+      },
+      "OPERATOR_ID": 4,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 271075545,
+        "network": {
+          "network_bytes": 2346108
+        },
+        "output_rows": 52593467
+      },
+      "OPERATOR_TYPE": "Join",
+      "PARENT_OPERATORS": [
+        3
+      ],
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "network_communication": 3.324956504929441e-03,
+        "overall_percentage": 5.876667311038082e-03,
+        "processing": 2.242412526580321e-03,
+        "synchronization": 3.092982795283201e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [
+          "COUNT(*)"
+        ],
+        "grouping_keys": [
+          "ORDERS.O_ORDERPRIORITY",
+          "ORDERS.O_ORDERKEY"
+        ]
+      },
+      "OPERATOR_ID": 5,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 57353602,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 57353602
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        4
+      ],
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 1.159868548231200e-04,
+        "processing": 1.159868548231200e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "filter_condition": "(ORDERS.O_ORDERDATE >= '1993-07-01') AND (ORDERS.O_ORDERDATE < '1993-10-01')"
+      },
+      "OPERATOR_ID": 6,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 57353602,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 57353602
+      },
+      "OPERATOR_TYPE": "Filter",
+      "PARENT_OPERATORS": [
+        5
+      ],
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "local_disk_io": 3.866228494104002e-05,
+        "overall_percentage": 5.142083897158322e-03,
+        "processing": 6.185965590566403e-04,
+        "remote_disk_io": 4.252851343514401e-03,
+        "synchronization": 2.319737096462401e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "O_ORDERKEY",
+          "O_ORDERDATE",
+          "O_ORDERPRIORITY"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.ORDERS"
+      },
+      "OPERATOR_ID": 7,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 271885952,
+          "percentage_scanned_from_cache": 0.8906,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 998053
+        },
+        "output_rows": 57353602,
+        "pruning": {
+          "partitions_scanned": 126,
+          "partitions_total": 3242
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        6
+      ],
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 4.910110187512082e-03,
+        "processing": 4.600811907983762e-03,
+        "synchronization": 3.092982795283201e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "filter_condition": "LINEITEM.L_COMMITDATE < LINEITEM.L_RECEIPTDATE"
+      },
+      "OPERATOR_ID": 8,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 213721943,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 213721943
+      },
+      "OPERATOR_TYPE": "Filter",
+      "PARENT_OPERATORS": [
+        4
+      ],
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 5.857336168567562e-02,
+        "processing": 5.752947999226754e-02,
+        "synchronization": 1.043881693408080e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "join_id": "4"
+      },
+      "OPERATOR_ID": 9,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 213721943,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 213721943
+      },
+      "OPERATOR_TYPE": "JoinFilter",
+      "PARENT_OPERATORS": [
+        8
+      ],
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "local_disk_io": 9.588246665377923e-03,
+        "overall_percentage": 8.804175526773632e-01,
+        "processing": 1.196984341774599e-01,
+        "remote_disk_io": 7.478832398994780e-01,
+        "synchronization": 3.247631935047362e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "L_ORDERKEY",
+          "L_COMMITDATE",
+          "L_RECEIPTDATE"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM"
+      },
+      "OPERATOR_ID": 10,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 38000798416,
+          "percentage_scanned_from_cache": 0.2456,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 964916
+        },
+        "output_rows": 213721943,
+        "pruning": {
+          "partitions_scanned": 10336,
+          "partitions_total": 10336
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        9
+      ],
+      "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+      "STEP_ID": 1
+    }
+  ],
+  "summary": {
+    "AUTHN_EVENT_ID": 1361667844038174,
+    "BYTES_SCANNED": 173028614432,
+    "BYTES_WRITTEN_TO_RESULT": 109,
+    "CLUSTER_NUMBER": 1,
+    "COMPILATION_TIME": 261,
+    "CREDITS_USED_CLOUD_SERVICES": 0.000041,
+    "DATABASE_NAME": "SNOWFLAKE_SAMPLE_DATA",
+    "END_TIME": "2025-10-22 07:36:13.993 -0700",
+    "EXECUTION_STATUS": "SUCCESS",
+    "EXECUTION_TIME": 5996,
+    "EXTERNAL_FUNCTION_TOTAL_INVOCATIONS": 0,
+    "EXTERNAL_FUNCTION_TOTAL_RECEIVED_BYTES": 0,
+    "EXTERNAL_FUNCTION_TOTAL_RECEIVED_ROWS": 0,
+    "EXTERNAL_FUNCTION_TOTAL_SENT_BYTES": 0,
+    "EXTERNAL_FUNCTION_TOTAL_SENT_ROWS": 0,
+    "FAULT_HANDLING_TIME": 0,
+    "INBOUND_DATA_TRANSFER_BYTES": 0,
+    "IS_CLIENT_GENERATED_STATEMENT": false,
+    "LIST_EXTERNAL_FILE_TIME": 0,
+    "OUTBOUND_DATA_TRANSFER_BYTES": 0,
+    "QUERY_ACCELERATION_BYTES_SCANNED": 0,
+    "QUERY_ACCELERATION_PARTITIONS_SCANNED": 0,
+    "QUERY_ACCELERATION_UPPER_LIMIT_SCALE_FACTOR": 0,
+    "QUERY_HASH": "8fc557c0272daaf703b8bd3c566f8e68",
+    "QUERY_HASH_VERSION": 2,
+    "QUERY_ID": "01bfe1cc-0003-b605-0004-d66e03369d12",
+    "QUERY_PARAMETERIZED_HASH": "8fc557c0272daaf703b8bd3c566f8e68",
+    "QUERY_PARAMETERIZED_HASH_VERSION": 1,
+    "QUERY_RETRY_TIME": 0,
+    "QUERY_TAG": "",
+    "QUERY_TEXT": "SELECT\n    o_orderpriority,\n    COUNT(*) AS order_count\nFROM\n    orders\nWHERE\n      o_orderdate >= TO_DATE('1993-07-01')                       -- CHANGED: explicit TO_DATE(...)\n  AND o_orderdate < DATEADD(month, 3, TO_DATE('1993-07-01'))     -- CHANGED: DATE + INTERVAL → DATEADD\n  AND EXISTS (\n        SELECT\n            *\n        FROM\n            lineitem\n        WHERE\n              l_orderkey = o_orderkey\n          AND l_commitdate < l_receiptdate\n    )\nGROUP BY\n    o_orderpriority\nORDER BY\n    o_orderpriority;\n",
+    "QUERY_TYPE": "SELECT",
+    "QUEUED_OVERLOAD_TIME": 0,
+    "QUEUED_PROVISIONING_TIME": 0,
+    "QUEUED_REPAIR_TIME": 0,
+    "RELEASE_VERSION": "9.33.1",
+    "ROLE_NAME": "ACCOUNTADMIN",
+    "ROWS_INSERTED": 0,
+    "ROWS_PRODUCED": 5,
+    "ROWS_WRITTEN_TO_RESULT": 5,
+    "SCHEMA_NAME": "TPCH_SF1000",
+    "SESSION_ID": 1361667858898986,
+    "START_TIME": "2025-10-22 07:36:07.736 -0700",
+    "TOTAL_ELAPSED_TIME": 6257,
+    "TRANSACTION_BLOCKED_TIME": 0,
+    "TRANSACTION_ID": 0,
+    "USER_NAME": "YNIESTIEROV",
+    "WAREHOUSE_NAME": "BENCHMARK_WH_TPCDS",
+    "WAREHOUSE_SIZE": "Large",
+    "WAREHOUSE_TYPE": "STANDARD"
+  }
+}
+
+================================================================================

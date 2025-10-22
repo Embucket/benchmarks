@@ -1,0 +1,536 @@
+{
+  "timestamp": "2025-10-22_17:34:06",
+  "engine": "snowflake",
+  "snowflake-warehouse-size": "LARGE",
+  "scale_factor": 1000,
+  "iterations": 3,
+  "mode": "sample",
+  "query_1": {
+    "iteration_times": [
+      12.132,
+      11.986,
+      12.188
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1ca-0003-b605-0004-d66e03369cfa",
+        "total_time_ms": 12132
+      },
+      {
+        "query_id": "01bfe1ca-0003-b68d-0004-d66e0337958e",
+        "total_time_ms": 11986
+      },
+      {
+        "query_id": "01bfe1ca-0003-b566-0004-d66e03376672",
+        "total_time_ms": 12188
+      }
+    ],
+    "avg_time": 12.101999999999999,
+    "min_time": 11.986,
+    "max_time": 12.188
+  },
+  "query_2": {
+    "iteration_times": [
+      3.151,
+      3.512,
+      3.121
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1cb-0003-b566-0004-d66e0337667a",
+        "total_time_ms": 3151
+      },
+      {
+        "query_id": "01bfe1cb-0003-b606-0004-d66e03372fc6",
+        "total_time_ms": 3512
+      },
+      {
+        "query_id": "01bfe1cb-0003-b605-0004-d66e03369d02",
+        "total_time_ms": 3121
+      }
+    ],
+    "avg_time": 3.261333333333333,
+    "min_time": 3.121,
+    "max_time": 3.512
+  },
+  "query_3": {
+    "iteration_times": [
+      7.597,
+      7.333,
+      6.975
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1cb-0003-b605-0004-d66e03369d0a",
+        "total_time_ms": 7597
+      },
+      {
+        "query_id": "01bfe1cb-0003-b68d-0004-d66e03379592",
+        "total_time_ms": 7333
+      },
+      {
+        "query_id": "01bfe1cb-0003-b661-0004-d66e03374816",
+        "total_time_ms": 6975
+      }
+    ],
+    "avg_time": 7.301666666666667,
+    "min_time": 6.975,
+    "max_time": 7.597
+  },
+  "query_4": {
+    "iteration_times": [
+      4.965,
+      4.827,
+      4.934
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1cc-0003-b605-0004-d66e03369d1a",
+        "total_time_ms": 4965
+      },
+      {
+        "query_id": "01bfe1cc-0003-b605-0004-d66e03369d1e",
+        "total_time_ms": 4827
+      },
+      {
+        "query_id": "01bfe1cc-0003-b60d-0004-d66e0337192e",
+        "total_time_ms": 4934
+      }
+    ],
+    "avg_time": 4.908666666666666,
+    "min_time": 4.827,
+    "max_time": 4.965
+  },
+  "query_5": {
+    "iteration_times": [
+      9.882,
+      9.503,
+      9.434
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1cc-0003-b605-0004-d66e03369d26",
+        "total_time_ms": 9882
+      },
+      {
+        "query_id": "01bfe1cd-0003-b605-0004-d66e03369d2a",
+        "total_time_ms": 9503
+      },
+      {
+        "query_id": "01bfe1cd-0003-b606-0004-d66e03372fe6",
+        "total_time_ms": 9434
+      }
+    ],
+    "avg_time": 9.606333333333334,
+    "min_time": 9.434,
+    "max_time": 9.882
+  },
+  "query_6": {
+    "iteration_times": [
+      1.076,
+      0.898,
+      0.812
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1cd-0003-b661-0004-d66e03374822",
+        "total_time_ms": 1076
+      },
+      {
+        "query_id": "01bfe1cd-0003-b661-0004-d66e03374826",
+        "total_time_ms": 898
+      },
+      {
+        "query_id": "01bfe1cd-0003-b60d-0004-d66e0337194e",
+        "total_time_ms": 812
+      }
+    ],
+    "avg_time": 0.9286666666666666,
+    "min_time": 0.812,
+    "max_time": 1.076
+  },
+  "query_7": {
+    "iteration_times": [
+      5.869,
+      5.63,
+      5.336
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1cd-0003-b60d-0004-d66e03371952",
+        "total_time_ms": 5869
+      },
+      {
+        "query_id": "01bfe1cd-0003-b605-0004-d66e03369d3a",
+        "total_time_ms": 5630
+      },
+      {
+        "query_id": "01bfe1cd-0003-b60d-0004-d66e03371956",
+        "total_time_ms": 5336
+      }
+    ],
+    "avg_time": 5.611666666666667,
+    "min_time": 5.336,
+    "max_time": 5.869
+  },
+  "query_8": {
+    "iteration_times": [
+      8.153,
+      7.683,
+      7.536
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1ce-0003-b606-0004-d66e03372ffa",
+        "total_time_ms": 8153
+      },
+      {
+        "query_id": "01bfe1ce-0003-b605-0004-d66e03369d52",
+        "total_time_ms": 7683
+      },
+      {
+        "query_id": "01bfe1ce-0003-b606-0004-d66e0337a006",
+        "total_time_ms": 7536
+      }
+    ],
+    "avg_time": 7.790666666666667,
+    "min_time": 7.536,
+    "max_time": 8.153
+  },
+  "query_9": {
+    "iteration_times": [
+      23.393,
+      24.047,
+      23.778
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1cf-0003-b605-0004-d66e03369d5a",
+        "total_time_ms": 23393
+      },
+      {
+        "query_id": "01bfe1cf-0003-b68d-0004-d66e033795ae",
+        "total_time_ms": 24047
+      },
+      {
+        "query_id": "01bfe1d0-0003-b606-0004-d66e0337a012",
+        "total_time_ms": 23778
+      }
+    ],
+    "avg_time": 23.739333333333335,
+    "min_time": 23.393,
+    "max_time": 24.047
+  },
+  "query_10": {
+    "iteration_times": [
+      11.144,
+      11.317,
+      11.946
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d0-0003-b68d-0004-d66e033795b6",
+        "total_time_ms": 11144
+      },
+      {
+        "query_id": "01bfe1d0-0003-b661-0004-d66e0337484a",
+        "total_time_ms": 11317
+      },
+      {
+        "query_id": "01bfe1d1-0003-b606-0004-d66e0337a036",
+        "total_time_ms": 11946
+      }
+    ],
+    "avg_time": 11.469,
+    "min_time": 11.144,
+    "max_time": 11.946
+  },
+  "query_11": {
+    "iteration_times": [
+      1.694,
+      1.865,
+      1.504
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d1-0003-b68d-0004-d66e0337962a",
+        "total_time_ms": 1694
+      },
+      {
+        "query_id": "01bfe1d1-0003-b605-0004-d66e03369de6",
+        "total_time_ms": 1865
+      },
+      {
+        "query_id": "01bfe1d1-0003-b605-0004-d66e03369dfe",
+        "total_time_ms": 1504
+      }
+    ],
+    "avg_time": 1.6876666666666666,
+    "min_time": 1.504,
+    "max_time": 1.865
+  },
+  "query_12": {
+    "iteration_times": [
+      4.136,
+      3.976,
+      3.853
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d1-0003-b606-0004-d66e0337a0e2",
+        "total_time_ms": 4136
+      },
+      {
+        "query_id": "01bfe1d1-0003-b68d-0004-d66e0337966e",
+        "total_time_ms": 3976
+      },
+      {
+        "query_id": "01bfe1d1-0003-b606-0004-d66e0337a102",
+        "total_time_ms": 3853
+      }
+    ],
+    "avg_time": 3.9883333333333333,
+    "min_time": 3.853,
+    "max_time": 4.136
+  },
+  "query_13": {
+    "iteration_times": [
+      17.166,
+      16.985,
+      17.098
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d2-0003-b606-0004-d66e0337a14e",
+        "total_time_ms": 17166
+      },
+      {
+        "query_id": "01bfe1d2-0003-b68d-0004-d66e033796f6",
+        "total_time_ms": 16985
+      },
+      {
+        "query_id": "01bfe1d2-0003-b605-0004-d66e03369e5a",
+        "total_time_ms": 17098
+      }
+    ],
+    "avg_time": 17.083,
+    "min_time": 16.985,
+    "max_time": 17.166
+  },
+  "query_14": {
+    "iteration_times": [
+      1.406,
+      1.479,
+      1.505
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d3-0003-b605-0004-d66e03369e66",
+        "total_time_ms": 1406
+      },
+      {
+        "query_id": "01bfe1d3-0003-b60d-0004-d66e03371a2a",
+        "total_time_ms": 1479
+      },
+      {
+        "query_id": "01bfe1d3-0003-b606-0004-d66e0337a1b6",
+        "total_time_ms": 1505
+      }
+    ],
+    "avg_time": 1.4633333333333332,
+    "min_time": 1.406,
+    "max_time": 1.505
+  },
+  "query_15": {
+    "iteration_times": [
+      2.957,
+      2.798,
+      2.82
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d3-0003-b605-0004-d66e03369e72",
+        "total_time_ms": 2957
+      },
+      {
+        "query_id": "01bfe1d3-0003-b68d-0004-d66e0337975a",
+        "total_time_ms": 2798
+      },
+      {
+        "query_id": "01bfe1d3-0003-b606-0004-d66e0337a1ea",
+        "total_time_ms": 2820
+      }
+    ],
+    "avg_time": 2.858333333333333,
+    "min_time": 2.798,
+    "max_time": 2.957
+  },
+  "query_16": {
+    "iteration_times": [
+      3.829,
+      3.708,
+      3.898
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d4-0003-b68d-0004-d66e0337976a",
+        "total_time_ms": 3829
+      },
+      {
+        "query_id": "01bfe1d4-0003-b606-0004-d66e0337a1f2",
+        "total_time_ms": 3708
+      },
+      {
+        "query_id": "01bfe1d4-0003-b60d-0004-d66e03371a3a",
+        "total_time_ms": 3898
+      }
+    ],
+    "avg_time": 3.811666666666667,
+    "min_time": 3.708,
+    "max_time": 3.898
+  },
+  "query_17": {
+    "iteration_times": [
+      4.436,
+      4.61,
+      4.926
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d4-0003-b605-0004-d66e03369e8e",
+        "total_time_ms": 4436
+      },
+      {
+        "query_id": "01bfe1d4-0003-b606-0004-d66e0337a206",
+        "total_time_ms": 4610
+      },
+      {
+        "query_id": "01bfe1d4-0003-b60d-0004-d66e03371a42",
+        "total_time_ms": 4926
+      }
+    ],
+    "avg_time": 4.657333333333334,
+    "min_time": 4.436,
+    "max_time": 4.926
+  },
+  "query_18": {
+    "iteration_times": [
+      36.578,
+      37.895,
+      36.795
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d5-0003-b68d-0004-d66e03379782",
+        "total_time_ms": 36578
+      },
+      {
+        "query_id": "01bfe1d6-0003-b605-0004-d66e03369e9a",
+        "total_time_ms": 37895
+      },
+      {
+        "query_id": "01bfe1d6-0003-b606-0004-d66e0337a20a",
+        "total_time_ms": 36795
+      }
+    ],
+    "avg_time": 37.089333333333336,
+    "min_time": 36.578,
+    "max_time": 37.895
+  },
+  "query_19": {
+    "iteration_times": [
+      5.224,
+      4.864,
+      4.549
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d7-0003-b661-0004-d66e033749f2",
+        "total_time_ms": 5224
+      },
+      {
+        "query_id": "01bfe1d7-0003-b606-0004-d66e0337a20e",
+        "total_time_ms": 4864
+      },
+      {
+        "query_id": "01bfe1d7-0003-b606-0004-d66e0337a212",
+        "total_time_ms": 4549
+      }
+    ],
+    "avg_time": 4.8790000000000004,
+    "min_time": 4.549,
+    "max_time": 5.224
+  },
+  "query_20": {
+    "iteration_times": [
+      3.452,
+      3.268,
+      3.37
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d7-0003-b60d-0004-d66e03371a56",
+        "total_time_ms": 3452
+      },
+      {
+        "query_id": "01bfe1d8-0003-b661-0004-d66e033749fa",
+        "total_time_ms": 3268
+      },
+      {
+        "query_id": "01bfe1d8-0003-b661-0004-d66e033749fe",
+        "total_time_ms": 3370
+      }
+    ],
+    "avg_time": 3.3633333333333333,
+    "min_time": 3.268,
+    "max_time": 3.452
+  },
+  "query_21": {
+    "iteration_times": [
+      20.52,
+      20.14,
+      19.894
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d8-0003-b605-0004-d66e03369eae",
+        "total_time_ms": 20520
+      },
+      {
+        "query_id": "01bfe1d9-0003-b68d-0004-d66e0337979e",
+        "total_time_ms": 20140
+      },
+      {
+        "query_id": "01bfe1d9-0003-b606-0004-d66e0337a232",
+        "total_time_ms": 19894
+      }
+    ],
+    "avg_time": 20.18466666666667,
+    "min_time": 19.894,
+    "max_time": 20.52
+  },
+  "query_22": {
+    "iteration_times": [
+      4.141,
+      4.779,
+      4.087
+    ],
+    "query_results": [
+      {
+        "query_id": "01bfe1d9-0003-b605-0004-d66e03369eb6",
+        "total_time_ms": 4141
+      },
+      {
+        "query_id": "01bfe1d9-0003-b605-0004-d66e03369ebe",
+        "total_time_ms": 4779
+      },
+      {
+        "query_id": "01bfe1da-0003-b606-0004-d66e0337a24e",
+        "total_time_ms": 4087
+      }
+    ],
+    "avg_time": 4.335666666666667,
+    "min_time": 4.087,
+    "max_time": 4.779
+  }
+}
