@@ -340,20 +340,17 @@ def print_usage():
     print()
     print("Options:")
     print("  --rows N      Generate N rows per file (default: 1000)")
-    print("  --gb SIZE     Generate files based on scale factor SIZE GB")
+    print("  --gb SIZE     Generate files based on total size SIZE GB")
     print()
     print("Output files:")
-    print("  - events.csv: Full scale factor (SIZE GB)")
-    print("  - events_incr_1.csv: Half scale factor (SIZE/2 GB)")
-    print("  - events_incr_2.csv: Half scale factor (SIZE/2 GB)")
+    print("  - events_yesterday.csv: Half of total size (SIZE/2 GB)")
+    print("  - events_today.csv: Half of total size (SIZE/2 GB)")
     print()
     print("Examples:")
     print("  python gen_events.py --rows 10000")
     print("  python gen_events.py --gb 1")
-    print("  python gen_events.py --gb 2")
-    print("    → events.csv: 1 GB")
-    print("    → events_incr_1.csv: 0.5 GB")
-    print("    → events_incr_2.csv: 0.5 GB")
+    print("    → events_yesterday.csv: 0.5 GB")
+    print("    → events_today.csv: 0.5 GB")
 
 def main():
     """Generate events files based on scale factor."""
@@ -406,29 +403,23 @@ def main():
     print("="*60)
     print("Snowplow Event Data Generator")
     print("="*60)
-    
+
     if use_size_mode:
-        print(f"Mode: Scale-factor based generation")
-        print(f"Scale factor: {scale_factor_gb} GB")
+        print(f"Mode: Size-based generation")
+        print(f"Total size: {scale_factor_gb} GB")
         print(f"Generating files:")
-        print(f"  - events.csv: {scale_factor_gb} GB")
-        print(f"  - events_incr_1.csv: {scale_factor_gb/2} GB")
-        print(f"  - events_incr_2.csv: {scale_factor_gb/2} GB")
+        print(f"  - events_yesterday.csv: {scale_factor_gb/2} GB")
+        print(f"  - events_today.csv: {scale_factor_gb/2} GB")
         print()
-        
-        # Generate main events.csv file (full scale factor)
-        print(f"Generating events.csv ({scale_factor_gb} GB)...")
-        main_events = generate_events_by_size('events.csv', yesterday, scale_factor_gb)
-        
+
+        # Generate events_yesterday.csv (half of total size)
+        print(f"Generating events_yesterday.csv ({scale_factor_gb/2} GB)...")
+        yesterday_events = generate_events_by_size('events_yesterday.csv', yesterday, scale_factor_gb/2)
+
         print()
-        # Generate events_incr_1.csv (half scale factor)
-        print(f"Generating events_incr_1.csv ({scale_factor_gb/2} GB)...")
-        incr1_events = generate_events_by_size('events_incr_1.csv', yesterday, scale_factor_gb/2)
-        
-        print()
-        # Generate events_incr_2.csv (half scale factor)
-        print(f"Generating events_incr_2.csv ({scale_factor_gb/2} GB)...")
-        incr2_events = generate_events_by_size('events_incr_2.csv', today, scale_factor_gb/2)
+        # Generate events_today.csv (half of total size)
+        print(f"Generating events_today.csv ({scale_factor_gb/2} GB)...")
+        today_events = generate_events_by_size('events_today.csv', today, scale_factor_gb/2)
         
     else:
         print(f"Mode: Row-based generation")
@@ -437,25 +428,21 @@ def main():
         print(f"  Yesterday: {yesterday}")
         print(f"  Today: {today}")
         print()
-        
+
         # Generate events for yesterday
         print(f"Generating yesterday's events ({num_events:,} rows)...")
         yesterday_events = generate_event_data(yesterday, num_events=num_events)
-        
-        # Generate events for today  
+
+        # Generate events for today
         print(f"Generating today's events ({num_events:,} rows)...")
         today_events = generate_event_data(today, num_events=num_events)
-        
-        # Create the three required files
-        print(f"Creating events.csv ({num_events * 2:,} rows)...")
-        combined_events = yesterday_events + today_events
-        write_events_csv('events.csv', combined_events)
-        
-        print(f"Creating events_incr_1.csv ({num_events:,} rows)...")
-        write_events_csv('events_incr_1.csv', yesterday_events)
-        
-        print(f"Creating events_incr_2.csv ({num_events:,} rows)...")
-        write_events_csv('events_incr_2.csv', today_events)
+
+        # Create the two required files
+        print(f"Creating events_yesterday.csv ({num_events:,} rows)...")
+        write_events_csv('events_yesterday.csv', yesterday_events)
+
+        print(f"Creating events_today.csv ({num_events:,} rows)...")
+        write_events_csv('events_today.csv', today_events)
     
     print()
     print("="*60)
@@ -463,13 +450,13 @@ def main():
     print("="*60)
     print("Files generated:")
     if use_size_mode:
-        print(f"  - events.csv ({scale_factor_gb} GB)")
-        print(f"  - events_incr_1.csv ({scale_factor_gb/2} GB)")
-        print(f"  - events_incr_2.csv ({scale_factor_gb/2} GB)")
+        print(f"  - events_yesterday.csv ({scale_factor_gb/2} GB)")
+        print(f"  - events_today.csv ({scale_factor_gb/2} GB)")
+        print(f"  Total: {scale_factor_gb} GB")
     else:
-        print("  - events.csv (yesterday's + today's events)")
-        print("  - events_incr_1.csv (yesterday's events)")
-        print("  - events_incr_2.csv (today's events)")
+        print(f"  - events_yesterday.csv ({num_events:,} rows)")
+        print(f"  - events_today.csv ({num_events:,} rows)")
+        print(f"  Total: {num_events * 2:,} rows")
     print("="*60)
 
 if __name__ == "__main__":
