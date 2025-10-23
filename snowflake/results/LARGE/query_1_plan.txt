@@ -1,0 +1,304 @@
+Snowflake Query Plan - Query 1
+================================================================================
+
+RAW RESULT:
+{
+  "plan_json": {
+    "GlobalStats": {
+      "bytesAssigned": 168650845184,
+      "partitionsAssigned": 10186,
+      "partitionsTotal": 10336
+    },
+    "Operations": [
+      [
+        {
+          "expressions": [
+            "LINEITEM.L_RETURNFLAG",
+            "LINEITEM.L_LINESTATUS",
+            "SUM(LINEITEM.L_QUANTITY)",
+            "SUM(LINEITEM.L_EXTENDEDPRICE)",
+            "SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT))",
+            "SUM((LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)) * (1 + LINEITEM.L_TAX))",
+            "(SUM(LINEITEM.L_QUANTITY)) / (COUNT(LINEITEM.L_QUANTITY))",
+            "(SUM(LINEITEM.L_EXTENDEDPRICE)) / (COUNT(LINEITEM.L_EXTENDEDPRICE))",
+            "(SUM(LINEITEM.L_DISCOUNT)) / (COUNT(LINEITEM.L_DISCOUNT))",
+            "COUNT(*)"
+          ],
+          "id": 0,
+          "operation": "Result"
+        },
+        {
+          "expressions": [
+            "LINEITEM.L_RETURNFLAG ASC NULLS LAST",
+            "LINEITEM.L_LINESTATUS ASC NULLS LAST"
+          ],
+          "id": 1,
+          "operation": "Sort",
+          "parentOperators": [
+            0
+          ]
+        },
+        {
+          "expressions": [
+            "aggExprs: [SUM(LINEITEM.L_QUANTITY), SUM(LINEITEM.L_EXTENDEDPRICE), SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)), SUM((LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)) * (1 + LINEITEM.L_TAX)), COUNT(LINEITEM.L_QUANTITY), COUNT(LINEITEM.L_EXTENDEDPRICE), SUM(LINEITEM.L_DISCOUNT), COUNT(LINEITEM.L_DISCOUNT), COUNT(*)]",
+            "groupKeys: [LINEITEM.L_RETURNFLAG, LINEITEM.L_LINESTATUS]"
+          ],
+          "id": 2,
+          "operation": "Aggregate",
+          "parentOperators": [
+            1
+          ]
+        },
+        {
+          "expressions": [
+            "LINEITEM.L_SHIPDATE <= '1998-09-02'"
+          ],
+          "id": 3,
+          "operation": "Filter",
+          "parentOperators": [
+            2
+          ]
+        },
+        {
+          "bytesAssigned": 168650845184,
+          "expressions": [
+            "L_QUANTITY",
+            "L_EXTENDEDPRICE",
+            "L_DISCOUNT",
+            "L_TAX",
+            "L_RETURNFLAG",
+            "L_LINESTATUS",
+            "L_SHIPDATE"
+          ],
+          "id": 4,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            3
+          ],
+          "partitionsAssigned": 10186,
+          "partitionsTotal": 10336
+        }
+      ]
+    ]
+  },
+  "plan_text": "GlobalStats:\n\tbytesAssigned=168650845184\n\tpartitionsAssigned=10186\n\tpartitionsTotal=10336\nOperations:\n1:0     ->Result  LINEITEM.L_RETURNFLAG, LINEITEM.L_LINESTATUS, SUM(LINEITEM.L_QUANTITY), SUM(LINEITEM.L_EXTENDEDPRICE), SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)), SUM((LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)) * (1 + LINEITEM.L_TAX)), (SUM(LINEITEM.L_QUANTITY)) / (COUNT(LINEITEM.L_QUANTITY)), (SUM(LINEITEM.L_EXTENDEDPRICE)) / (COUNT(LINEITEM.L_EXTENDEDPRICE)), (SUM(LINEITEM.L_DISCOUNT)) / (COUNT(LINEITEM.L_DISCOUNT)), COUNT(*)  \n1:1          ->Sort  LINEITEM.L_RETURNFLAG ASC NULLS LAST, LINEITEM.L_LINESTATUS ASC NULLS LAST  \n1:2               ->Aggregate  aggExprs: [SUM(LINEITEM.L_QUANTITY), SUM(LINEITEM.L_EXTENDEDPRICE), SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)), SUM((LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)) * (1 + LINEITEM.L_TAX)), COUNT(LINEITEM.L_QUANTITY), COUNT(LINEITEM.L_EXTENDEDPRICE), SUM(LINEITEM.L_DISCOUNT), COUNT(LINEITEM.L_DISCOUNT), COUNT(*)], groupKeys: [LINEITEM.L_RETURNFLAG, LINEITEM.L_LINESTATUS]  \n1:3                    ->Filter  LINEITEM.L_SHIPDATE <= '1998-09-02'  \n1:4                         ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM  L_QUANTITY, L_EXTENDEDPRICE, L_DISCOUNT, L_TAX, L_RETURNFLAG, L_LINESTATUS, L_SHIPDATE  {partitionsTotal=10336, partitionsAssigned=10186, bytesAssigned=168650845184}\n",
+  "query_id": "01bfe1ca-0003-b606-0004-d66e03372fbe",
+  "stats": [
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "expressions": [
+          "LINEITEM.L_RETURNFLAG",
+          "LINEITEM.L_LINESTATUS",
+          "SUM(LINEITEM.L_QUANTITY)",
+          "SUM(LINEITEM.L_EXTENDEDPRICE)",
+          "SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT))",
+          "SUM((LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)) * (1 + LINEITEM.L_TAX))",
+          "(SUM(LINEITEM.L_QUANTITY)) / (COUNT(LINEITEM.L_QUANTITY))",
+          "(SUM(LINEITEM.L_EXTENDEDPRICE)) / (COUNT(LINEITEM.L_EXTENDEDPRICE))",
+          "(SUM(LINEITEM.L_DISCOUNT)) / (COUNT(LINEITEM.L_DISCOUNT))",
+          "COUNT(*)"
+        ]
+      },
+      "OPERATOR_ID": 0,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 4,
+        "network": {
+          "network_bytes": 4991
+        }
+      },
+      "OPERATOR_TYPE": "Result",
+      "QUERY_ID": "01bfe1ca-0003-b606-0004-d66e03372fbe",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "sort_keys": [
+          "LINEITEM.L_RETURNFLAG ASC NULLS LAST",
+          "LINEITEM.L_LINESTATUS ASC NULLS LAST"
+        ]
+      },
+      "OPERATOR_ID": 1,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 4,
+        "network": {
+          "network_bytes": 4718
+        },
+        "output_rows": 4
+      },
+      "OPERATOR_TYPE": "Sort",
+      "PARENT_OPERATORS": [
+        0
+      ],
+      "QUERY_ID": "01bfe1ca-0003-b606-0004-d66e03372fbe",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 1.783197831978320e-01,
+        "processing": 1.777777777777778e-01,
+        "synchronization": 5.420054200542005e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [
+          "SUM(LINEITEM.L_QUANTITY)",
+          "SUM(LINEITEM.L_EXTENDEDPRICE)",
+          "SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT))",
+          "SUM((LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)) * (1 + LINEITEM.L_TAX))",
+          "COUNT(LINEITEM.L_QUANTITY)",
+          "COUNT(LINEITEM.L_EXTENDEDPRICE)",
+          "SUM(LINEITEM.L_DISCOUNT)",
+          "COUNT(LINEITEM.L_DISCOUNT)",
+          "COUNT(*)"
+        ],
+        "grouping_keys": [
+          "LINEITEM.L_RETURNFLAG",
+          "LINEITEM.L_LINESTATUS"
+        ]
+      },
+      "OPERATOR_ID": 2,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 5915582721,
+        "network": {
+          "network_bytes": 3380
+        },
+        "output_rows": 4
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        1
+      ],
+      "QUERY_ID": "01bfe1ca-0003-b606-0004-d66e03372fbe",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 4.715447154471545e-03,
+        "processing": 4.552845528455285e-03,
+        "synchronization": 1.626016260162602e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "filter_condition": "LINEITEM.L_SHIPDATE <= '1998-09-02'"
+      },
+      "OPERATOR_ID": 3,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 5915582721,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 5915582721
+      },
+      "OPERATOR_TYPE": "Filter",
+      "PARENT_OPERATORS": [
+        2
+      ],
+      "QUERY_ID": "01bfe1ca-0003-b606-0004-d66e03372fbe",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "local_disk_io": 1.073170731707317e-02,
+        "overall_percentage": 8.157723577235773e-01,
+        "processing": 2.867208672086721e-02,
+        "remote_disk_io": 7.756639566395664e-01,
+        "synchronization": 7.046070460704607e-04
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "L_QUANTITY",
+          "L_EXTENDEDPRICE",
+          "L_DISCOUNT",
+          "L_TAX",
+          "L_RETURNFLAG",
+          "L_LINESTATUS",
+          "L_SHIPDATE"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM"
+      },
+      "OPERATOR_ID": 4,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 30099617584,
+          "percentage_scanned_from_cache": 0,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 921693
+        },
+        "output_rows": 5915582721,
+        "pruning": {
+          "partitions_scanned": 10186,
+          "partitions_total": 10336
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        3
+      ],
+      "QUERY_ID": "01bfe1ca-0003-b606-0004-d66e03372fbe",
+      "STEP_ID": 1
+    }
+  ],
+  "summary": {
+    "AUTHN_EVENT_ID": 1361667844038174,
+    "BYTES_SCANNED": 0,
+    "BYTES_WRITTEN_TO_RESULT": 312,
+    "CLUSTER_NUMBER": 1,
+    "COMPILATION_TIME": 1358,
+    "CREDITS_USED_CLOUD_SERVICES": 0.00021,
+    "DATABASE_NAME": "SNOWFLAKE_SAMPLE_DATA",
+    "END_TIME": "2025-10-22 07:34:25.317 -0700",
+    "EXECUTION_STATUS": "SUCCESS",
+    "EXECUTION_TIME": 13274,
+    "EXTERNAL_FUNCTION_TOTAL_INVOCATIONS": 0,
+    "EXTERNAL_FUNCTION_TOTAL_RECEIVED_BYTES": 0,
+    "EXTERNAL_FUNCTION_TOTAL_RECEIVED_ROWS": 0,
+    "EXTERNAL_FUNCTION_TOTAL_SENT_BYTES": 0,
+    "EXTERNAL_FUNCTION_TOTAL_SENT_ROWS": 0,
+    "FAULT_HANDLING_TIME": 0,
+    "INBOUND_DATA_TRANSFER_BYTES": 0,
+    "IS_CLIENT_GENERATED_STATEMENT": false,
+    "LIST_EXTERNAL_FILE_TIME": 0,
+    "OUTBOUND_DATA_TRANSFER_BYTES": 0,
+    "QUERY_ACCELERATION_BYTES_SCANNED": 0,
+    "QUERY_ACCELERATION_PARTITIONS_SCANNED": 0,
+    "QUERY_ACCELERATION_UPPER_LIMIT_SCALE_FACTOR": 0,
+    "QUERY_HASH": "e895718cce56f4088fb6f6cf78838225",
+    "QUERY_HASH_VERSION": 2,
+    "QUERY_ID": "01bfe1ca-0003-b606-0004-d66e03372fbe",
+    "QUERY_PARAMETERIZED_HASH": "e895718cce56f4088fb6f6cf78838225",
+    "QUERY_PARAMETERIZED_HASH_VERSION": 1,
+    "QUERY_RETRY_TIME": 0,
+    "QUERY_TAG": "",
+    "QUERY_TEXT": "\nselect\n    l_returnflag,\n    l_linestatus,\n    sum(l_quantity) as sum_qty,\n    sum(l_extendedprice) as sum_base_price,\n    sum(l_extendedprice * (1 - l_discount)) as sum_disc_price,\n    sum(l_extendedprice * (1 - l_discount) * (1 + l_tax)) as sum_charge,\n    avg(l_quantity) as avg_qty,\n    avg(l_extendedprice) as avg_price,\n    avg(l_discount) as avg_disc,\n    count(*) as count_order\nfrom\n    lineitem\nwhere\n        l_shipdate <= date '1998-09-02'\ngroup by\n    l_returnflag,\n    l_linestatus\norder by\n    l_returnflag,\n    l_linestatus;\n",
+    "QUERY_TYPE": "SELECT",
+    "QUEUED_OVERLOAD_TIME": 0,
+    "QUEUED_PROVISIONING_TIME": 0,
+    "QUEUED_REPAIR_TIME": 0,
+    "RELEASE_VERSION": "9.33.1",
+    "ROLE_NAME": "ACCOUNTADMIN",
+    "ROWS_INSERTED": 0,
+    "ROWS_PRODUCED": 4,
+    "ROWS_WRITTEN_TO_RESULT": 4,
+    "SCHEMA_NAME": "TPCH_SF1000",
+    "SESSION_ID": 1361667858898986,
+    "START_TIME": "2025-10-22 07:34:10.685 -0700",
+    "TOTAL_ELAPSED_TIME": 14632,
+    "TRANSACTION_BLOCKED_TIME": 0,
+    "TRANSACTION_ID": 0,
+    "USER_NAME": "YNIESTIEROV",
+    "WAREHOUSE_NAME": "BENCHMARK_WH_TPCDS",
+    "WAREHOUSE_SIZE": "Large",
+    "WAREHOUSE_TYPE": "STANDARD"
+  }
+}
+
+================================================================================

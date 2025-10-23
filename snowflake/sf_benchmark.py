@@ -44,6 +44,59 @@ def get_tpch_queries(queries_dir):
     return queries
 
 
+def save_query_plan(sf_cursor, query_num, query_text, output_dir, user_db, user_schema):
+    """Save query plan using EXPLAIN_ANALYZE procedure."""
+    plan_file = os.path.join(output_dir, f"query_{query_num}_plan.txt")
+
+    try:
+        # Call the procedure with fully qualified name
+        sf_cursor.execute(f"CALL {user_db}.{user_schema}.EXPLAIN_ANALYZE($$\n{query_text}\n$$)")
+        result_raw = sf_cursor.fetchone()[0]
+
+        with open(plan_file, 'w') as f:
+            f.write(f"Snowflake Query Plan - Query {query_num}\n")
+            f.write("=" * 80 + "\n\n")
+
+            # Handle result based on its type
+            if isinstance(result_raw, dict):
+                # It's already a dictionary
+                result = result_raw
+
+                # Write query ID
+                f.write(f"Query ID: {result.get('query_id', 'N/A')}\n\n")
+
+                # Write plan
+                f.write("EXECUTION PLAN:\n")
+                plan_data = result.get('plan', {})
+                f.write(json.dumps(plan_data, indent=2))
+                f.write("\n\n")
+
+                # Write stats
+                f.write("OPERATOR STATISTICS:\n")
+                stats_data = result.get('stats', [])
+                f.write(json.dumps(stats_data, indent=2))
+                f.write("\n\n")
+
+                # Write summary
+                f.write("QUERY SUMMARY:\n")
+                summary_data = result.get('summary', {})
+                f.write(json.dumps(summary_data, indent=2))
+                f.write("\n\n")
+            else:
+                # If it's not a dictionary, write the raw result
+                f.write("RAW RESULT:\n")
+                f.write(str(result_raw))
+                f.write("\n\n")
+
+            f.write("=" * 80 + "\n")
+
+        logger.info(f"Query plan saved to: {plan_file}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to save query plan: {e}")
+        return False
+
+
 def create_snowflake_connection(tpch_scale_factor, warehouse_size=None):
     """Create connection to Snowflake and recreate warehouse if size is specified."""
     # Read credentials from environment variables
@@ -52,7 +105,7 @@ def create_snowflake_connection(tpch_scale_factor, warehouse_size=None):
     account = os.environ.get("SNOWFLAKE_ACCOUNT")
     warehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
     database = os.environ.get("SNOWFLAKE_DATABASE")
-    schema = os.environ.get("SNOWFLAKE_SCHEMA")
+    schema = os.environ.get("SNOWFLAKE_SCHEMA", "PUBLIC")
 
     if not all([user, password, account, warehouse, database]):
         print("Error: Missing Snowflake credentials in environment variables")
@@ -62,13 +115,13 @@ def create_snowflake_connection(tpch_scale_factor, warehouse_size=None):
 
     print(f"Connecting to Snowflake account: {account}")
 
-    # First connect without specifying a warehouse to be able to create/replace it
+    # Connect with user's database
     conn = sf.connect(
         user=user,
         password=password,
         account=account,
         database=database,
-        schema=schema if schema else "PUBLIC"
+        schema=schema
     )
 
     cursor = conn.cursor()
@@ -87,8 +140,38 @@ def create_snowflake_connection(tpch_scale_factor, warehouse_size=None):
     cursor.execute(f"USE WAREHOUSE {warehouse}")
     print(f"Using warehouse: {warehouse}")
 
-    # Use Snowflake sample data
-    tpch_db = f"SNOWFLAKE_SAMPLE_DATA"
+    # Create procedure in user's database
+    print(f"Creating procedure in {database}.{schema} to retrieve query plan")
+    cursor.execute(
+    """
+    CREATE OR REPLACE PROCEDURE EXPLAIN_ANALYZE(sql_text STRING)
+    RETURNS VARIANT
+    LANGUAGE SQL
+    EXECUTE AS CALLER
+    AS
+    $$
+    DECLARE
+      qid STRING;
+    BEGIN
+      EXECUTE IMMEDIATE :sql_text;
+      qid := SQLID;
+
+      RETURN OBJECT_CONSTRUCT(
+        'query_id', qid,
+        'plan_json', PARSE_JSON(SYSTEM$EXPLAIN_PLAN_JSON(:qid)),
+        'plan_text', SYSTEM$EXPLAIN_JSON_TO_TEXT(SYSTEM$EXPLAIN_PLAN_JSON(:qid)),
+        'stats', (SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*)) FROM TABLE(GET_QUERY_OPERATOR_STATS(:qid))),
+        'summary', (SELECT OBJECT_CONSTRUCT(*)
+                    FROM TABLE(INFORMATION_SCHEMA.QUERY_HISTORY_BY_SESSION())
+                    WHERE query_id = :qid)
+      );
+    END;
+    $$;
+    """
+    )
+
+    # Now switch to sample data for queries
+    tpch_db = "SNOWFLAKE_SAMPLE_DATA"
     tpch_schema = f"TPCH_SF{tpch_scale_factor}"
     cursor.execute(f"USE DATABASE {tpch_db}")
     cursor.execute(f"USE SCHEMA {tpch_schema}")
@@ -99,14 +182,19 @@ def create_snowflake_connection(tpch_scale_factor, warehouse_size=None):
     print("Disabled query result cache (USE_CACHED_RESULT = FALSE)")
 
     print()
-    return conn, cursor
+    return conn, cursor, database, schema
 
 
 def main(queries_dir, iterations, output_file, queries_to_run, timestamp, tpch_scale_factor, warehouse_size_arg=None):
     warehouse_size = warehouse_size_arg if warehouse_size_arg else os.environ.get("SNOWFLAKE_WAREHOUSE_SIZE")
     if not warehouse_size:
-        print("Error: Missing Snowflake warehouse size. Provide it via --warehouse-size or SNOWFLAKE_WAREHOUSE_SIZE env var")
+        print(
+            "Error: Missing Snowflake warehouse size. Provide it via --warehouse-size or SNOWFLAKE_WAREHOUSE_SIZE env var")
         sys.exit(1)
+
+    # Create output directory for plans
+    output_dir = os.path.dirname(output_file)
+    os.makedirs(output_dir, exist_ok=True)
 
     # Create results dictionary
     results = {
@@ -119,7 +207,7 @@ def main(queries_dir, iterations, output_file, queries_to_run, timestamp, tpch_s
     }
 
     # Create connection with the scale factor
-    sf_conn, sf_cursor = create_snowflake_connection(tpch_scale_factor, warehouse_size)
+    sf_conn, sf_cursor, user_db, user_schema = create_snowflake_connection(tpch_scale_factor, warehouse_size)
 
     # Load queries
     all_queries = get_tpch_queries(queries_dir)
@@ -136,6 +224,54 @@ def main(queries_dir, iterations, output_file, queries_to_run, timestamp, tpch_s
 
         iteration_times = []
         query_results = []
+
+        # Special handling for query plan extraction for Q15
+        if query_num == 15:
+            # Extract statements
+            statements = [stmt.strip() for stmt in query.split(';') if stmt.strip()]
+
+            if len(statements) >= 2:
+                # Get the original database and schema to return to later
+                sf_cursor.execute("SELECT CURRENT_DATABASE(), CURRENT_SCHEMA()")
+                current_db, current_schema = sf_cursor.fetchone()
+                sample_db = "SNOWFLAKE_SAMPLE_DATA"
+                sample_schema = f"TPCH_SF{tpch_scale_factor}"
+
+                try:
+                    # 1. Switch to user's database/schema to create the view
+                    sf_cursor.execute(f"USE DATABASE {user_db}")
+                    sf_cursor.execute(f"USE SCHEMA {user_schema}")
+
+                    # 2. Create view with fully qualified table references
+                    create_view_stmt = statements[0].replace(
+                        "FROM\n        lineitem",
+                        f"FROM\n        {sample_db}.{sample_schema}.lineitem"
+                    )
+                    sf_cursor.execute(create_view_stmt)
+
+                    # 3. Now prepare the SELECT statement with fully qualified references
+                    select_stmt = statements[1].replace(
+                        "supplier,\n    revenue0",
+                        f"{sample_db}.{sample_schema}.supplier,\n    revenue0"
+                    )
+
+                    # 4. Save plan for the fully qualified SELECT statement
+                    save_query_plan(sf_cursor, query_num, select_stmt, output_dir, user_db, user_schema)
+                finally:
+                    # Clean up - drop the view and restore context
+                    try:
+                        sf_cursor.execute(f"DROP VIEW IF EXISTS revenue0")
+                    except Exception as e:
+                        logger.error(f"Failed to drop view: {e}")
+
+                    # Restore original context
+                    sf_cursor.execute(f"USE DATABASE {current_db}")
+                    sf_cursor.execute(f"USE SCHEMA {current_schema}")
+            else:
+                logger.error(f"Could not extract statements from query {query_num}")
+        else:
+            # For other queries, save the full query plan
+            save_query_plan(sf_cursor, query_num, query, output_dir, user_db, user_schema)
 
         # Run iterations for this query
         for i in range(iterations):
@@ -156,10 +292,6 @@ def main(queries_dir, iterations, output_file, queries_to_run, timestamp, tpch_s
                     sample_schema = f"TPCH_SF{tpch_scale_factor}"
 
                     try:
-                        # Get the user's database from connection parameters for view creation
-                        user_db = os.environ.get("SNOWFLAKE_DATABASE")
-                        user_schema = os.environ.get("SNOWFLAKE_SCHEMA", "PUBLIC")
-
                         # 1. Switch to user's database/schema to create the view
                         sf_cursor.execute(f"USE DATABASE {user_db}")
                         sf_cursor.execute(f"USE SCHEMA {user_schema}")
@@ -171,17 +303,10 @@ def main(queries_dir, iterations, output_file, queries_to_run, timestamp, tpch_s
                         )
                         sf_cursor.execute(create_view_stmt)
 
-                        # 3. Switch back to sample database for main query execution
-                        sf_cursor.execute(f"USE DATABASE {sample_db}")
-                        sf_cursor.execute(f"USE SCHEMA {sample_schema}")
-
-                        # 4. Execute main query with fully qualified view reference
+                        # 3. Execute main query with qualified supplier reference
                         main_query = statements[1].replace(
                             "supplier,\n    revenue0",
-                            f"supplier,\n    {user_db}.{user_schema}.revenue0"
-                        ).replace(
-                            "FROM revenue0",
-                            f"FROM {user_db}.{user_schema}.revenue0"
+                            f"{sample_db}.{sample_schema}.supplier,\n    revenue0"
                         )
                         sf_cursor.execute(main_query)
                         result = sf_cursor.fetchall()
@@ -190,9 +315,9 @@ def main(queries_dir, iterations, output_file, queries_to_run, timestamp, tpch_s
                         sf_cursor.execute("SELECT LAST_QUERY_ID()")
                         query_id = sf_cursor.fetchone()[0]
                     finally:
-                        # 5. Clean up - drop the view and restore context
+                        # Clean up - drop the view and restore context
                         try:
-                            sf_cursor.execute(f"DROP VIEW IF EXISTS {user_db}.{user_schema}.revenue0")
+                            sf_cursor.execute(f"DROP VIEW IF EXISTS revenue0")
                         except Exception as e:
                             print(f"Warning: Failed to drop view: {e}")
 
@@ -256,7 +381,6 @@ def main(queries_dir, iterations, output_file, queries_to_run, timestamp, tpch_s
         print()
 
     # Save results to JSON
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, 'w') as f:
         json.dump(results, f, indent=2)
 
