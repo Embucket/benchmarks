@@ -282,7 +282,7 @@ def create_total_bar_chart(data: Dict[str, Dict], title: str, ylabel: str,
     ax.set_ylabel(ylabel, fontsize=12, fontweight='bold')
     ax.set_title(title, fontsize=14, fontweight='bold', pad=20)
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, fontsize=10, rotation=45, ha='right')
+    ax.set_xticklabels(labels, fontsize=10)
     ax.grid(axis='y', alpha=0.3, linestyle='--')
     
     # Format y-axis
@@ -375,7 +375,7 @@ if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Generate benchmark visualizations')
     parser.add_argument('--benchmark', default='tpch', help='Benchmark name (e.g., tpch)')
-    parser.add_argument('--scale-factor', type=int, default=1000, help='Scale factor (e.g., 1000 for sf1000)')
+    parser.add_argument('--scale-factor', type=int, default=10, help='Scale factor (e.g., 10 for sf10)')
     parser.add_argument('--output-dir', default='visualizations', help='Output directory for charts')
     parser.add_argument('--base-dir', default='.',
                         help='Base directory where benchmark results are stored')

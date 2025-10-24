@@ -1,0 +1,227 @@
+Snowflake Query Plan - Query 6
+================================================================================
+
+RAW RESULT:
+{
+  "plan_json": {
+    "GlobalStats": {
+      "bytesAssigned": 26018068992,
+      "partitionsAssigned": 1571,
+      "partitionsTotal": 10336
+    },
+    "Operations": [
+      [
+        {
+          "expressions": [
+            "SUM(LINEITEM.L_EXTENDEDPRICE * (LINEITEM.L_DISCOUNT))"
+          ],
+          "id": 0,
+          "operation": "Result"
+        },
+        {
+          "expressions": [
+            "aggExprs: [SUM(LINEITEM.L_EXTENDEDPRICE * (LINEITEM.L_DISCOUNT))]"
+          ],
+          "id": 1,
+          "operation": "Aggregate",
+          "parentOperators": [
+            0
+          ]
+        },
+        {
+          "expressions": [
+            "(LINEITEM.L_SHIPDATE >= '1994-01-01') AND (LINEITEM.L_SHIPDATE < '1995-01-01') AND (LINEITEM.L_DISCOUNT >= 0.05) AND (LINEITEM.L_DISCOUNT <= 0.07) AND (LINEITEM.L_QUANTITY < 24)"
+          ],
+          "id": 2,
+          "operation": "Filter",
+          "parentOperators": [
+            1
+          ]
+        },
+        {
+          "bytesAssigned": 26018068992,
+          "expressions": [
+            "L_QUANTITY",
+            "L_EXTENDEDPRICE",
+            "L_DISCOUNT",
+            "L_SHIPDATE"
+          ],
+          "id": 3,
+          "objects": [
+            "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM"
+          ],
+          "operation": "TableScan",
+          "parentOperators": [
+            2
+          ],
+          "partitionsAssigned": 1571,
+          "partitionsTotal": 10336
+        }
+      ]
+    ]
+  },
+  "plan_text": "GlobalStats:\n\tbytesAssigned=26018068992\n\tpartitionsAssigned=1571\n\tpartitionsTotal=10336\nOperations:\n1:0     ->Result  SUM(LINEITEM.L_EXTENDEDPRICE * (LINEITEM.L_DISCOUNT))  \n1:1          ->Aggregate  aggExprs: [SUM(LINEITEM.L_EXTENDEDPRICE * (LINEITEM.L_DISCOUNT))]  \n1:2               ->Filter  (LINEITEM.L_SHIPDATE >= '1994-01-01') AND (LINEITEM.L_SHIPDATE < '1995-01-01') AND (LINEITEM.L_DISCOUNT >= 0.05) AND (LINEITEM.L_DISCOUNT <= 0.07) AND (LINEITEM.L_QUANTITY < 24)  \n1:3                    ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM  L_QUANTITY, L_EXTENDEDPRICE, L_DISCOUNT, L_SHIPDATE  {partitionsTotal=10336, partitionsAssigned=1571, bytesAssigned=26018068992}\n",
+  "query_id": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+  "stats": [
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 0.000000000000000e+00
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "expressions": [
+          "SUM(LINEITEM.L_EXTENDEDPRICE * (LINEITEM.L_DISCOUNT))"
+        ]
+      },
+      "OPERATOR_ID": 0,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 1
+      },
+      "OPERATOR_TYPE": "Result",
+      "QUERY_ID": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 4.301075268817205e-02,
+        "processing": 4.301075268817205e-02
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "functions": [
+          "SUM(LINEITEM.L_EXTENDEDPRICE * (LINEITEM.L_DISCOUNT))"
+        ]
+      },
+      "OPERATOR_ID": 1,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 114213142,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 1
+      },
+      "OPERATOR_TYPE": "Aggregate",
+      "PARENT_OPERATORS": [
+        0
+      ],
+      "QUERY_ID": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "overall_percentage": 3.763440860215054e-02,
+        "processing": 3.225806451612904e-02,
+        "synchronization": 5.376344086021506e-03
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "filter_condition": "(LINEITEM.L_SHIPDATE >= '1994-01-01') AND (LINEITEM.L_SHIPDATE < '1995-01-01') AND (LINEITEM.L_DISCOUNT >= 0.05) AND (LINEITEM.L_DISCOUNT <= 0.07) AND (LINEITEM.L_QUANTITY < 24)"
+      },
+      "OPERATOR_ID": 2,
+      "OPERATOR_STATISTICS": {
+        "input_rows": 114213142,
+        "network": {
+          "network_bytes": 2366
+        },
+        "output_rows": 114213142
+      },
+      "OPERATOR_TYPE": "Filter",
+      "PARENT_OPERATORS": [
+        1
+      ],
+      "QUERY_ID": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+      "STEP_ID": 1
+    },
+    {
+      "EXECUTION_TIME_BREAKDOWN": {
+        "local_disk_io": 2.258064516129032e-01,
+        "overall_percentage": 8.790322580645161e-01,
+        "processing": 5.376344086021505e-01,
+        "remote_disk_io": 8.333333333333333e-02,
+        "synchronization": 3.225806451612903e-02
+      },
+      "OPERATOR_ATTRIBUTES": {
+        "columns": [
+          "L_QUANTITY",
+          "L_EXTENDEDPRICE",
+          "L_DISCOUNT",
+          "L_SHIPDATE"
+        ],
+        "table_name": "SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM"
+      },
+      "OPERATOR_ID": 3,
+      "OPERATOR_STATISTICS": {
+        "io": {
+          "bytes_scanned": 4010077248,
+          "percentage_scanned_from_cache": 0.9908,
+          "scan_progress": 1
+        },
+        "network": {
+          "network_bytes": 1132181
+        },
+        "output_rows": 114213142,
+        "pruning": {
+          "partitions_scanned": 1571,
+          "partitions_total": 10336
+        }
+      },
+      "OPERATOR_TYPE": "TableScan",
+      "PARENT_OPERATORS": [
+        2
+      ],
+      "QUERY_ID": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+      "STEP_ID": 1
+    }
+  ],
+  "summary": {
+    "AUTHN_EVENT_ID": 1361667844038174,
+    "BYTES_SCANNED": 0,
+    "BYTES_WRITTEN_TO_RESULT": 41,
+    "CLUSTER_NUMBER": 1,
+    "COMPILATION_TIME": 781,
+    "CREDITS_USED_CLOUD_SERVICES": 0.000122,
+    "DATABASE_NAME": "SNOWFLAKE_SAMPLE_DATA",
+    "END_TIME": "2025-10-22 07:37:23.539 -0700",
+    "EXECUTION_STATUS": "SUCCESS",
+    "EXECUTION_TIME": 694,
+    "EXTERNAL_FUNCTION_TOTAL_INVOCATIONS": 0,
+    "EXTERNAL_FUNCTION_TOTAL_RECEIVED_BYTES": 0,
+    "EXTERNAL_FUNCTION_TOTAL_RECEIVED_ROWS": 0,
+    "EXTERNAL_FUNCTION_TOTAL_SENT_BYTES": 0,
+    "EXTERNAL_FUNCTION_TOTAL_SENT_ROWS": 0,
+    "FAULT_HANDLING_TIME": 0,
+    "INBOUND_DATA_TRANSFER_BYTES": 0,
+    "IS_CLIENT_GENERATED_STATEMENT": false,
+    "LIST_EXTERNAL_FILE_TIME": 0,
+    "OUTBOUND_DATA_TRANSFER_BYTES": 0,
+    "QUERY_ACCELERATION_BYTES_SCANNED": 0,
+    "QUERY_ACCELERATION_PARTITIONS_SCANNED": 0,
+    "QUERY_ACCELERATION_UPPER_LIMIT_SCALE_FACTOR": 0,
+    "QUERY_HASH": "1a896a63f044f934c407b5efc86c0676",
+    "QUERY_HASH_VERSION": 2,
+    "QUERY_ID": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+    "QUERY_PARAMETERIZED_HASH": "14d08f64dae963a90a7322e1e6fd5f11",
+    "QUERY_PARAMETERIZED_HASH_VERSION": 1,
+    "QUERY_RETRY_TIME": 0,
+    "QUERY_TAG": "",
+    "QUERY_TEXT": "\nselect\n    sum(l_extendedprice * l_discount) as revenue\nfrom\n    lineitem\nwhere\n        l_shipdate >= date '1994-01-01'\n  and l_shipdate < date '1995-01-01'\n  and l_discount between 0.06 - 0.01 and 0.06 + 0.01\n  and l_quantity < 24;\n",
+    "QUERY_TYPE": "SELECT",
+    "QUEUED_OVERLOAD_TIME": 0,
+    "QUEUED_PROVISIONING_TIME": 0,
+    "QUEUED_REPAIR_TIME": 0,
+    "RELEASE_VERSION": "9.33.1",
+    "ROLE_NAME": "ACCOUNTADMIN",
+    "ROWS_INSERTED": 0,
+    "ROWS_PRODUCED": 1,
+    "ROWS_WRITTEN_TO_RESULT": 1,
+    "SCHEMA_NAME": "TPCH_SF1000",
+    "SESSION_ID": 1361667858898986,
+    "START_TIME": "2025-10-22 07:37:22.064 -0700",
+    "TOTAL_ELAPSED_TIME": 1475,
+    "TRANSACTION_BLOCKED_TIME": 0,
+    "TRANSACTION_ID": 0,
+    "USER_NAME": "YNIESTIEROV",
+    "WAREHOUSE_NAME": "BENCHMARK_WH_TPCDS",
+    "WAREHOUSE_SIZE": "Large",
+    "WAREHOUSE_TYPE": "STANDARD"
+  }
+}
+
+================================================================================
