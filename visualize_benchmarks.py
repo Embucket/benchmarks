@@ -215,7 +215,7 @@ def create_bar_chart(data: Dict[str, Dict], title: str, ylabel: str,
     ax.set_ylabel(ylabel, fontsize=12, fontweight='bold')
     ax.set_title(title, fontsize=14, fontweight='bold', pad=20)
     ax.set_xticks(x)
-    ax.set_xticklabels([f"Q{q}" for q in all_queries], rotation=0)
+    ax.set_xticklabels([f"Q{q}" for q in all_queries], rotation=45, ha='right')
     ax.legend(loc='upper left', fontsize=10)
     ax.grid(axis='y', alpha=0.3, linestyle='--')
     
