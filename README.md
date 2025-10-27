@@ -6,3 +6,9 @@
 
 ![Total Cost](visualizations/tpch_sf1000_total_cost.png)
 
+## dbt-snowplow-web Lineage Visualizations
+
+![dbt-snowplow-web First Run](visualizations/dbt_snowplow_web_first_run.png)
+
+![dbt-snowplow-web Incremental Run](visualizations/dbt_snowplow_web_incremental_run.png)
+

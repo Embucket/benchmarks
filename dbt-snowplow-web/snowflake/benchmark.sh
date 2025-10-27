@@ -86,8 +86,46 @@ dbt deps
 dbt seed
 dbt run --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-10-01', snowplow__backfill_limit_days: 50, snowplow__cwv_days_to_measure: 999}'
 
+# Save run results for first run (outside target/ to survive dbt clean)
+echo "Saving first run results..."
+cp target/run_results.json ../run_results_first_run.json
+
+# Enrich run results with actual row counts from Snowflake
+echo "Querying Snowflake for actual row counts..."
+cd ..
+# Source environment variables for Snowflake connection
+set -a
+source .env
+set +a
+# Use virtual environment's Python which has snowflake-connector-python
+env/bin/python3 enrich_run_results.py \
+  --manifest dbt-snowplow-web/target/manifest.json \
+  --run-results run_results_first_run.json \
+  --output run_results_first_run_enriched.json
+
+# Generate lineage visualization for first run
+echo "Generating lineage visualization for first run..."
+python3 ../visualize_lineage.py \
+  --manifest dbt-snowplow-web/target/manifest.json \
+  --run-results run_results_first_run_enriched.json \
+  --output lineage_first_run.html \
+  --title "dbt-snowplow-web First Run - Snowflake" \
+  --row-label "Rows Created"
+cd dbt-snowplow-web
+
 echo ""
 echo "✓ First run complete"
+echo "✓ Lineage visualization saved to: lineage_first_run.html"
+echo ""
+echo "=========================================="
+echo "PAUSED - Review First Run Results"
+echo "=========================================="
+echo "You can now review the first run results:"
+echo "  - Lineage visualization: lineage_first_run.html"
+echo "  - Query Snowflake to check table contents"
+echo ""
+echo "Press ENTER to continue with the incremental run..."
+read -r
 
 # Step 5: Second run - Load combined data (incremental)
 echo ""
@@ -108,8 +146,38 @@ dbt deps
 dbt seed
 dbt run --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-10-01', snowplow__backfill_limit_days: 50, snowplow__cwv_days_to_measure: 999}'
 
+# Save run results for incremental run (outside target/ for consistency)
+echo "Saving incremental run results..."
+cp target/run_results.json ../run_results_incremental_run.json
+
+# Generate lineage visualization for incremental run
+echo "Generating lineage visualization for incremental run..."
+cd ..
+python3 ../visualize_lineage.py \
+  --manifest dbt-snowplow-web/target/manifest.json \
+  --run-results run_results_incremental_run.json \
+  --output lineage_incremental_run.html \
+  --title "dbt-snowplow-web Incremental Run - Snowflake" \
+  --row-label "Rows Affected"
+cd dbt-snowplow-web
+
 echo ""
 echo "✓ Second run complete"
+echo "✓ Lineage visualization saved to: lineage_incremental_run.html"
+
+# Cleanup temporary files
+cd ..
+rm -f run_results_first_run.json run_results_first_run_enriched.json run_results_incremental_run.json
+cd dbt-snowplow-web
+
+# Generate screenshots for README
+echo ""
+echo "=========================================="
+echo "Generating Screenshots for README"
+echo "=========================================="
+cd ..
+env/bin/python3 generate_screenshots.py
+cd dbt-snowplow-web
 
 # Summary
 echo ""
@@ -117,4 +185,12 @@ echo "=========================================="
 echo "Benchmark Complete!"
 echo "=========================================="
 echo "Results can be found in dbt-snowplow-web/target/"
+echo ""
+echo "Lineage visualizations:"
+echo "  - First run:       lineage_first_run.html"
+echo "  - Incremental run: lineage_incremental_run.html"
+echo ""
+echo "Screenshots for README:"
+echo "  - ../../visualizations/dbt_snowplow_web_first_run.png"
+echo "  - ../../visualizations/dbt_snowplow_web_incremental_run.png"
 echo ""

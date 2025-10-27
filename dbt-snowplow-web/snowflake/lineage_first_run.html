@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>dbt-snowplow-web First Run - Snowflake</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .diagram-container {
+            background-color: #fafafa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .legend {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        .legend-color {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+            border: 1px solid #333;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>dbt-snowplow-web First Run - Snowflake</h1>
+        <p>Generated: 2025-10-27 14:39:45</p>
+        
+        <h2>Summary Statistics</h2>
+        <div class="summary">
+            <div class="stat-card">
+                <div class="stat-label">Total Models</div>
+                <div class="stat-value">29</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Execution Time</div>
+                <div class="stat-value">87.3s</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Average Time</div>
+                <div class="stat-value">3.0s</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Slowest Model</div>
+                <div class="stat-value">5.8s</div>
+            </div>
+        </div>
+        
+        <h2>Model Lineage</h2>
+        <div class="legend">
+            <strong>Schema Legend:</strong><br/>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #87CEEB;"></span>
+                <span>Atomic (Source) - Raw events data</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #B19CD9;"></span>
+                <span>Manifest (Metadata) - Tracking tables for incremental processing</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #FFB366;"></span>
+                <span>Scratch (Intermediate) - Temporary transformations</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #90EE90;"></span>
+                <span>Derived (Final Tables) - Final output tables</span>
+            </div>
+        </div>
+
+        <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 20px 0; border-radius: 4px;">
+            <strong>Note:</strong> The diagram shows data flow from top to bottom. The <strong>events</strong> source table (blue) is the starting point for data transformations.
+            Manifest tables (purple) like <em>incremental_manifest</em> and <em>base_quarantined_sessions</em> are metadata tracking tables used by the dbt-snowplow-web framework
+            and may appear at the top due to having no data dependencies, but they support the incremental processing logic.
+        </div>
+        
+        <div class="diagram-container">
+            <div class="mermaid">
+graph TD
+    page_views["page_views<br/>3.6s"]
+    pv_scroll_depth["pv_scroll_depth<br/>3.1s"]
+    pv_engaged_time["pv_engaged_time<br/>2.3s"]
+    page_views_this_run["page_views_this_run<br/>4.4s"]
+    consent_scope_status["consent_scope_status<br/>1.7s"]
+    consent_log["consent_log<br/>3.9s"]
+    consent_cmp_stats["consent_cmp_stats<br/>2.0s"]
+    consent_users["consent_users<br/>2.4s"]
+    consent_versions["consent_versions<br/>2.3s"]
+    consent_totals["consent_totals<br/>1.8s"]
+    consent_events_this_run["consent_events_this_run<br/>2.3s"]
+    vitals["vitals<br/>2.6s"]
+    vital_measurements["vital_measurements<br/>3.0s"]
+    vitals_this_run["vitals_this_run<br/>2.7s"]
+    vital_events_this_run["vital_events_this_run<br/>1.8s"]
+    user_mapping["user_mapping<br/>2.3s"]
+    sessions["sessions<br/>5.8s"]
+    sessions_this_run["sessions_this_run<br/>4.3s"]
+    users["users<br/>3.5s"]
+    users_sessions_this_run["users_sessions_this_run<br/>3.2s"]
+    users_this_run["users_this_run<br/>2.3s"]
+    users_aggs["users_aggs<br/>2.3s"]
+    users_lasts["users_lasts<br/>2.9s"]
+    incremental_manifest["incremental_manifest<br/>2.3s"]
+    base_sessions_lifecycle_manifest["base_sessions_lifecycle_manifest<br/>4.5s"]
+    base_quarantined_sessions["base_quarantined_sessions<br/>3.4s"]
+    base_new_event_limits["base_new_event_limits<br/>3.0s"]
+    base_sessions_this_run["base_sessions_this_run<br/>3.9s"]
+    base_events_this_run["base_events_this_run<br/>3.6s"]
+    events["events<br/>(source)"]
+    page_views_this_run --> page_views
+    base_new_event_limits --> page_views
+    incremental_manifest --> page_views
+    base_events_this_run --> pv_scroll_depth
+    base_events_this_run --> pv_engaged_time
+    base_events_this_run --> page_views_this_run
+    pv_engaged_time --> page_views_this_run
+    pv_scroll_depth --> page_views_this_run
+    consent_users --> consent_scope_status
+    consent_events_this_run --> consent_log
+    base_new_event_limits --> consent_log
+    incremental_manifest --> consent_log
+    consent_log --> consent_cmp_stats
+    consent_log --> consent_users
+    consent_versions --> consent_users
+    consent_log --> consent_versions
+    consent_users --> consent_totals
+    consent_versions --> consent_totals
+    base_events_this_run --> consent_events_this_run
+    base_new_event_limits --> consent_events_this_run
+    incremental_manifest --> consent_events_this_run
+    vitals_this_run --> vitals
+    base_new_event_limits --> vitals
+    incremental_manifest --> vitals
+    vitals --> vital_measurements
+    vital_events_this_run --> vitals_this_run
+    base_new_event_limits --> vitals_this_run
+    incremental_manifest --> vitals_this_run
+    base_events_this_run --> vital_events_this_run
+    base_new_event_limits --> vital_events_this_run
+    incremental_manifest --> vital_events_this_run
+    base_events_this_run --> user_mapping
+    base_new_event_limits --> user_mapping
+    incremental_manifest --> user_mapping
+    sessions_this_run --> sessions
+    base_new_event_limits --> sessions
+    incremental_manifest --> sessions
+    user_mapping --> sessions
+    base_events_this_run --> sessions_this_run
+    users_this_run --> users
+    base_new_event_limits --> users
+    incremental_manifest --> users
+    sessions --> users_sessions_this_run
+    base_sessions_this_run --> users_sessions_this_run
+    users_aggs --> users_this_run
+    users_sessions_this_run --> users_this_run
+    users_lasts --> users_this_run
+    users_sessions_this_run --> users_aggs
+    users_sessions_this_run --> users_lasts
+    users_aggs --> users_lasts
+    base_new_event_limits --> base_sessions_lifecycle_manifest
+    incremental_manifest --> base_sessions_lifecycle_manifest
+    base_quarantined_sessions --> base_sessions_lifecycle_manifest
+    events --> base_sessions_lifecycle_manifest
+    incremental_manifest --> base_new_event_limits
+    base_sessions_lifecycle_manifest --> base_sessions_this_run
+    base_new_event_limits --> base_sessions_this_run
+    base_quarantined_sessions --> base_sessions_this_run
+    base_sessions_this_run --> base_events_this_run
+    events --> base_events_this_run
+
+    style page_views fill:#90EE90,stroke:#333,stroke-width:2px
+    style pv_scroll_depth fill:#FFB366,stroke:#333,stroke-width:2px
+    style pv_engaged_time fill:#FFB366,stroke:#333,stroke-width:2px
+    style page_views_this_run fill:#FFB366,stroke:#333,stroke-width:2px
+    style consent_scope_status fill:#90EE90,stroke:#333,stroke-width:2px
+    style consent_log fill:#90EE90,stroke:#333,stroke-width:2px
+    style consent_cmp_stats fill:#90EE90,stroke:#333,stroke-width:2px
+    style consent_users fill:#90EE90,stroke:#333,stroke-width:2px
+    style consent_versions fill:#90EE90,stroke:#333,stroke-width:2px
+    style consent_totals fill:#90EE90,stroke:#333,stroke-width:2px
+    style consent_events_this_run fill:#FFB366,stroke:#333,stroke-width:2px
+    style vitals fill:#90EE90,stroke:#333,stroke-width:2px
+    style vital_measurements fill:#90EE90,stroke:#333,stroke-width:2px
+    style vitals_this_run fill:#FFB366,stroke:#333,stroke-width:2px
+    style vital_events_this_run fill:#FFB366,stroke:#333,stroke-width:2px
+    style user_mapping fill:#90EE90,stroke:#333,stroke-width:2px
+    style sessions fill:#90EE90,stroke:#333,stroke-width:2px
+    style sessions_this_run fill:#FFB366,stroke:#333,stroke-width:2px
+    style users fill:#90EE90,stroke:#333,stroke-width:2px
+    style users_sessions_this_run fill:#FFB366,stroke:#333,stroke-width:2px
+    style users_this_run fill:#FFB366,stroke:#333,stroke-width:2px
+    style users_aggs fill:#FFB366,stroke:#333,stroke-width:2px
+    style users_lasts fill:#FFB366,stroke:#333,stroke-width:2px
+    style incremental_manifest fill:#B19CD9,stroke:#333,stroke-width:2px
+    style base_sessions_lifecycle_manifest fill:#B19CD9,stroke:#333,stroke-width:2px
+    style base_quarantined_sessions fill:#B19CD9,stroke:#333,stroke-width:2px
+    style base_new_event_limits fill:#FFB366,stroke:#333,stroke-width:2px
+    style base_sessions_this_run fill:#FFB366,stroke:#333,stroke-width:2px
+    style base_events_this_run fill:#FFB366,stroke:#333,stroke-width:2px
+    style events fill:#87CEEB,stroke:#333,stroke-width:2px
+            </div>
+        </div>
+        
+        <h2>Model Execution Details</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Model Name</th>
+                    <th>Schema</th>
+                    <th>Execution Time</th>
+                    <th>Rows Created</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+        <tr>
+            <td>snowplow_web_sessions</td>
+            <td>derived</td>
+            <td>5.77s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_base_sessions_lifecycle_manifest</td>
+            <td>snowplow_manifest</td>
+            <td>4.54s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_page_views_this_run</td>
+            <td>scratch</td>
+            <td>4.37s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_sessions_this_run</td>
+            <td>scratch</td>
+            <td>4.31s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_log</td>
+            <td>derived</td>
+            <td>3.92s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_base_sessions_this_run</td>
+            <td>scratch</td>
+            <td>3.91s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_page_views</td>
+            <td>derived</td>
+            <td>3.62s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_base_events_this_run</td>
+            <td>scratch</td>
+            <td>3.57s</td>
+            <td>86,444</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_users</td>
+            <td>derived</td>
+            <td>3.53s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_base_quarantined_sessions</td>
+            <td>snowplow_manifest</td>
+            <td>3.37s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_users_sessions_this_run</td>
+            <td>scratch</td>
+            <td>3.20s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_pv_scroll_depth</td>
+            <td>scratch</td>
+            <td>3.13s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_vital_measurements</td>
+            <td>derived</td>
+            <td>3.01s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_base_new_event_limits</td>
+            <td>scratch</td>
+            <td>2.95s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_users_lasts</td>
+            <td>scratch</td>
+            <td>2.94s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_vitals_this_run</td>
+            <td>scratch</td>
+            <td>2.69s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_vitals</td>
+            <td>derived</td>
+            <td>2.62s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_users</td>
+            <td>derived</td>
+            <td>2.39s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_users_aggs</td>
+            <td>scratch</td>
+            <td>2.33s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_pv_engaged_time</td>
+            <td>scratch</td>
+            <td>2.33s</td>
+            <td>11,454</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_user_mapping</td>
+            <td>derived</td>
+            <td>2.31s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_versions</td>
+            <td>derived</td>
+            <td>2.27s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_users_this_run</td>
+            <td>scratch</td>
+            <td>2.26s</td>
+            <td>12,297</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_incremental_manifest</td>
+            <td>snowplow_manifest</td>
+            <td>2.26s</td>
+            <td>23</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_events_this_run</td>
+            <td>scratch</td>
+            <td>2.26s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_cmp_stats</td>
+            <td>derived</td>
+            <td>1.97s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_totals</td>
+            <td>derived</td>
+            <td>1.85s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_vital_events_this_run</td>
+            <td>scratch</td>
+            <td>1.81s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_scope_status</td>
+            <td>derived</td>
+            <td>1.73s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>
