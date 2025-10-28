@@ -79,11 +79,24 @@ python3 load_events.py --yesterday
 
 cd dbt-snowplow-web/
 
-echo "Running dbt (first run)..."
+echo "Preparing dbt environment..."
 dbt debug
 dbt clean
 dbt deps
+echo "Loading seed files (reference data)..."
 dbt seed
+
+echo ""
+echo "=========================================="
+echo "PAUSED - Ready for First dbt Run"
+echo "=========================================="
+echo "Setup complete. Seed files loaded, yesterday's data loaded."
+echo "You can now review the dashboard state before dbt models are built."
+echo ""
+echo "Press ENTER to run dbt and build the models..."
+read -r
+
+echo "Running dbt to build models (first run)..."
 dbt run --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-10-01', snowplow__backfill_limit_days: 50, snowplow__cwv_days_to_measure: 999}'
 
 # Save run results for first run (outside target/ to survive dbt clean)
