@@ -362,7 +362,7 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
 
     for query_num in query_numbers:
         print(f"=== Running Query {query_num} ===")
-        query_file = os.path.join(queries_dir, f"q{query_num:01d}.sql")
+        query_file = os.path.join(queries_dir, f"q{query_num:02d}.sql")
 
         if not os.path.exists(query_file):
             print(f"⚠ Query file not found: {query_file}")
