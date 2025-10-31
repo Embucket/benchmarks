@@ -265,6 +265,9 @@ def main():
     # Configuration
     script_dir = Path(__file__).parent
     sql_script = script_dir / "create.sql"
+    # CSV files are in the parent directory
+    parent_dir = script_dir.parent
+    input_files = [str(parent_dir / file) for file in input_files]
 
     # Check if required files exist
     for file in input_files:
