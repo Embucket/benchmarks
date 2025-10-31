@@ -1,11 +1,12 @@
 import json
 import re
-import os
 import tempfile
-import numpy as np
 import matplotlib.pyplot as plt
 from graphviz import Digraph
 import matplotlib.image as mpimg
+import argparse
+import os
+import glob
 
 
 def extract_json_from_file(filepath):
@@ -226,15 +227,44 @@ def generate_combined_visualization_duckdb(exec_json, output_filename="query_ana
         os.remove(tree_image_path)
 
 
-def main():
-
-    filepath = '/Users/yevheniiniestierov/Desktop/benchmarks/duckdb/explain_output/q2_breakdown.json'
-    data = extract_json_from_file(filepath)
-    if not data:
-        print("Could not load data.")
-        return
-    generate_combined_visualization_duckdb(data)
+def process_all_duckdb_plans(base_dir, output_subdir, overwrite=False, dpi=150):
+    for instance in os.listdir(base_dir):
+        instance_dir = os.path.join(base_dir, instance)
+        if not os.path.isdir(instance_dir):
+            continue
+        output_dir = os.path.join(instance_dir, output_subdir)
+        os.makedirs(output_dir, exist_ok=True)
+        for plan_path in glob.glob(os.path.join(instance_dir, "query_*_breakdown.json")):
+            output_filename = os.path.join(
+                output_dir,
+                os.path.basename(plan_path).replace("_breakdown.json", "_analysis.png")
+            )
+            if not overwrite and os.path.exists(output_filename):
+                print(f"Skipping existing: {output_filename}")
+                continue
+            data = extract_json_from_file(plan_path)
+            if not data:
+                print(f"Failed to load: {plan_path}")
+                continue
+            generate_combined_visualization_duckdb(data, output_filename=output_filename)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="Batch-generate DuckDB visualizations for all 'query_*_breakdown.json' files."
+    )
+    parser.add_argument("--base-dir", default="/Users/yevheniiniestierov/Desktop/benchmarks/duckdb/results-parquet",
+                        help="Base folder with instance subfolders (default: 'results-parquet').")
+    parser.add_argument("--output-subdir", default="/Users/yevheniiniestierov/Desktop/benchmarks/duckdb/duckdb/results-parquet/visualizations",
+                        help="Subfolder name to store images under each instance (default: 'visualizations').")
+    parser.add_argument("--overwrite", action="store_true",
+                        help="Overwrite existing output files.")
+    parser.add_argument("--dpi", type=int, default=150,
+                        help="Matplotlib output DPI for combined image (default: 150).")
+    args = parser.parse_args()
+    process_all_duckdb_plans(
+        base_dir=args.base_dir,
+        output_subdir=args.output_subdir,
+        overwrite=args.overwrite,
+        dpi=args.dpi,
+    )
