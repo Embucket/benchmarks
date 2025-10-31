@@ -33,7 +33,7 @@ echo "=========================================="
 python3 -m venv env
 source env/bin/activate
 
-./dbt.sh
+../dbt.sh
 
 source env/bin/activate
 
@@ -53,13 +53,13 @@ if [ -f "events_yesterday.csv" ] && [ -f "events_today.csv" ]; then
     echo ""
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "Regenerating data..."
-        python3 gen_events.py --gb ${SCALE_FACTOR}
+        python3 ../gen_events.py --gb ${SCALE_FACTOR}
     else
         echo "Skipping data generation, using existing files"
     fi
 else
     echo "Generating new data files..."
-    python3 gen_events.py --gb ${SCALE_FACTOR}
+    python3 ../gen_events.py --gb ${SCALE_FACTOR}
 fi
 
 # Step 3: Setup dbt-snowplow-web
@@ -67,7 +67,7 @@ echo ""
 echo "=========================================="
 echo "Step 3: Setting up dbt-snowplow-web"
 echo "=========================================="
-./snowplow_web.sh
+../snowplow_web.sh
 
 # Step 4: First run - Load yesterday's data
 echo ""
