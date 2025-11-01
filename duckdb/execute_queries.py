@@ -374,16 +374,15 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
             query = f.read()
 
         iteration_times = []
-
+        print('Clearing OS cache before query executions...')
+        subprocess.run(
+            ["sudo", "sync"], check=True
+        )
+        subprocess.run(
+            ["sudo", "tee", "/proc/sys/vm/drop_caches"],
+            input="3\n", text=True, check=True
+        )
         for i in range(iterations):
-            if i == 0:
-                subprocess.run(
-                    ["sudo", "sync"], check=True
-                )
-                subprocess.run(
-                    ["sudo", "tee", "/proc/sys/vm/drop_caches"],
-                    input="3\n", text=True, check=True
-                )
             print(f"  Iteration {i + 1}/{iterations}...", end=' ', flush=True)
 
             start = time.time()
