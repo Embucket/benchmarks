@@ -84,9 +84,9 @@ python3 load_events.py --yesterday
 cd dbt-snowplow-web/
 
 echo "Preparing dbt environment..."
-dbt debug
-dbt clean
-dbt deps
+dbt debug --target snowflake
+dbt clean --target snowflake
+dbt deps --target snowflake
 echo "Loading seed files (reference data)..."
 dbt seed --full-refresh --target snowflake
 
@@ -157,9 +157,9 @@ python3 load_events.py --combined
 cd dbt-snowplow-web/
 
 echo "Running dbt (incremental run)..."
-dbt debug
-dbt clean
-dbt deps
+dbt debug --target snowflake
+dbt clean --target snowflake
+dbt deps --target snowflake
 dbt seed --target snowflake
 dbt run --target snowflake --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-10-01', snowplow__backfill_limit_days: 50, snowplow__cwv_days_to_measure: 999}'
 

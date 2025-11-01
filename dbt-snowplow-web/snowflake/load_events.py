@@ -186,13 +186,15 @@ def load_multiple_files(conn, files):
     total_rows_loaded = 0
 
     for file in files:
+        # Extract just the filename for the stage path
+        filename = Path(file).name
         print(f"Uploading {file} to stage...")
         cursor.execute(f"PUT file://{file} @my_stage")
 
         print(f"Loading {file} into events table...")
         result = cursor.execute(f"""
             COPY INTO events
-            FROM @my_stage/{file}
+            FROM @my_stage/{filename}
             FILE_FORMAT = (
                 TYPE = 'CSV'
                 FIELD_DELIMITER = ','
@@ -214,10 +216,12 @@ def load_multiple_files(conn, files):
         # Get row count from COPY result
         # Result format: (file, status, rows_parsed, rows_loaded, error_limit, errors_seen, first_error, first_error_line, first_error_character, first_error_column_name)
         copy_result = result.fetchone()
-        if copy_result:
+        if copy_result and len(copy_result) > 3:
             rows_loaded = int(copy_result[3])  # Fourth column is rows_loaded
             total_rows_loaded += rows_loaded
             print(f"✓ Loaded {rows_loaded:,} rows from {file}")
+        else:
+            print(f"⚠ Warning: Could not get row count from COPY result for {file}")
 
     # Clean up: Remove all files from stage to avoid storage costs
     print("Cleaning up stage files...")
