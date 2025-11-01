@@ -18,3 +18,4 @@ events_today.csv
 __pycache__/
 *.pyc
 *.pyo
+=3.0.0

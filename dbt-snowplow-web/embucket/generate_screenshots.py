@@ -50,12 +50,12 @@ async def main():
     screenshots = [
         {
             'html': script_dir / 'lineage_first_run.html',
-            'png': visualizations_dir / 'dbt_snowplow_web_first_run_sf.png',
+            'png': visualizations_dir / 'dbt_snowplow_web_first_run_embucket.png',
             'name': 'First Run'
         },
         {
             'html': script_dir / 'lineage_incremental_run.html',
-            'png': visualizations_dir / 'dbt_snowplow_web_incremental_run_sf.png',
+            'png': visualizations_dir / 'dbt_snowplow_web_incremental_run_embucket.png',
             'name': 'Incremental Run'
         }
     ]
