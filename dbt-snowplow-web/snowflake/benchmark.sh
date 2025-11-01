@@ -101,7 +101,7 @@ echo "Press ENTER to run dbt and build the models..."
 read -r
 
 echo "Running dbt to build models (first run)..."
-dbt run --full-refresh --target snowflake --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-10-01', snowplow__backfill_limit_days: 50, snowplow__cwv_days_to_measure: 999}'
+dbt run --full-refresh --target snowflake --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-09-01', snowplow__backfill_limit_days: 50, snowplow__cwv_days_to_measure: 999}'
 
 # Save run results for first run (outside target/ to survive dbt clean)
 echo "Saving first run results..."
@@ -161,7 +161,7 @@ dbt debug --target snowflake
 #dbt clean --target snowflake
 dbt deps --target snowflake
 dbt seed --target snowflake
-dbt run --target snowflake --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-10-01', snowplow__backfill_limit_days: 50, snowplow__cwv_days_to_measure: 999}'
+dbt run --target snowflake --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-09-01', snowplow__backfill_limit_days: 50, snowplow__cwv_days_to_measure: 999}'
 
 # Save run results for incremental run (outside target/ for consistency)
 echo "Saving incremental run results..."
