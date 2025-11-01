@@ -1,10 +1,197 @@
-#!/usr/bin/env python3
 import duckdb
 import time
 import json
 import sys
 import os
 import glob
+
+def get_execution_time_breakdown(profile):
+    """
+    profile: either a dict (already loaded JSON) or a path to a JSON file.
+    Returns:
+      {
+        overall_time, processing, synchronization, operators: [...],
+        processing_percentage, synchronization_percentage,
+        operator_tree: {
+          tree: {...},              # nested operator tree (QUERY root)
+          nodes: [...], edges: [...]# flattened for graphing
+        }
+      }
+    """
+    # Load if a path was passed
+    if isinstance(profile, str):
+        with open(profile, 'r') as f:
+            profile_data = json.load(f)
+    else:
+        profile_data = profile
+
+    # Root wall-clock latency (seconds) lives at the top level
+    def find_latency(node):
+        if isinstance(node, dict) and node.get('latency') is not None:
+            return float(node['latency'])
+        for ch in (node.get('children') or []):
+            v = find_latency(ch)
+            if v is not None:
+                return v
+        return None
+
+    root_latency = float(find_latency(profile_data) or 0.0)
+
+    breakdown = {
+        "overall_time": root_latency,           # wall-clock query time (s)
+        "processing": 0.0,                      # sum of min(cpu_time, operator_timing)
+        "synchronization": 0.0,                 # sum of blocked_thread_time
+        "operators": []
+    }
+
+    # ---- Per-operator list --------------------------------
+    def walk_collect(node):
+        if not isinstance(node, dict):
+            return
+        op_name = node.get('operator_name')
+        op_type = node.get('operator_type')
+
+        if op_name or op_type:
+            op_timing = float(node.get('operator_timing') or 0.0)       # seconds
+            cpu_time = float(node.get('cpu_time') or 0.0)               # seconds
+            blocked = float(node.get('blocked_thread_time') or 0.0)     # seconds
+
+            entry = {
+                "name": op_name or op_type or "UNKNOWN",
+                "type": op_type or op_name or "UNKNOWN",
+                "timing": op_timing,
+                "cpu_time": cpu_time,
+                "blocked_time": blocked,
+                "rows_produced": node.get('operator_cardinality', 0),
+                "rows_scanned": node.get('operator_rows_scanned', 0),
+                "bytes_read": node.get('total_bytes_read', 0),
+                "bytes_written": node.get('total_bytes_written', 0),
+            }
+
+            if root_latency > 0:
+                entry["overall_percentage"] = 100.0 * (op_timing / root_latency)
+                entry["processing_percentage"] = 100.0 * (min(cpu_time, op_timing) / root_latency)
+                entry["synchronization_percentage"] = 100.0 * (blocked / root_latency)
+            else:
+                entry["overall_percentage"] = entry["processing_percentage"] = entry["synchronization_percentage"] = 0.0
+
+            breakdown["operators"].append(entry)
+            breakdown["processing"] += min(cpu_time, op_timing)
+            breakdown["synchronization"] += blocked
+
+        for ch in (node.get('children') or []):
+            walk_collect(ch)
+
+    walk_collect(profile_data)
+
+    if root_latency > 0:
+        breakdown["processing_percentage"] = 100.0 * (breakdown["processing"] / root_latency)
+        breakdown["synchronization_percentage"] = 100.0 * (breakdown["synchronization"] / root_latency)
+    else:
+        breakdown["processing_percentage"] = 0.0
+        breakdown["synchronization_percentage"] = 0.0
+
+    breakdown["operators"].sort(key=lambda x: x.get("overall_percentage", 0.0), reverse=True)
+
+    # ---- Build operator tree (nested) ----------------------
+    def is_operator(n):
+        return isinstance(n, dict) and (n.get('operator_name') or n.get('operator_type'))
+
+    def op_entry(n):
+        name = n.get('operator_name') or n.get('operator_type') or "UNKNOWN"
+        typ  = n.get('operator_type') or n.get('operator_name') or "UNKNOWN"
+        t    = float(n.get('operator_timing') or 0.0)
+        c    = float(n.get('cpu_time') or 0.0)
+        b    = float(n.get('blocked_thread_time') or 0.0)
+        entry = {
+            "name": name,
+            "type": typ,
+            "timing": t,
+            "cpu_time": c,
+            "blocked_time": b,
+            "rows_produced": n.get('operator_cardinality', 0),
+            "rows_scanned": n.get('operator_rows_scanned', 0),
+            "bytes_read": n.get('total_bytes_read', 0),
+            "bytes_written": n.get('total_bytes_written', 0),
+            "children": []
+        }
+        if root_latency > 0:
+            entry["overall_percentage"] = 100.0 * (t / root_latency)
+            entry["processing_percentage"] = 100.0 * (min(c, t) / root_latency)
+            entry["synchronization_percentage"] = 100.0 * (b / root_latency)
+        else:
+            entry["overall_percentage"] = entry["processing_percentage"] = entry["synchronization_percentage"] = 0.0
+        return entry
+
+    def build_operator_subtree(node):
+        if not isinstance(node, dict):
+            return []
+
+        # Build children first
+        child_ops = []
+        for ch in (node.get('children') or []):
+            sub = build_operator_subtree(ch)
+            if isinstance(sub, list):
+                child_ops.extend(sub)
+            elif isinstance(sub, dict):
+                child_ops.append(sub)
+
+        # If this node is an operator, attach operator-children and return it
+        if is_operator(node):
+            e = op_entry(node)
+            e["children"] = child_ops
+            return e
+
+        # Not an operator: bubble up the collected children
+        return child_ops
+
+    op_forest = build_operator_subtree(profile_data)
+    op_children = [op_forest] if isinstance(op_forest, dict) else op_forest
+
+    query_root = {
+        "name": "QUERY",
+        "type": "ROOT",
+        "timing": root_latency,
+        "overall_percentage": 100.0 if root_latency > 0 else 0.0,
+        "children": op_children
+    }
+
+    # ---- Flat graph (nodes + edges) -----------------------
+    nodes, edges = [], []
+    counter = {"id": 0}
+    def assign_ids(n, parent_id=None, depth=0):
+        nid = counter["id"]
+        counter["id"] += 1
+        nodes.append({
+            "id": nid,
+            "parent_id": parent_id,
+            "depth": depth,
+            "name": n.get("name"),
+            "type": n.get("type"),
+            "timing": n.get("timing"),
+            "overall_percentage": n.get("overall_percentage"),
+            "processing_percentage": n.get("processing_percentage"),
+            "synchronization_percentage": n.get("synchronization_percentage"),
+            "rows_produced": n.get("rows_produced"),
+            "rows_scanned": n.get("rows_scanned"),
+            "bytes_read": n.get("bytes_read"),
+            "bytes_written": n.get("bytes_written"),
+        })
+        for ch in n.get("children", []):
+            cid = assign_ids(ch, parent_id=nid, depth=depth+1)
+            edges.append({"parent": nid, "child": cid})
+        return nid
+
+    assign_ids(query_root)
+
+    breakdown["operator_tree"] = {
+        "tree": query_root,
+        "nodes": nodes,
+        "edges": edges
+    }
+
+    return breakdown
+
 
 def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_run, memory_limit_mb, threads, mode, db_file, timestamp):
     # Create DuckDB connection based on mode
@@ -53,17 +240,11 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
         import urllib.request
         import urllib.error
 
-        # Install and load httpfs extension for S3 access
         conn.execute("INSTALL httpfs")
         conn.execute("LOAD httpfs")
-
-        # Set S3 region (embucket-testdata is in us-east-2)
         conn.execute("SET s3_region='us-east-2'")
-
-        # Enable S3 to use instance credentials
         conn.execute("SET s3_use_ssl=true")
 
-        # Check if AWS credentials are available in environment
         if 'AWS_ACCESS_KEY_ID' in os.environ and 'AWS_SECRET_ACCESS_KEY' in os.environ:
             conn.execute(f"SET s3_access_key_id='{os.environ['AWS_ACCESS_KEY_ID']}'")
             conn.execute(f"SET s3_secret_access_key='{os.environ['AWS_SECRET_ACCESS_KEY']}'")
@@ -71,9 +252,7 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
                 conn.execute(f"SET s3_session_token='{os.environ['AWS_SESSION_TOKEN']}'")
             print(f"✓ Using AWS credentials from environment variables")
         else:
-            # Fetch credentials from EC2 instance metadata
             try:
-                # Get IMDSv2 token
                 token_url = 'http://169.254.169.254/latest/api/token'
                 token_request = urllib.request.Request(
                     token_url,
@@ -83,7 +262,6 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
                 with urllib.request.urlopen(token_request, timeout=2) as response:
                     token = response.read().decode('utf-8')
 
-                # Get IAM role name
                 role_url = 'http://169.254.169.254/latest/meta-data/iam/security-credentials/'
                 role_request = urllib.request.Request(
                     role_url,
@@ -92,17 +270,14 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
                 with urllib.request.urlopen(role_request, timeout=2) as response:
                     role_name = response.read().decode('utf-8').strip()
 
-                # Get credentials
                 creds_url = f'http://169.254.169.254/latest/meta-data/iam/security-credentials/{role_name}'
                 creds_request = urllib.request.Request(
                     creds_url,
                     headers={'X-aws-ec2-metadata-token': token}
                 )
                 with urllib.request.urlopen(creds_request, timeout=2) as response:
-                    import json
                     creds = json.loads(response.read().decode('utf-8'))
 
-                # Set credentials in DuckDB
                 conn.execute(f"SET s3_access_key_id='{creds['AccessKeyId']}'")
                 conn.execute(f"SET s3_secret_access_key='{creds['SecretAccessKey']}'")
                 conn.execute(f"SET s3_session_token='{creds['Token']}'")
@@ -124,28 +299,53 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
     if mode == 'parquet':
         tables = ['customer', 'lineitem', 'nation', 'orders', 'part', 'partsupp', 'region', 'supplier']
         for table in tables:
-            table_path = os.path.join(data_dir, table, '*.parquet')
+            single_file = os.path.join(data_dir, f"{table}.parquet")
+            dir_pattern = os.path.join(data_dir, table, "*.parquet")
+
+            if os.path.exists(single_file):
+                table_path = single_file
+            elif glob.glob(dir_pattern):
+                table_path = dir_pattern
+            else:
+                print(f"⚠ No parquet files found for table: {table} "
+                      f"(checked `{single_file}` and `{dir_pattern}`)")
+                continue
+
             conn.execute(f"CREATE VIEW {table} AS SELECT * FROM read_parquet('{table_path}')")
-            print(f"✓ Registered table: {table}")
+            print(f"✓ Registered table: {table} -> {table_path}")
         print()
     elif mode == 'parquet-s3':
         tables = ['customer', 'lineitem', 'nation', 'orders', 'part', 'partsupp', 'region', 'supplier']
         for table in tables:
-            # S3 path format: s3://bucket/path/table.parquet (single file per table)
-            table_path = f"{data_dir}/{table}.parquet"
-            conn.execute(f"CREATE VIEW {table} AS SELECT * FROM read_parquet('{table_path}')")
-            print(f"✓ Registered table: {table}")
+            # Try both single file and directory pattern on S3
+            candidate_paths = [f"{data_dir}/{table}.parquet", f"{data_dir}/{table}/*.parquet"]
+            created = False
+            for table_path in candidate_paths:
+                try:
+                    conn.execute(f"CREATE VIEW {table} AS SELECT * FROM read_parquet('{table_path}')")
+                    print(f"✓ Registered table: {table} -> {table_path}")
+                    created = True
+                    break
+                except duckdb.IOException:
+                    continue
+            if not created:
+                print(f"⚠ No parquet files found for table: {table} "
+                      f"(tried `{candidate_paths[0]}` and `{candidate_paths[1]}`)")
         print()
     else:
         print("✓ Using tables from internal database")
         print()
-    
+
+    # Enable JSON profiling once per session
+    conn.execute("SET enable_profiling = 'json'")
+    conn.execute("SET profiling_mode = 'detailed'")
+
     # Determine which queries to run
     if queries_to_run:
         query_numbers = queries_to_run
     else:
         query_numbers = list(range(1, 23))  # All 22 TPC-H queries
-    
+
     results = {
         'timestamp': timestamp,
         'engine': 'duckdb',
@@ -157,7 +357,9 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
         'memory_limit_mb': memory_limit_mb,
         'threads': threads
     }
-    
+
+    output_dir = os.path.dirname(output_file) if output_file else "."
+
     for query_num in query_numbers:
         print(f"=== Running Query {query_num} ===")
         query_file = os.path.join(queries_dir, f"q{query_num:02d}.sql")
@@ -172,41 +374,45 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
         iteration_times = []
 
         for i in range(iterations):
-            print(f"  Iteration {i+1}/{iterations}...", end=' ', flush=True)
+            print(f"  Iteration {i + 1}/{iterations}...", end=' ', flush=True)
 
             start = time.time()
             try:
-                # Check if query contains DDL statements (can't use EXPLAIN ANALYZE with them)
-                query_upper = query.upper()
-                use_explain_analyze = not any(stmt in query_upper for stmt in ["CREATE VIEW", "DROP VIEW", "CREATE TABLE", "DROP TABLE"])
+                # Ensure profiling is disabled before configuring it for this run
+                conn.execute("SET profiling_output = ''")
 
-                if use_explain_analyze:
-                    # Use EXPLAIN ANALYZE to get execution metrics
-                    explain_query = f"EXPLAIN ANALYZE {query}"
-                    explain_result = conn.execute(explain_query).fetchall()
+                # Profile only the first actual execution
+                profile_path = os.path.join(temp_dir, f"duck_profile_q{query_num:02d}_iter{i + 1}.json")
+                if i == 0:
+                    os.makedirs(os.path.dirname(profile_path), exist_ok=True)
+                    conn.execute(f"SET profiling_output = '{profile_path}'")
 
-                    # Save EXPLAIN ANALYZE output to file (only on first iteration)
-                    if i == 0:
-                        output_dir = os.path.dirname(output_file) if output_file else "."
-                        plan_file = os.path.join(output_dir, f"query_{query_num}_plan.txt")
-                        with open(plan_file, 'w') as f:
-                            f.write(f"DuckDB EXPLAIN ANALYZE - Query {query_num}\n")
-                            f.write("=" * 80 + "\n\n")
-                            for row in explain_result:
-                                f.write(str(row[1]) + "\n")  # explain_value column
-                            f.write("\n" + "=" * 80 + "\n")
-                        print(f"\n  ✓ Query plan saved to: {plan_file}")
-
-                    # Execute the actual query for timing
-                    result = conn.execute(query).fetchall()
-                else:
-                    # For DDL queries, execute normally
-                    result = conn.execute(query).fetchall()
+                # Execute the query
+                result = conn.execute(query).fetchall()
 
                 elapsed = time.time() - start
                 iteration_times.append(elapsed)
                 print(f"{elapsed:.2f}s ({len(result)} rows)")
+
+                # After first iteration, parse and save the execution breakdown
+                if i == 0 and os.path.exists(profile_path):
+                    try:
+                        breakdown = get_execution_time_breakdown(profile_path)
+                        breakdown_file = os.path.join(output_dir, f"query_{query_num}_breakdown.json")
+                        with open(breakdown_file, 'w') as fout:
+                            json.dump({"EXECUTION_TIME_BREAKDOWN": breakdown}, fout, indent=2)
+                        print(f"  ✓ Breakdown saved to: {breakdown_file}")
+                    except Exception as pe:
+                        print(f"  ⚠ Failed to parse breakdown: {pe}")
+                elif i == 0:
+                    print(f"  ⚠ Profile file not found: {profile_path}")
+
             except Exception as e:
+                # Ensure profiling is disabled after an error
+                try:
+                    conn.execute("SET profiling_output = ''")
+                except Exception:
+                    pass
                 print(f"ERROR: {e}")
                 break
 
@@ -218,11 +424,11 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
             results[str(query_num)] = iteration_times
 
         print()
-    
+
     # Save results
     with open(output_file, 'w') as f:
         json.dump(results, f, indent=2)
-    
+
     print(f"✓ Results saved to: {output_file}")
     conn.close()
 
@@ -254,4 +460,3 @@ if __name__ == '__main__':
 
     main(args.data_dir, args.queries_dir, args.temp_dir, args.iterations,
          args.output, args.queries, args.memory_limit_mb, args.threads, args.mode, args.db_file, args.timestamp)
-

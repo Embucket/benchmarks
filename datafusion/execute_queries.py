@@ -153,7 +153,7 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
 
         # Execute datafusion-cli with EXPLAIN ANALYZE
         result = subprocess.run(
-            ['datafusion-cli', '-f', temp_file],
+            ['datafusion-cli', '--format', 'json', '-f', temp_file],
             capture_output=True,
             text=True,
             timeout=timeout,

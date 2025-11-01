@@ -77,8 +77,6 @@ def find_result_files(benchmark: str, scale_factor: int, base_dir: str = ".") ->
     return result_files
 
 
-
-
 def load_and_process_results(file_path: str) -> Dict:
     """
     Load a result JSON file and calculate averages for each query.
@@ -97,11 +95,16 @@ def load_and_process_results(file_path: str) -> Dict:
         'timestamp': data.get('timestamp'),
         'ec2_instance_type': data.get('ec2_instance_type',
                                       data.get('snowflake-warehouse-size', 'unknown')),
-        'usd_per_hour': data.get('usd_per_hour', calculate_snowflake_cost(data)),
         'engine': data.get('engine'),
         'mode': data.get('mode'),
         'iterations': data.get('iterations', 3)
     }
+
+    # Handle cost calculation appropriately based on the engine
+    if data.get('engine') == 'snowflake':
+        metadata['usd_per_hour'] = calculate_snowflake_cost(data)
+    else:
+        metadata['usd_per_hour'] = data['usd_per_hour']
 
     # Calculate averages for each query
     query_averages = {}
@@ -134,7 +137,7 @@ def calculate_snowflake_cost(data: Dict) -> float:
         Estimated USD per hour for the Snowflake warehouse
     """
     # Get the warehouse size or use a default value
-    warehouse_size = data.get('snowflake-warehouse-size', 'X-SMALL').upper()
+    warehouse_size = data.get('snowflake-warehouse-size').upper()
 
     # Approximate hourly costs for different Snowflake warehouse sizes
     # Based on general pricing tiers (adjust as needed)
