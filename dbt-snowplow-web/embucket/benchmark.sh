@@ -79,7 +79,7 @@ echo "=========================================="
 echo "Step 4: First Run - Yesterday's Data"
 echo "=========================================="
 echo "Loading events_yesterday.csv..."
-python3 load_events.py ../events_yesterday.csv
+python3 load_events.py --yesterday
 
 cd dbt-snowplow-web/
 
@@ -152,7 +152,7 @@ echo "=========================================="
 cd ..
 
 echo "Loading combined data (yesterday + today)..."
-python3 load_events.py ../events_today.csv
+python3 load_events.py --combined
 
 cd dbt-snowplow-web/
 

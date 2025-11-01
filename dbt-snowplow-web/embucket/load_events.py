@@ -4,8 +4,9 @@ Upload CSV directly to Embucket via HTTP API - NO EC2 FILE TRANSFER NEEDED!
 This is the simplest approach for uploading from your local machine.
 
 Usage:
-    python upload_via_http_api.py events_yesterday.csv
-    python upload_via_http_api.py events_yesterday.csv --host http://your-ec2:3000
+    python load_events.py --yesterday    # First run: load yesterday's data
+    python load_events.py --combined     # Second run: load combined data incrementally
+    python load_events.py --combined --host http://your-ec2:3000
 """
 
 import os
@@ -178,6 +179,46 @@ def upload_csv_via_http(base_url, headers, local_file, database, schema, table_n
         sys.exit(1)
 
 
+def drop_schemas(base_url, headers, database):
+    """Drop the specified schemas."""
+    schemas_to_drop = ['PUBLIC_DERIVED', 'PUBLIC_SCRATCH', 'PUBLIC_SNOWPLOW_MANIFEST']
+    
+    for schema in schemas_to_drop:
+        try:
+            print(f"Dropping schema {database}.{schema}...")
+            query = f"DROP SCHEMA IF EXISTS {database}.{schema} CASCADE"
+            response = requests.post(
+                f"{base_url}/ui/queries",
+                headers={**headers, 'Content-Type': 'application/json'},
+                json={"query": query},
+                timeout=30
+            )
+            if response.status_code in [200, 201]:
+                print(f"✓ Schema {database}.{schema} dropped successfully")
+            else:
+                print(f"⚠ Warning: Could not drop schema {database}.{schema} (status: {response.status_code})")
+        except Exception as e:
+            print(f"⚠ Warning: Could not drop schema {database}.{schema}: {e}")
+
+
+def load_multiple_files(base_url, headers, files, database, schema, table_name):
+    """Load multiple CSV files sequentially without creating a combined file."""
+    total_rows_loaded = 0
+    
+    for file in files:
+        file_path = Path(file)
+        if not file_path.exists():
+            print(f"⚠ Warning: File {file} not found, skipping...")
+            continue
+        
+        print(f"\n📤 Loading {file_path.name}...")
+        rows_loaded = upload_csv_via_http(base_url, headers, str(file_path), database, schema, table_name)
+        total_rows_loaded += rows_loaded
+    
+    print(f"\n✓ Total rows loaded: {total_rows_loaded:,}")
+    return total_rows_loaded
+
+
 def verify_data(base_url, headers, database, schema, table_name):
     """Query the table to verify data was loaded."""
     print(f"\n🔍 Verifying data...")
@@ -206,6 +247,35 @@ def verify_data(base_url, headers, database, schema, table_name):
         print(f"⚠ Could not verify data: {e}")
 
 
+def print_usage():
+    """Print usage information."""
+    print("Usage:")
+    print("  python load_events.py [OPTIONS]")
+    print()
+    print("Options:")
+    print("  --yesterday          Load only events_yesterday.csv (first run)")
+    print("  --combined           Load both events_yesterday.csv and events_today.csv (second run)")
+    print()
+    print("Schema Management:")
+    print("  - First run (--yesterday): Drops PUBLIC_DERIVED, PUBLIC_SCRATCH, PUBLIC_SNOWPLOW_MANIFEST schemas")
+    print("  - Second run (--combined): Preserves existing schemas (incremental mode)")
+    print()
+    print("Additional Options:")
+    print("  --host <url>         Embucket URL (default: http://localhost:3000)")
+    print("  --user <username>    Username (default: embucket)")
+    print("  --password <pass>    Password (default: embucket)")
+    print("  --database <name>    Database (default: embucket)")
+    print("  --schema <name>      Schema (default: atomic)")
+    print("  --table <name>       Table (default: events)")
+    print()
+    print("Examples:")
+    print("  python load_events.py --yesterday    # First run: load yesterday's data")
+    print("  python load_events.py --combined     # Second run: load combined data incrementally")
+    print()
+    print("Or set environment variables:")
+    print("  export EMBUCKET_HOST=http://your-ec2:3000")
+
+
 def main():
     """Main function: Upload CSV via HTTP API."""
     print("=" * 70)
@@ -213,24 +283,44 @@ def main():
     print("Upload from your laptop without moving files to EC2!")
     print("=" * 70)
     
-    # Parse arguments
-    if len(sys.argv) < 2:
-        print("\nUsage: python upload_via_http_api.py <file> [options]")
-        print("\nOptions:")
-        print("  --host <url>         Embucket URL (default: http://localhost:3000)")
-        print("  --user <username>    Username (default: embucket)")
-        print("  --password <pass>    Password (default: embucket)")
-        print("  --database <name>    Database (default: embucket)")
-        print("  --schema <name>      Schema (default: public_snowplow_manifest)")
-        print("  --table <name>       Table (default: events)")
-        print("\nExample:")
-        print("  python upload_via_http_api.py events_yesterday.csv")
-        print("  python upload_via_http_api.py events.csv --host http://ec2-3-123-45-67.compute.amazonaws.com:3000")
-        print("\nOr set environment variables:")
-        print("  export EMBUCKET_HOST=http://your-ec2:3000")
+    # Parse command line arguments
+    mode = None
+    args = sys.argv[1:]
+    
+    for arg in args:
+        if arg in ['-h', '--help']:
+            print_usage()
+            return
+        elif arg == '--yesterday':
+            mode = 'yesterday'
+        elif arg == '--combined':
+            mode = 'combined'
+    
+    if not mode:
+        print("Error: Must specify either --yesterday or --combined")
+        print()
+        print_usage()
         sys.exit(1)
     
-    local_file = sys.argv[1]
+    # Determine files and incremental mode based on run type
+    if mode == 'yesterday':
+        input_files = ['events_yesterday.csv']
+        is_incremental = False
+        print("First run: Loading yesterday's data only")
+    else:  # mode == 'combined'
+        input_files = ['events_yesterday.csv', 'events_today.csv']
+        is_incremental = True
+        print("Second run: Loading combined data (yesterday + today)")
+    
+    script_dir = Path(__file__).parent
+    parent_dir = script_dir.parent
+    input_files = [str(parent_dir / file) for file in input_files]
+    
+    # Check if required files exist
+    for file in input_files:
+        if not Path(file).exists():
+            print(f"Error: {file} not found")
+            sys.exit(1)
     
     # Handle EMBUCKET_HOST and EMBUCKET_PORT separately (if set)
     host = os.getenv('EMBUCKET_HOST', 'localhost')
@@ -254,7 +344,6 @@ def main():
     table_name = 'events'
     
     # Parse optional arguments
-    args = sys.argv[2:]
     i = 0
     while i < len(args):
         if args[i] == '--host' and i + 1 < len(args):
@@ -287,22 +376,25 @@ def main():
             # Has port
             base_url = f'http://{base_url}'
     
-    # Check file exists
-    if not os.path.exists(local_file):
-        print(f"\n✗ Error: File '{local_file}' not found")
-        sys.exit(1)
-    
     print(f"\nConfiguration:")
-    print(f"  File: {local_file}")
+    print(f"  Files: {', '.join([Path(f).name for f in input_files])}")
     print(f"  Embucket: {base_url}")
     print(f"  Target: {database}.{schema}.{table_name}")
+    print(f"  Mode: {'Full run (will drop schemas)' if not is_incremental else 'Incremental run (preserves schemas)'}")
     print()
     
     # Step 1: Authenticate
     access_token = authenticate(base_url, username, password)
     headers = {'Authorization': f'Bearer {access_token}'}
     
-    # Step 2: Run SQL file to set up database, schema, and table
+    # Step 2: Drop schemas unless this is an incremental run
+    if not is_incremental:
+        print("Full run: Dropping existing schemas...")
+        drop_schemas(base_url, headers, database)
+    else:
+        print("Incremental run: Skipping schema drop")
+    
+    # Step 3: Run SQL file to set up database, schema, and table
     script_dir = Path(__file__).parent
     sql_file = script_dir / "create.sql"
     
@@ -311,10 +403,10 @@ def main():
         print("Make sure create.sql exists in the same directory")
         sys.exit(1)
     
-    # Step 3: Upload CSV via HTTP
-    rows_loaded = upload_csv_via_http(base_url, headers, local_file, database, schema, table_name)
+    # Step 4: Load multiple CSV files via HTTP
+    rows_loaded = load_multiple_files(base_url, headers, input_files, database, schema, table_name)
     
-    # Step 4: Verify
+    # Step 5: Verify
     verify_data(base_url, headers, database, schema, table_name)
     
     # Summary
@@ -323,9 +415,11 @@ def main():
     print("=" * 70)
     print(f"\nWhat happened:")
     print(f"  1. Authenticated with Embucket")
-    print(f"  2. Created/verified table exists")
-    print(f"  3. Uploaded CSV via HTTP API (no EC2 file transfer!)")
-    print(f"  4. Loaded {rows_loaded:,} rows into {database}.{schema}.{table_name}")
+    if not is_incremental:
+        print(f"  2. Dropped existing schemas (PUBLIC_DERIVED, PUBLIC_SCRATCH, PUBLIC_SNOWPLOW_MANIFEST)")
+    print(f"  3. Created/verified table exists")
+    print(f"  4. Uploaded {len(input_files)} CSV file(s) via HTTP API (no EC2 file transfer!)")
+    print(f"  5. Loaded {rows_loaded:,} rows into {database}.{schema}.{table_name}")
     print()
 
 
