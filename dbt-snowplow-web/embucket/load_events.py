@@ -396,11 +396,11 @@ def main():
     
     # Step 3: Run SQL file to set up database, schema, and table
     script_dir = Path(__file__).parent
-    sql_file = script_dir / "create.sql"
+    sql_file = script_dir / "../create.sql"
     
     if not run_sql_file(base_url, headers, str(sql_file)):
         print("\n✗ Failed to run SQL setup file")
-        print("Make sure create.sql exists in the same directory")
+        print("Make sure ../create.sql exists in the same directory")
         sys.exit(1)
     
     # Step 4: Load multiple CSV files via HTTP

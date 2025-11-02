@@ -2,8 +2,8 @@
   "metadata": {
     "dbt_schema_version": "https://schemas.getdbt.com/dbt/run-results/v6.json",
     "dbt_version": "1.9.8",
-    "generated_at": "2025-11-01T15:59:18.272779Z",
-    "invocation_id": "1e779c9f-82b8-4c26-aecb-ba1bb5ce90ad",
+    "generated_at": "2025-11-02T11:14:12.070381Z",
+    "invocation_id": "ce1582e1-6654-4a3a-a220-d504dcd0c7ec",
     "env": {}
   },
   "results": [
@@ -12,17 +12,17 @@
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:58:58.945642Z",
-          "completed_at": "2025-11-01T15:58:58.954193Z"
+          "started_at": "2025-11-02T11:13:46.595978Z",
+          "completed_at": "2025-11-02T11:13:46.606121Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:58:58.954555Z",
-          "completed_at": "2025-11-01T15:58:58.954559Z"
+          "started_at": "2025-11-02T11:13:46.606549Z",
+          "completed_at": "2025-11-02T11:13:46.606554Z"
         }
       ],
       "thread_id": "main",
-      "execution_time": 0.008917,
+      "execution_time": 0.010576,
       "adapter_response": {},
       "message": "snowplow_web.on-run-start.0 passed",
       "failures": 0,
@@ -37,22 +37,22 @@
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:58:58.959075Z",
-          "completed_at": "2025-11-01T15:58:58.965899Z"
+          "started_at": "2025-11-02T11:13:46.611450Z",
+          "completed_at": "2025-11-02T11:13:46.625346Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:58:58.966134Z",
-          "completed_at": "2025-11-01T15:58:59.620634Z"
+          "started_at": "2025-11-02T11:13:46.634267Z",
+          "completed_at": "2025-11-02T11:13:47.266725Z"
         }
       ],
       "thread_id": "Thread-1 (worker)",
-      "execution_time": 0.662595272064209,
+      "execution_time": 0.656425952911377,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5dbd9ef"
+        "query_id": "00000000-0000-0000-001d-4457c401797f"
       },
       "message": "02000 1",
       "failures": null,
@@ -68,22 +68,22 @@
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:58:58.962613Z",
-          "completed_at": "2025-11-01T15:58:58.972432Z"
+          "started_at": "2025-11-02T11:13:46.615245Z",
+          "completed_at": "2025-11-02T11:13:46.619074Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:58:58.979059Z",
-          "completed_at": "2025-11-01T15:58:59.619334Z"
+          "started_at": "2025-11-02T11:13:46.619343Z",
+          "completed_at": "2025-11-02T11:13:47.269254Z"
         }
       ],
       "thread_id": "Thread-2 (worker)",
-      "execution_time": 0.6610760688781738,
+      "execution_time": 0.6586220264434814,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5dbf24a"
+        "query_id": "00000000-0000-0000-001d-4457c4015680"
       },
       "message": "02000 1",
       "failures": null,
@@ -99,22 +99,22 @@
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:58:59.626800Z",
-          "completed_at": "2025-11-01T15:59:02.105362Z"
+          "started_at": "2025-11-02T11:13:47.273915Z",
+          "completed_at": "2025-11-02T11:13:49.747131Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:02.105589Z",
-          "completed_at": "2025-11-01T15:59:03.038487Z"
+          "started_at": "2025-11-02T11:13:49.747331Z",
+          "completed_at": "2025-11-02T11:13:50.568766Z"
         }
       ],
       "thread_id": "Thread-4 (worker)",
-      "execution_time": 3.412405014038086,
+      "execution_time": 3.295470952987671,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5acf649"
+        "query_id": "00000000-0000-0000-001d-4457c3d2abb9"
       },
       "message": "02000 1",
       "failures": null,
@@ -130,22 +130,22 @@
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:03.043818Z",
-          "completed_at": "2025-11-01T15:59:03.426456Z"
+          "started_at": "2025-11-02T11:13:50.571110Z",
+          "completed_at": "2025-11-02T11:13:50.955084Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:03.427137Z",
-          "completed_at": "2025-11-01T15:59:04.510438Z"
+          "started_at": "2025-11-02T11:13:50.955720Z",
+          "completed_at": "2025-11-02T11:13:52.274277Z"
         }
       ],
       "thread_id": "Thread-1 (worker)",
-      "execution_time": 1.4681189060211182,
+      "execution_time": 1.7036738395690918,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e58f3a5b"
+        "query_id": "00000000-0000-0000-001d-4457c3b310cc"
       },
       "message": "02000 1",
       "failures": null,
@@ -154,29 +154,29 @@
       "compiled_code": "\n\n\n\n\n\n\n\n        with new_events_session_ids_init as (\n            select\n            \n                COALESCE(\n                    e.domain_sessionid,NULL\n                ) as session_identifier,\n                max(\n                    COALESCE(\n                        e.domain_userid,NULL\n                    )\n                ) as user_identifier, -- Edge case 1: Arbitary selection to avoid window function like first_value.\n            \n                min(collector_tstamp) as start_tstamp,\n                max(collector_tstamp) as end_tstamp\n\n            from embucket.atomic.events e\n\n            where\n                dvce_sent_tstamp <= \n\n    dateadd(\n        day,\n        3,\n        dvce_created_tstamp\n        )\n\n -- don't process data that's too late\n                and collector_tstamp >= \n        cast('2025-09-01 00:00:00' as timestamp)\n    \n                and collector_tstamp <= \n        cast('2025-10-21 00:00:00' as timestamp)\n    \n                and true\n                and True --don't reprocess sessions that have already been processed.\n                \n\n            group by 1\n        ), new_events_session_ids as (\n            select *\n            from new_events_session_ids_init e\n            \n                where session_identifier is not null\n                and not exists (select 1 from embucket.public_snowplow_manifest.snowplow_web_base_quarantined_sessions as a where a.session_identifier = e.session_identifier) -- don't continue processing v.long sessions\n\n        )\n        \n\n        , session_lifecycle as (\n\n        select * from new_events_session_ids\n\n        )\n\n        \n\n        select\n        sl.session_identifier,\n        sl.user_identifier,\n        sl.start_tstamp,\n        least(\n\n    dateadd(\n        day,\n        3,\n        sl.start_tstamp\n        )\n\n, sl.end_tstamp) as end_tstamp -- limit session length to max_session_days\n        \n\n        from session_lifecycle sl\n    ",
       "relation_name": "embucket.public_snowplow_manifest.snowplow_web_base_sessions_lifecycle_manifest",
       "batch_results": null,
-      "actual_row_count": 10000
+      "actual_row_count": 20000
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:04.515994Z",
-          "completed_at": "2025-11-01T15:59:04.742894Z"
+          "started_at": "2025-11-02T11:13:52.276701Z",
+          "completed_at": "2025-11-02T11:13:52.497592Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:04.743523Z",
-          "completed_at": "2025-11-01T15:59:05.970067Z"
+          "started_at": "2025-11-02T11:13:52.498078Z",
+          "completed_at": "2025-11-02T11:13:53.686900Z"
         }
       ],
       "thread_id": "Thread-3 (worker)",
-      "execution_time": 1.4551260471343994,
+      "execution_time": 1.4108591079711914,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e584a55f"
+        "query_id": "00000000-0000-0000-001d-4457c3a87ab9"
       },
       "message": "02000 1",
       "failures": null,
@@ -185,60 +185,60 @@
       "compiled_code": "\n\n\n\n\n\n\n\n\n\n        select\n        s.session_identifier,\n        s.user_identifier,\n        s.start_tstamp,\n        -- end_tstamp used in next step to limit events. When backfilling, set end_tstamp to upper_limit if end_tstamp > upper_limit.\n        -- This ensures we don't accidentally process events after upper_limit\n        case when s.end_tstamp > \n        cast('2025-10-21 00:00:00' as timestamp)\n     then \n        cast('2025-10-21 00:00:00' as timestamp)\n     else s.end_tstamp end as end_tstamp\n\n        from embucket.public_snowplow_manifest.snowplow_web_base_sessions_lifecycle_manifest s\n\n        where\n        -- General window of start_tstamps to limit table scans. Logic complicated by backfills.\n        -- To be within the run, session start_tstamp must be >= lower_limit - max_session_days as we limit end_tstamp in manifest to start_tstamp + max_session_days\n        s.start_tstamp >= \n        cast('2025-08-29 00:00:00' as timestamp)\n    \n        and s.start_tstamp <= \n        cast('2025-10-21 00:00:00' as timestamp)\n    \n        -- Select sessions within window that either; start or finish between lower & upper limit, start and finish outside of lower and upper limits\n        and not (s.start_tstamp > \n        cast('2025-10-21 00:00:00' as timestamp)\n     or s.end_tstamp < \n        cast('2025-09-01 00:00:00' as timestamp)\n    )\n    ",
       "relation_name": "embucket.public_scratch.snowplow_web_base_sessions_this_run",
       "batch_results": null,
-      "actual_row_count": 10000
+      "actual_row_count": 20000
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:05.976126Z",
-          "completed_at": "2025-11-01T15:59:06.182379Z"
+          "started_at": "2025-11-02T11:13:53.692719Z",
+          "completed_at": "2025-11-02T11:13:53.906222Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:06.182898Z",
-          "completed_at": "2025-11-01T15:59:07.938458Z"
+          "started_at": "2025-11-02T11:13:53.906681Z",
+          "completed_at": "2025-11-02T11:13:56.764555Z"
         }
       ],
       "thread_id": "Thread-2 (worker)",
-      "execution_time": 1.9637560844421387,
+      "execution_time": 3.07292103767395,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e56ea32c"
+        "query_id": "00000000-0000-0000-001d-4457c39311c7"
       },
       "message": "02000 1",
       "failures": null,
       "unique_id": "model.snowplow_web.snowplow_web_base_events_this_run",
       "compiled": true,
-      "compiled_code": "\n\n\n\n\n\nwith base_query as (\n  \n        with identified_events AS (\n            select\n                COALESCE(\n                        e.domain_sessionid,NULL\n                    ) as session_identifier,\n                e.*\n                \n\n            from embucket.atomic.events e\n\n        )\n\n        select\n            a.*,\n            b.user_identifier -- take user_identifier from manifest. This ensures only 1 domain_userid per session.\n\n        from identified_events as a\n        inner join embucket.public_scratch.snowplow_web_base_sessions_this_run as b\n        on a.session_identifier = b.session_identifier\n\n        where a.collector_tstamp <= \n\n    dateadd(\n        day,\n        3,\n        b.start_tstamp\n        )\n\n\n        and a.dvce_sent_tstamp <= \n\n    dateadd(\n        day,\n        3,\n        a.dvce_created_tstamp\n        )\n\n\n        and a.collector_tstamp >= \n        cast('2025-09-14 00:00:26.021000' as timestamp)\n    \n        and a.collector_tstamp <= \n        cast('2025-09-14 23:59:47.336000' as timestamp)\n    \n        and a.collector_tstamp >= b.start_tstamp -- deal with late loading events\n\n        \n\n        and true\n\n        qualify row_number() over (partition by a.event_id order by a.collector_tstamp, a.dvce_created_tstamp) = 1\n    \n)\n\nselect\n  a.contexts_com_snowplowanalytics_snowplow_web_page_1[0]:id::varchar as page_view_id,\n  a.session_identifier as domain_sessionid,\n  a.domain_sessionid as original_domain_sessionid,\n  a.user_identifier as domain_userid,\n  a.domain_userid as original_domain_userid,\n  a.* exclude(contexts_com_snowplowanalytics_snowplow_web_page_1, domain_sessionid, domain_userid)\n\nfrom base_query a",
+      "compiled_code": "\n\n\n\n\n\nwith base_query as (\n  \n        with identified_events AS (\n            select\n                COALESCE(\n                        e.domain_sessionid,NULL\n                    ) as session_identifier,\n                e.*\n                \n\n            from embucket.atomic.events e\n\n        )\n\n        select\n            a.*,\n            b.user_identifier -- take user_identifier from manifest. This ensures only 1 domain_userid per session.\n\n        from identified_events as a\n        inner join embucket.public_scratch.snowplow_web_base_sessions_this_run as b\n        on a.session_identifier = b.session_identifier\n\n        where a.collector_tstamp <= \n\n    dateadd(\n        day,\n        3,\n        b.start_tstamp\n        )\n\n\n        and a.dvce_sent_tstamp <= \n\n    dateadd(\n        day,\n        3,\n        a.dvce_created_tstamp\n        )\n\n\n        and a.collector_tstamp >= \n        cast('2025-09-14 00:00:26.021000' as timestamp)\n    \n        and a.collector_tstamp <= \n        cast('2025-09-15 23:59:57.222000' as timestamp)\n    \n        and a.collector_tstamp >= b.start_tstamp -- deal with late loading events\n\n        \n\n        and true\n\n        qualify row_number() over (partition by a.event_id order by a.collector_tstamp, a.dvce_created_tstamp) = 1\n    \n)\n\nselect\n  a.contexts_com_snowplowanalytics_snowplow_web_page_1[0]:id::varchar as page_view_id,\n  a.session_identifier as domain_sessionid,\n  a.domain_sessionid as original_domain_sessionid,\n  a.user_identifier as domain_userid,\n  a.domain_userid as original_domain_userid,\n  a.* exclude(contexts_com_snowplowanalytics_snowplow_web_page_1, domain_sessionid, domain_userid)\n\nfrom base_query a",
       "relation_name": "embucket.public_scratch.snowplow_web_base_events_this_run",
       "batch_results": null,
-      "actual_row_count": 10000
+      "actual_row_count": 20000
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:07.958967Z",
-          "completed_at": "2025-11-01T15:59:07.989653Z"
+          "started_at": "2025-11-02T11:13:56.787325Z",
+          "completed_at": "2025-11-02T11:13:56.813966Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:07.989932Z",
-          "completed_at": "2025-11-01T15:59:08.851853Z"
+          "started_at": "2025-11-02T11:13:56.814447Z",
+          "completed_at": "2025-11-02T11:13:57.713109Z"
         }
       ],
       "thread_id": "Thread-3 (worker)",
-      "execution_time": 0.9042141437530518,
+      "execution_time": 0.9395809173583984,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e551eaab"
+        "query_id": "00000000-0000-0000-001d-4457c365b88a"
       },
       "message": "02000 1",
       "failures": null,
@@ -247,29 +247,29 @@
       "compiled_code": "\n\n\n\nselect\n  ev.page_view_id,\n  \n  ev.domain_sessionid,\n  \n  max(ev.derived_tstamp) as end_tstamp,\n\n  -- aggregate pings:\n    -- divides epoch tstamps by snowplow__heartbeat to get distinct intervals\n    -- floor rounds to nearest integer - duplicates all evaluate to the same number\n    -- count(distinct) counts duplicates only once\n    -- adding snowplow__min_visit_length accounts for the page view event itself.\n\n  10 * (count(distinct(floor(date_part('epoch_seconds', ev.dvce_created_tstamp)/10))) - 1) + 5 as engaged_time_in_s\n\nfrom embucket.public_scratch.snowplow_web_base_events_this_run as ev\n\nwhere ev.event_name = 'page_ping'\nand ev.page_view_id is not null\n\ngroup by 1 , 2 ",
       "relation_name": "embucket.public_scratch.snowplow_web_pv_engaged_time",
       "batch_results": null,
-      "actual_row_count": 1385
+      "actual_row_count": 2791
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:07.965368Z",
-          "completed_at": "2025-11-01T15:59:07.987923Z"
+          "started_at": "2025-11-02T11:13:56.792053Z",
+          "completed_at": "2025-11-02T11:13:56.814218Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:07.988134Z",
-          "completed_at": "2025-11-01T15:59:08.985411Z"
+          "started_at": "2025-11-02T11:13:56.816387Z",
+          "completed_at": "2025-11-02T11:13:57.717527Z"
         }
       ],
       "thread_id": "Thread-1 (worker)",
-      "execution_time": 1.028864860534668,
+      "execution_time": 0.9435520172119141,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5521976"
+        "query_id": "00000000-0000-0000-001d-4457c365d069"
       },
       "message": "02000 1",
       "failures": null,
@@ -278,29 +278,29 @@
       "compiled_code": "\n\n\n\nwith prep as (\n  select\n    ev.page_view_id,\n    \n    ev.domain_sessionid,\n    \n\n    max(ev.doc_width) as doc_width,\n    max(ev.doc_height) as doc_height,\n\n    max(ev.br_viewwidth) as br_viewwidth,\n    max(ev.br_viewheight) as br_viewheight,\n\n    -- coalesce replaces null with 0 (because the page view event does send an offset)\n    -- greatest prevents outliers (negative offsets)\n    -- least also prevents outliers (offsets greater than the docwidth or docheight)\n\n    least(greatest(min(coalesce(ev.pp_xoffset_min, 0)), 0), max(ev.doc_width)) as hmin, -- should be zero\n    least(greatest(max(coalesce(ev.pp_xoffset_max, 0)), 0), max(ev.doc_width)) as hmax,\n\n    least(greatest(min(coalesce(ev.pp_yoffset_min, 0)), 0), max(ev.doc_height)) as vmin, -- should be zero (edge case: not zero because the pv event is missing)\n    least(greatest(max(coalesce(ev.pp_yoffset_max, 0)), 0), max(ev.doc_height)) as vmax\n\n  from embucket.public_scratch.snowplow_web_base_events_this_run as ev\n\n  where ev.event_name in ('page_view', 'page_ping')\n    and ev.page_view_id is not null\n    and ev.doc_height > 0 -- exclude problematic (but rare) edge case\n    and ev.doc_width > 0 -- exclude problematic (but rare) edge case\n\n  group by 1 , 2 \n)\n\nselect\n  page_view_id,\n  \n  domain_sessionid,\n  \n\n  doc_width,\n  doc_height,\n\n  br_viewwidth,\n  br_viewheight,\n\n  hmin,\n  hmax,\n  vmin,\n  vmax,\n\n  cast(round(100*(greatest(hmin, 0)/cast(doc_width as float))) as float) as relative_hmin, -- brackets matter: because hmin is of type int, we need to divide before we multiply by 100 or we risk an overflow\n  cast(round(100*(least(hmax + br_viewwidth, doc_width)/cast(doc_width as float))) as float) as relative_hmax,\n  cast(round(100*(greatest(vmin, 0)/cast(doc_height as float))) as float) as relative_vmin,\n  cast(round(100*(least(vmax + br_viewheight, doc_height)/cast(doc_height as float))) as float) as relative_vmax -- not zero when a user hasn't scrolled because it includes the non-zero viewheight\n\nfrom prep",
       "relation_name": "embucket.public_scratch.snowplow_web_pv_scroll_depth",
       "batch_results": null,
-      "actual_row_count": 2825
+      "actual_row_count": 5695
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:07.948517Z",
-          "completed_at": "2025-11-01T15:59:07.986002Z"
+          "started_at": "2025-11-02T11:13:56.776111Z",
+          "completed_at": "2025-11-02T11:13:56.818174Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:07.986244Z",
-          "completed_at": "2025-11-01T15:59:08.986908Z"
+          "started_at": "2025-11-02T11:13:56.818710Z",
+          "completed_at": "2025-11-02T11:13:57.828994Z"
         }
       ],
       "thread_id": "Thread-4 (worker)",
-      "execution_time": 1.043471097946167,
+      "execution_time": 1.0559208393096924,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5522d7c"
+        "query_id": "00000000-0000-0000-001d-4457c3655bbd"
       },
       "message": "02000 1",
       "failures": null,
@@ -309,91 +309,29 @@
       "compiled_code": "\n\n\n\nwith prep as (\n\n  select\n    e.event_id,\n    e.domain_userid,\n    e.original_domain_userid,\n    e.user_id,\n    e.geo_country,\n    e.page_view_id,\n    e.domain_sessionid,\n    e.original_domain_sessionid,\n    e.derived_tstamp,\n    e.load_tstamp,\n    e.event_name,\n    e.unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1:eventType::varchar as event_type,\n    e.unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1:basisForProcessing::varchar as basis_for_processing,\n    e.unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1:consentUrl::varchar as consent_url,\n    e.unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1:consentVersion::varchar as consent_version,\n    e.unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1:consentScopes::array as consent_scopes,\n    e.unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1:domainsApplied::array as domains_applied,\n    e.unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1:gdprApplies::boolean as gdpr_applies,\n    e.unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1:elapsedTime::float as cmp_load_time\n\n  from embucket.public_scratch.snowplow_web_base_events_this_run as e\n\n  where event_name in ('cmp_visible', 'consent_preferences')\n\n  and True --returns false if run doesn't contain new events.\n\n  \n      \n  and not rlike(lower(useragent), '.*(bot|crawl|slurp|spider|archiv|spinn|sniff|seo|audit|survey|pingdom|worm|capture|(browser|screen)shots|analyz|index|thumb|check|facebook|pingdombot|phantomjs|yandexbot|twitterbot|a_archiver|facebookexternalhit|bingbot|bingpreview|googlebot|baiduspider|360(spider|user-agent)|semalt).*')\n\n  \n\n)\n\nselect\n  p.event_id,\n  p.domain_userid,\n  p.original_domain_userid,\n  p.user_id,\n  p.geo_country,\n  p.page_view_id,\n  p.domain_sessionid,\n  p.original_domain_sessionid,\n  p.derived_tstamp,\n  p.load_tstamp,\n  p.event_name,\n  p.event_type,\n  p.basis_for_processing,\n  p.consent_url,\n  p.consent_version,\n  \n    array_to_string(p.consent_scopes,', ')\n as consent_scopes,\n  \n    array_to_string(p.domains_applied,', ')\n as domains_applied,\n  coalesce(p.gdpr_applies, false) as gdpr_applies,\n  p.cmp_load_time\n\nfrom prep p",
       "relation_name": "embucket.public_scratch.snowplow_web_consent_events_this_run",
       "batch_results": null,
-      "actual_row_count": 2846
+      "actual_row_count": 5666
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:08.856753Z",
-          "completed_at": "2025-11-01T15:59:08.866336Z"
+          "started_at": "2025-11-02T11:13:57.732099Z",
+          "completed_at": "2025-11-02T11:13:57.744831Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:08.866856Z",
-          "completed_at": "2025-11-01T15:59:09.844782Z"
-        }
-      ],
-      "thread_id": "Thread-3 (worker)",
-      "execution_time": 0.9889888763427734,
-      "adapter_response": {
-        "_message": "02000 1",
-        "code": "02000",
-        "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e545c259"
-      },
-      "message": "02000 1",
-      "failures": null,
-      "unique_id": "model.snowplow_web.snowplow_web_user_mapping",
-      "compiled": true,
-      "compiled_code": "\n\n\n\n\nselect distinct\n  domain_userid,\n  last_value(user_id) over(\n    partition by domain_userid\n    order by collector_tstamp\n    rows between unbounded preceding and unbounded following\n  ) as user_id,\n  max(collector_tstamp) over (partition by domain_userid) as end_tstamp\n\nfrom embucket.public_scratch.snowplow_web_base_events_this_run\n\nwhere True --returns false if run doesn't contain new events.\nand user_id is not null\nand domain_userid is not null",
-      "relation_name": "embucket.public_derived.snowplow_web_user_mapping",
-      "batch_results": null,
-      "actual_row_count": 10000
-    },
-    {
-      "status": "success",
-      "timing": [
-        {
-          "name": "compile",
-          "started_at": "2025-11-01T15:59:08.998369Z",
-          "completed_at": "2025-11-01T15:59:09.004344Z"
-        },
-        {
-          "name": "execute",
-          "started_at": "2025-11-01T15:59:09.004650Z",
-          "completed_at": "2025-11-01T15:59:10.116887Z"
-        }
-      ],
-      "thread_id": "Thread-4 (worker)",
-      "execution_time": 1.1257681846618652,
-      "adapter_response": {
-        "_message": "02000 1",
-        "code": "02000",
-        "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5397a7b"
-      },
-      "message": "02000 1",
-      "failures": null,
-      "unique_id": "model.snowplow_web.snowplow_web_consent_log",
-      "compiled": true,
-      "compiled_code": "\n\n\n\nselect\n  *\n  \n\nfrom embucket.public_scratch.snowplow_web_consent_events_this_run\n\nwhere True --returns false if run doesn't contain new events.",
-      "relation_name": "embucket.public_derived.snowplow_web_consent_log",
-      "batch_results": null,
-      "actual_row_count": 2846
-    },
-    {
-      "status": "success",
-      "timing": [
-        {
-          "name": "compile",
-          "started_at": "2025-11-01T15:59:08.992230Z",
-          "completed_at": "2025-11-01T15:59:09.007093Z"
-        },
-        {
-          "name": "execute",
-          "started_at": "2025-11-01T15:59:09.007308Z",
-          "completed_at": "2025-11-01T15:59:10.356086Z"
+          "started_at": "2025-11-02T11:13:57.745146Z",
+          "completed_at": "2025-11-02T11:13:59.931074Z"
         }
       ],
       "thread_id": "Thread-1 (worker)",
-      "execution_time": 1.3653440475463867,
+      "execution_time": 2.207693099975586,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5436bde"
+        "query_id": "00000000-0000-0000-001d-4457c35896b6"
       },
       "message": "02000 1",
       "failures": null,
@@ -402,29 +340,153 @@
       "compiled_code": "\n\n\n\nwith prep as (\n\n  select\n    e.event_id,\n    e.event_name,\n    e.app_id,\n    e.platform,\n    e.domain_userid,\n    e.original_domain_userid,\n    e.user_id,\n    e.page_view_id,\n    e.domain_sessionid,\n    e.original_domain_sessionid,\n    e.collector_tstamp,\n    e.derived_tstamp,\n    e.dvce_created_tstamp,\n    e.load_tstamp,\n    e.geo_country,\n    e.page_url,\n    e.page_title,\n    e.useragent,\n\n    contexts_nl_basjes_yauaa_context_1[0]:deviceClass::VARCHAR as device_class,\n        contexts_nl_basjes_yauaa_context_1[0]:agentClass::VARCHAR as agent_class,\n        contexts_nl_basjes_yauaa_context_1[0]:agentName::VARCHAR as agent_name,\n        contexts_nl_basjes_yauaa_context_1[0]:agentNameVersion::VARCHAR as agent_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:agentNameVersionMajor::VARCHAR as agent_name_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:agentVersion::VARCHAR as agent_version,\n        contexts_nl_basjes_yauaa_context_1[0]:agentVersionMajor::VARCHAR as agent_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceBrand::VARCHAR as device_brand,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceName::VARCHAR as device_name,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceVersion::VARCHAR as device_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineClass::VARCHAR as layout_engine_class,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineName::VARCHAR as layout_engine_name,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineNameVersion::VARCHAR as layout_engine_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineNameVersionMajor::VARCHAR as layout_engine_name_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineVersion::VARCHAR as layout_engine_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineVersionMajor::VARCHAR as layout_engine_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemClass::VARCHAR as operating_system_class,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemName::VARCHAR as operating_system_name,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemNameVersion::VARCHAR as operating_system_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemVersion::VARCHAR as operating_system_version,\n\n    ceil(e.unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1:lcp::decimal(14,4), 3) /1000 as lcp,\n    ceil(e.unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1:fcp::decimal(14,4), 3) as fcp,\n    ceil(e.unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1:fid::decimal(14,4), 3) as fid,\n    ceil(e.unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1:cls::decimal(14,4), 3) as cls,\n    ceil(e.unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1:inp::decimal(14,4), 3) as inp,\n    ceil(e.unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1:ttfb::decimal(14,4), 3) as ttfb,\n    e.unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1:navigationType::varchar as navigation_type\n\n  from embucket.public_scratch.snowplow_web_base_events_this_run as e\n\n  where True --returns false if run doesn't contain new events.\n\n  and event_name = 'web_vitals'\n\n  and page_view_id is not null\n\n  -- exclude bot traffic\n\n  \n    and not \ne.contexts_com_iab_snowplow_spiders_and_robots_1[0]:spiderOrRobot::boolean\n = True\n  \n\n  \n  and not rlike(lower(useragent), '.*(bot|crawl|slurp|spider|archiv|spinn|sniff|seo|audit|survey|pingdom|worm|capture|(browser|screen)shots|analyz|index|thumb|check|facebook|pingdombot|phantomjs|yandexbot|twitterbot|a_archiver|facebookexternalhit|bingbot|bingpreview|googlebot|baiduspider|360(spider|user-agent)|semalt).*')\n\n\n)\n\nselect\n  event_id,\n  event_name,\n  app_id,\n  platform,\n  domain_userid,\n  original_domain_userid,\n  user_id,\n  page_view_id,\n  domain_sessionid,\n  original_domain_sessionid,\n  collector_tstamp,\n  derived_tstamp,\n  dvce_created_tstamp,\n  load_tstamp,\n  geo_country,\n  page_url,\n  page_title,\n  useragent,\n  lower(device_class) as device_class,\n  agent_class,\n  agent_name,\n  agent_name_version,\n  agent_name_version_major,\n  agent_version,\n  agent_version_major,\n  device_brand,\n  device_name,\n  device_version,\n  layout_engine_class,\n  layout_engine_name,\n  layout_engine_name_version,\n  layout_engine_name_version_major,\n  layout_engine_version,\n  layout_engine_version_major,\n  operating_system_class,\n  operating_system_name,\n  operating_system_name_version,\n  operating_system_version,\n  lcp,\n  fcp,\n  fid,\n  cls,\n  inp,\n  ttfb,\n  navigation_type\n\nfrom prep p",
       "relation_name": "embucket.public_scratch.snowplow_web_vital_events_this_run",
       "batch_results": null,
-      "actual_row_count": 1427
+      "actual_row_count": 2934
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:07.970836Z",
-          "completed_at": "2025-11-01T15:59:07.992110Z"
+          "started_at": "2025-11-02T11:13:57.724533Z",
+          "completed_at": "2025-11-02T11:13:57.740119Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:07.992387Z",
-          "completed_at": "2025-11-01T15:59:10.593965Z"
+          "started_at": "2025-11-02T11:13:57.740483Z",
+          "completed_at": "2025-11-02T11:14:00.094250Z"
         }
       ],
-      "thread_id": "Thread-2 (worker)",
-      "execution_time": 2.637026786804199,
+      "thread_id": "Thread-3 (worker)",
+      "execution_time": 2.371466875076294,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e551fac5"
+        "query_id": "00000000-0000-0000-001d-4457c35889c6"
+      },
+      "message": "02000 1",
+      "failures": null,
+      "unique_id": "model.snowplow_web.snowplow_web_user_mapping",
+      "compiled": true,
+      "compiled_code": "\n\n\n\n\nselect distinct\n  domain_userid,\n  last_value(user_id) over(\n    partition by domain_userid\n    order by collector_tstamp\n    rows between unbounded preceding and unbounded following\n  ) as user_id,\n  max(collector_tstamp) over (partition by domain_userid) as end_tstamp\n\nfrom embucket.public_scratch.snowplow_web_base_events_this_run\n\nwhere True --returns false if run doesn't contain new events.\nand user_id is not null\nand domain_userid is not null",
+      "relation_name": "embucket.public_derived.snowplow_web_user_mapping",
+      "batch_results": null,
+      "actual_row_count": 20000
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2025-11-02T11:13:57.832145Z",
+          "completed_at": "2025-11-02T11:13:57.843811Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2025-11-02T11:13:57.844094Z",
+          "completed_at": "2025-11-02T11:14:00.864439Z"
+        }
+      ],
+      "thread_id": "Thread-4 (worker)",
+      "execution_time": 3.033021926879883,
+      "adapter_response": {
+        "_message": "02000 1",
+        "code": "02000",
+        "rows_affected": 1,
+        "query_id": "00000000-0000-0000-001d-4457c356fed0"
+      },
+      "message": "02000 1",
+      "failures": null,
+      "unique_id": "model.snowplow_web.snowplow_web_page_views_this_run",
+      "compiled": true,
+      "compiled_code": "\n\n\n\nwith prep as (\nselect\n  ev.page_view_id,\n  ev.event_id,\n\n  ev.app_id,\n  ev.platform,\n\n  -- user fields\n  ev.user_id,\n  ev.domain_userid,\n  ev.original_domain_userid,\n  \n    cast(null as TEXT) as stitched_user_id,\n  \n  ev.network_userid,\n\n  -- session fields\n  ev.domain_sessionid,\n  ev.original_domain_sessionid,\n  ev.domain_sessionidx,\n\n  -- timestamp fields\n  ev.dvce_created_tstamp,\n  ev.collector_tstamp,\n  ev.derived_tstamp,\n  ev.derived_tstamp as start_tstamp,\n\n  ev.doc_width,\n  ev.doc_height,\n\n  ev.page_title,\n  \n  case when ev.page_url like '%/product%' then 'PDP'\n      when ev.page_url like '%/list%' then 'PLP'\n      when ev.page_url like '%/checkout%' then 'checkout'\n      when ev.page_url like '%/home%' then 'homepage'\n      else 'other'\n  end\n\n as content_group,\n  ev.page_url,\n  ev.page_urlscheme,\n  ev.page_urlhost,\n  ev.page_urlpath,\n  ev.page_urlquery,\n  ev.page_urlfragment,\n\n  -- marketing fields\n  ev.mkt_medium,\n  ev.mkt_source,\n  ev.mkt_term,\n  ev.mkt_content,\n  ev.mkt_campaign,\n  ev.mkt_clickid,\n  ev.mkt_network,\n  \ncase\n   when lower(trim(mkt_source)) = '(direct)' and lower(trim(mkt_medium)) in ('(not set)', '(none)') then 'Direct'\n   when lower(trim(mkt_medium)) like '%cross-network%' then 'Cross-network'\n   when regexp_like(lower(trim(mkt_medium)), '^(.*cp.*|ppc|retargeting|paid.*)$') then\n      case\n         when upper(source_category) = 'SOURCE_CATEGORY_SHOPPING'\n            or regexp_like(lower(trim(mkt_campaign)), '^(.*(([^a-df-z]|^)shop|shopping).*)$') then 'Paid Shopping'\n         when upper(source_category) = 'SOURCE_CATEGORY_SEARCH' then 'Paid Search'\n         when upper(source_category) = 'SOURCE_CATEGORY_SOCIAL' then 'Paid Social'\n         when upper(source_category) = 'SOURCE_CATEGORY_VIDEO' then 'Paid Video'\n         else 'Paid Other'\n      end\n   when lower(trim(mkt_medium)) in ('display', 'banner', 'expandable', 'intersitial', 'cpm') then 'Display'\n   when upper(source_category) = 'SOURCE_CATEGORY_SHOPPING'\n      or regexp_like(lower(trim(mkt_campaign)), '^(.*(([^a-df-z]|^)shop|shopping).*)$') then 'Organic Shopping'\n   when upper(source_category) = 'SOURCE_CATEGORY_SOCIAL' or lower(trim(mkt_medium)) in ('social', 'social-network', 'sm', 'social network', 'social media') then 'Organic Social'\n   when upper(source_category) = 'SOURCE_CATEGORY_VIDEO'\n      or regexp_like(lower(trim(mkt_medium)), '^(.*video.*)$') then 'Organic Video'\n   when upper(source_category) = 'SOURCE_CATEGORY_SEARCH' or lower(trim(mkt_medium)) = 'organic' then 'Organic Search'\n   when lower(trim(mkt_medium)) in ('referral', 'app', 'link') then 'Referral'\n   when lower(trim(mkt_source)) in ('email', 'e-mail', 'e_mail', 'e mail') or lower(trim(mkt_medium)) in ('email', 'e-mail', 'e_mail', 'e mail') then 'Email'\n   when lower(trim(mkt_medium)) = 'affiliate' then 'Affiliates'\n   when lower(trim(mkt_medium)) = 'audio' then 'Audio'\n   when lower(trim(mkt_source)) = 'sms' or lower(trim(mkt_medium)) = 'sms' then 'SMS'\n   when lower(trim(mkt_medium)) like '%push' or regexp_like(lower(trim(mkt_medium)), '.*(mobile|notification).*') or lower(trim(mkt_source)) = 'firebase' then 'Mobile Push Notifications'\n   else 'Unassigned'\nend\n as default_channel_group,\n\n  -- referrer fields\n  ev.page_referrer,\n  ev.refr_urlscheme,\n  ev.refr_urlhost,\n  ev.refr_urlpath,\n  ev.refr_urlquery,\n  ev.refr_urlfragment,\n  ev.refr_medium,\n  ev.refr_source,\n  ev.refr_term,\n\n  -- geo fields\n  ev.geo_country,\n  ev.geo_region,\n  ev.geo_region_name,\n  ev.geo_city,\n  ev.geo_zipcode,\n  ev.geo_latitude,\n  ev.geo_longitude,\n  ev.geo_timezone ,\n\n  ev.user_ipaddress,\n\n  ev.useragent,\n\n  ev.dvce_screenwidth || 'x' || ev.dvce_screenheight as screen_resolution,\n\n  ev.br_lang,\n  ev.br_viewwidth,\n  ev.br_viewheight,\n  ev.br_colordepth,\n  ev.br_renderengine,\n  ev.os_timezone,\n\n  -- optional fields, only populated if enabled.\n\n  -- iab enrichment fields: set iab variable to true to enable\n  \n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:category::VARCHAR as category,\n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:primaryImpact::VARCHAR as primary_impact,\n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:reason::VARCHAR as reason,\n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:spiderOrRobot::BOOLEAN as spider_or_robot,\n\n  -- ua parser enrichment fields\n  contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentFamily::VARCHAR as useragent_family,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentMajor::VARCHAR as useragent_major,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentMinor::VARCHAR as useragent_minor,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentPatch::VARCHAR as useragent_patch,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentVersion::VARCHAR as useragent_version,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osFamily::VARCHAR as os_family,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osMajor::VARCHAR as os_major,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osMinor::VARCHAR as os_minor,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osPatch::VARCHAR as os_patch,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osPatchMinor::VARCHAR as os_patch_minor,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osVersion::VARCHAR as os_version,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:deviceFamily::VARCHAR as device_family\n\n,\n\n  -- yauaa enrichment fields\n  contexts_nl_basjes_yauaa_context_1[0]:deviceClass::VARCHAR as device_class,\n        contexts_nl_basjes_yauaa_context_1[0]:agentClass::VARCHAR as agent_class,\n        contexts_nl_basjes_yauaa_context_1[0]:agentName::VARCHAR as agent_name,\n        contexts_nl_basjes_yauaa_context_1[0]:agentNameVersion::VARCHAR as agent_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:agentNameVersionMajor::VARCHAR as agent_name_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:agentVersion::VARCHAR as agent_version,\n        contexts_nl_basjes_yauaa_context_1[0]:agentVersionMajor::VARCHAR as agent_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceBrand::VARCHAR as device_brand,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceName::VARCHAR as device_name,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceVersion::VARCHAR as device_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineClass::VARCHAR as layout_engine_class,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineName::VARCHAR as layout_engine_name,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineNameVersion::VARCHAR as layout_engine_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineNameVersionMajor::VARCHAR as layout_engine_name_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineVersion::VARCHAR as layout_engine_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineVersionMajor::VARCHAR as layout_engine_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemClass::VARCHAR as operating_system_class,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemName::VARCHAR as operating_system_name,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemNameVersion::VARCHAR as operating_system_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemVersion::VARCHAR as operating_system_version\n\n  from embucket.public_scratch.snowplow_web_base_events_this_run as ev\n\n  left join embucket.public_snowplow_manifest.snowplow_web_dim_ga4_source_categories c on lower(trim(ev.mkt_source)) = lower(c.source)\n\n  where ev.event_name = 'page_view'\n  and ev.page_view_id is not null\n\n  \n     \n  and not rlike(lower(ev.useragent), '.*(bot|crawl|slurp|spider|archiv|spinn|sniff|seo|audit|survey|pingdom|worm|capture|(browser|screen)shots|analyz|index|thumb|check|facebook|pingdombot|phantomjs|yandexbot|twitterbot|a_archiver|facebookexternalhit|bingbot|bingpreview|googlebot|baiduspider|360(spider|user-agent)|semalt).*')\n\n  \n\n  qualify row_number() over (partition by ev.page_view_id order by ev.derived_tstamp, ev.dvce_created_tstamp) = 1\n)\n\n, page_view_events as (\n  select\n    p.page_view_id,\n    p.event_id,\n\n    p.app_id,\n    p.platform,\n\n    -- user fields\n    p.user_id,\n    p.domain_userid,\n    p.original_domain_userid,\n    p.stitched_user_id,\n    p.network_userid,\n\n    -- session fields\n    p.domain_sessionid,\n    p.original_domain_sessionid,\n    p.domain_sessionidx,\n\n    row_number() over (partition by p.domain_sessionid order by p.derived_tstamp, p.dvce_created_tstamp, p.event_id) AS page_view_in_session_index,\n\n    -- timestamp fields\n    p.dvce_created_tstamp,\n    p.collector_tstamp,\n    p.derived_tstamp,\n    p.start_tstamp,\n    coalesce(t.end_tstamp, p.derived_tstamp) as end_tstamp, -- only page views with pings will have a row in table t\n    \n    convert_timezone('UTC', convert_timezone('UTC', current_timestamp()))::timestamp\n as model_tstamp,\n\n    coalesce(t.engaged_time_in_s, 0) as engaged_time_in_s, -- where there are no pings, engaged time is 0.\n    datediff(\n        second,\n        p.derived_tstamp,\n        coalesce(t.end_tstamp, p.derived_tstamp)\n        ) as absolute_time_in_s,\n\n    sd.hmax as horizontal_pixels_scrolled,\n    sd.vmax as vertical_pixels_scrolled,\n\n    sd.relative_hmax as horizontal_percentage_scrolled,\n    sd.relative_vmax as vertical_percentage_scrolled,\n\n    p.doc_width,\n    p.doc_height,\n\n    p.content_group,\n\n    p.page_title,\n    p.page_url,\n    p.page_urlscheme,\n    p.page_urlhost,\n    p.page_urlpath,\n    p.page_urlquery,\n    p.page_urlfragment,\n\n    p.mkt_medium,\n    p.mkt_source,\n    p.mkt_term,\n    p.mkt_content,\n    p.mkt_campaign,\n    p.mkt_clickid,\n    p.mkt_network,\n    p.default_channel_group,\n\n    p.page_referrer,\n    p.refr_urlscheme,\n    p.refr_urlhost,\n    p.refr_urlpath,\n    p.refr_urlquery,\n    p.refr_urlfragment,\n    p.refr_medium,\n    p.refr_source,\n    p.refr_term,\n\n    p.geo_country,\n    p.geo_region,\n    p.geo_region_name,\n    p.geo_city,\n    p.geo_zipcode,\n    p.geo_latitude,\n    p.geo_longitude,\n    p.geo_timezone,\n\n    p.user_ipaddress,\n\n    p.useragent,\n\n    p.screen_resolution,\n\n    p.br_lang,\n    p.br_viewwidth,\n    p.br_viewheight,\n    p.br_colordepth,\n    p.br_renderengine,\n\n    p.os_timezone,\n\n    p.category,\n    p.primary_impact,\n    p.reason,\n    p.spider_or_robot,\n\n    p.useragent_family,\n    p.useragent_major,\n    p.useragent_minor,\n    p.useragent_patch,\n    p.useragent_version,\n    p.os_family,\n    p.os_major,\n    p.os_minor,\n    p.os_patch,\n    p.os_patch_minor,\n    p.os_version,\n    p.device_family,\n\n    p.device_class,\n    p.agent_class,\n    p.agent_name,\n    p.agent_name_version,\n    p.agent_name_version_major,\n    p.agent_version,\n    p.agent_version_major,\n    p.device_brand,\n    p.device_name,\n    p.device_version,\n    p.layout_engine_class,\n    p.layout_engine_name,\n    p.layout_engine_name_version,\n    p.layout_engine_name_version_major,\n    p.layout_engine_version,\n    p.layout_engine_version_major,\n    p.operating_system_class,\n    p.operating_system_name,\n    p.operating_system_name_version,\n    p.operating_system_version\n\n  from prep p\n\n  left join embucket.public_scratch.snowplow_web_pv_engaged_time t\n  on p.page_view_id = t.page_view_id  and p.domain_sessionid = t.domain_sessionid \n\n  left join embucket.public_scratch.snowplow_web_pv_scroll_depth sd\n  on p.page_view_id = sd.page_view_id  and p.domain_sessionid = sd.domain_sessionid \n)\n\nselect\n  pve.page_view_id,\n  pve.event_id,\n\n  pve.app_id,\n  pve.platform,\n\n  -- user fields\n  pve.user_id,\n  pve.domain_userid,\n  pve.original_domain_userid,\n  pve.stitched_user_id,\n  pve.network_userid,\n\n  -- session fields\n  pve.domain_sessionid,\n  pve.original_domain_sessionid,\n  pve.domain_sessionidx,\n\n  pve.page_view_in_session_index,\n  max(pve.page_view_in_session_index) over (partition by pve.domain_sessionid) as page_views_in_session,\n\n  -- timestamp fields\n  pve.dvce_created_tstamp,\n  pve.collector_tstamp,\n  pve.derived_tstamp,\n  pve.start_tstamp,\n  pve.end_tstamp,\n  pve.model_tstamp,\n\n  pve.engaged_time_in_s,\n  pve.absolute_time_in_s,\n\n  pve.horizontal_pixels_scrolled,\n  pve.vertical_pixels_scrolled,\n\n  pve.horizontal_percentage_scrolled,\n  pve.vertical_percentage_scrolled,\n\n  pve.doc_width,\n  pve.doc_height,\n  pve.content_group,\n\n  pve.page_title,\n  pve.page_url,\n  pve.page_urlscheme,\n  pve.page_urlhost,\n  pve.page_urlpath,\n  pve.page_urlquery,\n  pve.page_urlfragment,\n\n  pve.mkt_medium,\n  pve.mkt_source,\n  pve.mkt_term,\n  pve.mkt_content,\n  pve.mkt_campaign,\n  pve.mkt_clickid,\n  pve.mkt_network,\n  pve.default_channel_group,\n\n  pve.page_referrer,\n  pve.refr_urlscheme,\n  pve.refr_urlhost,\n  pve.refr_urlpath,\n  pve.refr_urlquery,\n  pve.refr_urlfragment,\n  pve.refr_medium,\n  pve.refr_source,\n  pve.refr_term,\n\n  pve.geo_country,\n  pve.geo_region,\n  pve.geo_region_name,\n  pve.geo_city,\n  pve.geo_zipcode,\n  pve.geo_latitude,\n  pve.geo_longitude,\n  pve.geo_timezone,\n\n  pve.user_ipaddress,\n\n  pve.useragent,\n\n  pve.br_lang,\n  pve.br_viewwidth,\n  pve.br_viewheight,\n  pve.br_colordepth,\n  pve.br_renderengine,\n\n  pve.os_timezone,\n\n  pve.category,\n  pve.primary_impact,\n  pve.reason,\n  pve.spider_or_robot,\n\n  pve.useragent_family,\n  pve.useragent_major,\n  pve.useragent_minor,\n  pve.useragent_patch,\n  pve.useragent_version,\n  pve.os_family,\n  pve.os_major,\n  pve.os_minor,\n  pve.os_patch,\n  pve.os_patch_minor,\n  pve.os_version,\n  pve.device_family,\n\n  pve.device_class,\n  case when pve.device_class = 'Desktop' then 'Desktop'\n    when pve.device_class = 'Phone' then 'Mobile'\n    when pve.device_class = 'Tablet' then 'Tablet'\n    else 'Other' end as device_category,\n  pve.screen_resolution,\n  pve.agent_class,\n  pve.agent_name,\n  pve.agent_name_version,\n  pve.agent_name_version_major,\n  pve.agent_version,\n  pve.agent_version_major,\n  pve.device_brand,\n  pve.device_name,\n  pve.device_version,\n  pve.layout_engine_class,\n  pve.layout_engine_name,\n  pve.layout_engine_name_version,\n  pve.layout_engine_name_version_major,\n  pve.layout_engine_version,\n  pve.layout_engine_version_major,\n  pve.operating_system_class,\n  pve.operating_system_name,\n  pve.operating_system_name_version,\n  pve.operating_system_version\n\nfrom page_view_events pve",
+      "relation_name": "embucket.public_scratch.snowplow_web_page_views_this_run",
+      "batch_results": null,
+      "actual_row_count": 2904
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2025-11-02T11:14:00.098825Z",
+          "completed_at": "2025-11-02T11:14:00.105578Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2025-11-02T11:14:00.106008Z",
+          "completed_at": "2025-11-02T11:14:01.082671Z"
+        }
+      ],
+      "thread_id": "Thread-3 (worker)",
+      "execution_time": 0.9855151176452637,
+      "adapter_response": {
+        "_message": "02000 1",
+        "code": "02000",
+        "rows_affected": 1,
+        "query_id": "00000000-0000-0000-001d-4457c3348700"
+      },
+      "message": "02000 1",
+      "failures": null,
+      "unique_id": "model.snowplow_web.snowplow_web_vitals_this_run",
+      "compiled": true,
+      "compiled_code": "\n\n\n\nwith prep as (\n\n  select\n    e.event_id,\n    e.event_name,\n    e.app_id,\n    e.platform,\n    e.domain_userid,\n    e.original_domain_userid,\n    e.user_id,\n    e.page_view_id,\n    e.domain_sessionid,\n    e.original_domain_sessionid,\n    e.collector_tstamp,\n    e.derived_tstamp,\n    e.load_tstamp,\n    coalesce(e.geo_country, 'unknown_geo_country') as geo_country,\n    coalesce(e.page_url, 'unknown_page_url') as page_url,\n    \n\n  case when page_url like '%/product%' then 'PDP'\n      when page_url like '%/list%' then 'PLP'\n      when page_url like '%/checkout%' then 'checkout'\n      when page_url like '%/home%' then 'homepage'\n      else 'other' end\n\n as url_group,\n    e.page_title,\n    e.useragent,\n    coalesce(e.device_class, 'unknown_device_class') as device_class,\n    e.device_name,\n    e.agent_name,\n    e.agent_version,\n    e.operating_system_name,\n    e.lcp,\n    e.fcp,\n    e.fid,\n    e.cls,\n    e.inp,\n    e.ttfb,\n    e.navigation_type,\n    row_number() over (partition by e.page_view_id order by e.derived_tstamp, e.dvce_created_tstamp, e.event_id) dedupe_index\n\n  from embucket.public_scratch.snowplow_web_vital_events_this_run as e\n\n  where True --returns false if run doesn't contain new events.\n\n\n)\n\nselect\n  *,\n  \n  case when lcp is null then 'not measurable'\n    when  lcp < 2.5 then 'good'\n    when lcp < 4 then 'needs improvement'\n    else 'poor' end as lcp_result,\n\n  case when fid is null then 'not measurable'\n    when fid < 100 then 'good'\n    when fid < 300 then 'needs improvement'\n    else 'poor' end as fid_result,\n\n  case when cls is null then 'not measurable'\n    when cls < 0.1 then 'good'\n    when cls < 0.25 then 'needs improvement'\n    else 'poor' end as cls_result,\n\n  case when ttfb is null then 'not measurable'\n    when ttfb < 800 then 'good'\n    when ttfb < 1800 then 'needs improvement'\n    else 'poor' end as ttfb_result,\n\n  case when inp is null then 'not measurable'\n    when inp < 200 then 'good'\n    when inp < 500 then 'needs improvement'\n    else 'poor' end as inp_result\n\n\n\nfrom prep p\n\nwhere dedupe_index = 1",
+      "relation_name": "embucket.public_scratch.snowplow_web_vitals_this_run",
+      "batch_results": null,
+      "actual_row_count": 2934
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2025-11-02T11:13:59.934181Z",
+          "completed_at": "2025-11-02T11:13:59.939256Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2025-11-02T11:13:59.939536Z",
+          "completed_at": "2025-11-02T11:14:01.188173Z"
+        }
+      ],
+      "thread_id": "Thread-1 (worker)",
+      "execution_time": 1.2546203136444092,
+      "adapter_response": {
+        "_message": "02000 1",
+        "code": "02000",
+        "rows_affected": 1,
+        "query_id": "00000000-0000-0000-001d-4457c32b16fd"
+      },
+      "message": "02000 1",
+      "failures": null,
+      "unique_id": "model.snowplow_web.snowplow_web_consent_log",
+      "compiled": true,
+      "compiled_code": "\n\n\n\nselect\n  *\n  \n\nfrom embucket.public_scratch.snowplow_web_consent_events_this_run\n\nwhere True --returns false if run doesn't contain new events.",
+      "relation_name": "embucket.public_derived.snowplow_web_consent_log",
+      "batch_results": null,
+      "actual_row_count": 5666
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2025-11-02T11:13:56.797064Z",
+          "completed_at": "2025-11-02T11:13:56.818517Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2025-11-02T11:13:56.821390Z",
+          "completed_at": "2025-11-02T11:14:01.220042Z"
+        }
+      ],
+      "thread_id": "Thread-2 (worker)",
+      "execution_time": 4.4456799030303955,
+      "adapter_response": {
+        "_message": "02000 1",
+        "code": "02000",
+        "rows_affected": 1,
+        "query_id": "00000000-0000-0000-001d-4457c36577d0"
       },
       "message": "02000 1",
       "failures": null,
@@ -433,60 +495,29 @@
       "compiled_code": "\n\n\n\nwith session_firsts as (\n    select\n        -- app id\n        app_id as app_id,\n\n        platform,\n\n        -- session fields\n        domain_sessionid,\n        original_domain_sessionid,\n        domain_sessionidx,\n\n        \n    convert_timezone('UTC', convert_timezone('UTC', current_timestamp()))::timestamp\n as model_tstamp,\n\n        -- user fields\n        user_id,\n        domain_userid,\n        original_domain_userid,\n        \n            -- updated with mapping as part of post hook on derived sessions table\n            cast(domain_userid as TEXT) as stitched_user_id,\n        \n        network_userid as network_userid,\n\n        -- first page fields\n        page_title as first_page_title,\n        page_url as first_page_url,\n        page_urlscheme as first_page_urlscheme,\n        page_urlhost as first_page_urlhost,\n        page_urlpath as first_page_urlpath,\n        page_urlquery as first_page_urlquery,\n        page_urlfragment as first_page_urlfragment,\n\n        -- referrer fields\n        page_referrer as referrer,\n\n        refr_urlscheme as refr_urlscheme,\n        refr_urlhost as refr_urlhost,\n        refr_urlpath as refr_urlpath,\n        refr_urlquery as refr_urlquery,\n        refr_urlfragment as refr_urlfragment,\n        refr_medium as refr_medium,\n        refr_source as refr_source,\n        refr_term as refr_term,\n\n        -- marketing fields\n        mkt_medium as mkt_medium,\n        mkt_source as mkt_source,\n        mkt_term as mkt_term,\n        mkt_content as mkt_content,\n        mkt_campaign as mkt_campaign,\n        mkt_clickid as mkt_clickid,\n        mkt_network as mkt_network,\n        regexp_substr(page_urlquery, 'utm_source_platform=([^?&#]*)', 1, 1, 'e') as mkt_source_platform,\n        \ncase\n   when lower(trim(mkt_source)) = '(direct)' and lower(trim(mkt_medium)) in ('(not set)', '(none)') then 'Direct'\n   when lower(trim(mkt_medium)) like '%cross-network%' then 'Cross-network'\n   when regexp_like(lower(trim(mkt_medium)), '^(.*cp.*|ppc|retargeting|paid.*)$') then\n      case\n         when upper(source_category) = 'SOURCE_CATEGORY_SHOPPING'\n            or regexp_like(lower(trim(mkt_campaign)), '^(.*(([^a-df-z]|^)shop|shopping).*)$') then 'Paid Shopping'\n         when upper(source_category) = 'SOURCE_CATEGORY_SEARCH' then 'Paid Search'\n         when upper(source_category) = 'SOURCE_CATEGORY_SOCIAL' then 'Paid Social'\n         when upper(source_category) = 'SOURCE_CATEGORY_VIDEO' then 'Paid Video'\n         else 'Paid Other'\n      end\n   when lower(trim(mkt_medium)) in ('display', 'banner', 'expandable', 'intersitial', 'cpm') then 'Display'\n   when upper(source_category) = 'SOURCE_CATEGORY_SHOPPING'\n      or regexp_like(lower(trim(mkt_campaign)), '^(.*(([^a-df-z]|^)shop|shopping).*)$') then 'Organic Shopping'\n   when upper(source_category) = 'SOURCE_CATEGORY_SOCIAL' or lower(trim(mkt_medium)) in ('social', 'social-network', 'sm', 'social network', 'social media') then 'Organic Social'\n   when upper(source_category) = 'SOURCE_CATEGORY_VIDEO'\n      or regexp_like(lower(trim(mkt_medium)), '^(.*video.*)$') then 'Organic Video'\n   when upper(source_category) = 'SOURCE_CATEGORY_SEARCH' or lower(trim(mkt_medium)) = 'organic' then 'Organic Search'\n   when lower(trim(mkt_medium)) in ('referral', 'app', 'link') then 'Referral'\n   when lower(trim(mkt_source)) in ('email', 'e-mail', 'e_mail', 'e mail') or lower(trim(mkt_medium)) in ('email', 'e-mail', 'e_mail', 'e mail') then 'Email'\n   when lower(trim(mkt_medium)) = 'affiliate' then 'Affiliates'\n   when lower(trim(mkt_medium)) = 'audio' then 'Audio'\n   when lower(trim(mkt_source)) = 'sms' or lower(trim(mkt_medium)) = 'sms' then 'SMS'\n   when lower(trim(mkt_medium)) like '%push' or regexp_like(lower(trim(mkt_medium)), '.*(mobile|notification).*') or lower(trim(mkt_source)) = 'firebase' then 'Mobile Push Notifications'\n   else 'Unassigned'\nend\n as default_channel_group,\n\n        -- geo fields\n        geo_country as geo_country,\n        geo_region as geo_region,\n        geo_region_name as geo_region_name,\n        geo_city as geo_city,\n        geo_zipcode as geo_zipcode,\n        geo_latitude as geo_latitude,\n        geo_longitude as geo_longitude,\n        geo_timezone as geo_timezone,\n        g.name as geo_country_name,\n        g.region as geo_continent,\n\n        -- ip address\n        user_ipaddress as user_ipaddress,\n\n        -- user agent\n        useragent as useragent,\n\n        dvce_screenwidth || 'x' || dvce_screenheight as screen_resolution,\n\n        br_renderengine as br_renderengine,\n        br_lang as br_lang,\n        l.name as br_lang_name,\n        os_timezone as os_timezone,\n\n        -- optional fields, only populated if enabled.\n\n        -- iab enrichment fields\n        \n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:category::VARCHAR as category,\n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:primaryImpact::VARCHAR as primary_impact,\n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:reason::VARCHAR as reason,\n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:spiderOrRobot::BOOLEAN as spider_or_robot,\n\n        -- ua parser enrichment fields\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentFamily::VARCHAR as useragent_family,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentMajor::VARCHAR as useragent_major,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentMinor::VARCHAR as useragent_minor,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentPatch::VARCHAR as useragent_patch,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentVersion::VARCHAR as useragent_version,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osFamily::VARCHAR as os_family,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osMajor::VARCHAR as os_major,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osMinor::VARCHAR as os_minor,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osPatch::VARCHAR as os_patch,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osPatchMinor::VARCHAR as os_patch_minor,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osVersion::VARCHAR as os_version,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:deviceFamily::VARCHAR as device_family\n\n,\n\n        -- yauaa enrichment fields\n        contexts_nl_basjes_yauaa_context_1[0]:deviceClass::VARCHAR as device_class,\n        contexts_nl_basjes_yauaa_context_1[0]:agentClass::VARCHAR as agent_class,\n        contexts_nl_basjes_yauaa_context_1[0]:agentName::VARCHAR as agent_name,\n        contexts_nl_basjes_yauaa_context_1[0]:agentNameVersion::VARCHAR as agent_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:agentNameVersionMajor::VARCHAR as agent_name_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:agentVersion::VARCHAR as agent_version,\n        contexts_nl_basjes_yauaa_context_1[0]:agentVersionMajor::VARCHAR as agent_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceBrand::VARCHAR as device_brand,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceName::VARCHAR as device_name,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceVersion::VARCHAR as device_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineClass::VARCHAR as layout_engine_class,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineName::VARCHAR as layout_engine_name,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineNameVersion::VARCHAR as layout_engine_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineNameVersionMajor::VARCHAR as layout_engine_name_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineVersion::VARCHAR as layout_engine_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineVersionMajor::VARCHAR as layout_engine_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemClass::VARCHAR as operating_system_class,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemName::VARCHAR as operating_system_name,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemNameVersion::VARCHAR as operating_system_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemVersion::VARCHAR as operating_system_version,\n\n        -- event name for use later\n        event_name\n    from embucket.public_scratch.snowplow_web_base_events_this_run ev\n    left join\n        embucket.public_snowplow_manifest.snowplow_web_dim_ga4_source_categories c on lower(trim(ev.mkt_source)) = lower(c.source)\n    left join\n        embucket.public_snowplow_manifest.snowplow_web_dim_rfc_5646_language_mapping l on lower(ev.br_lang) = lower(l.lang_tag)\n    left join\n        embucket.public_snowplow_manifest.snowplow_web_dim_geo_country_mapping g on lower(ev.geo_country) = lower(g.alpha_2)\n    where\n        event_name in ('page_ping', 'page_view')\n        and page_view_id is not null\n        \n            \n  and not rlike(lower(useragent), '.*(bot|crawl|slurp|spider|archiv|spinn|sniff|seo|audit|survey|pingdom|worm|capture|(browser|screen)shots|analyz|index|thumb|check|facebook|pingdombot|phantomjs|yandexbot|twitterbot|a_archiver|facebookexternalhit|bingbot|bingpreview|googlebot|baiduspider|360(spider|user-agent)|semalt).*')\n\n        \n    qualify row_number() over (partition by domain_sessionid order by derived_tstamp, dvce_created_tstamp, event_id) = 1\n)\n\n, session_lasts as (\n    select\n        domain_sessionid,\n        page_title as last_page_title,\n        page_url as last_page_url,\n        page_urlscheme as last_page_urlscheme,\n        page_urlhost as last_page_urlhost,\n        page_urlpath as last_page_urlpath,\n        page_urlquery as last_page_urlquery,\n        page_urlfragment as last_page_urlfragment,\n        geo_country as last_geo_country,\n        geo_city as last_geo_city,\n        geo_region_name as last_geo_region_name,\n        g.name as last_geo_country_name,\n        g.region as last_geo_continent,\n        br_lang as last_br_lang,\n        l.name as last_br_lang_name\n    from embucket.public_scratch.snowplow_web_base_events_this_run ev\n    left join\n        embucket.public_snowplow_manifest.snowplow_web_dim_rfc_5646_language_mapping l on lower(ev.br_lang) = lower(l.lang_tag)\n    left join\n        embucket.public_snowplow_manifest.snowplow_web_dim_geo_country_mapping g on lower(ev.geo_country) = lower(g.alpha_2)\n    where\n        event_name = 'page_view'\n        and page_view_id is not null\n        \n            \n  and not rlike(lower(useragent), '.*(bot|crawl|slurp|spider|archiv|spinn|sniff|seo|audit|survey|pingdom|worm|capture|(browser|screen)shots|analyz|index|thumb|check|facebook|pingdombot|phantomjs|yandexbot|twitterbot|a_archiver|facebookexternalhit|bingbot|bingpreview|googlebot|baiduspider|360(spider|user-agent)|semalt).*')\n\n        \n    qualify row_number() over (partition by domain_sessionid order by derived_tstamp desc, dvce_created_tstamp desc, event_id) = 1\n)\n\n, session_aggs as (\n    select\n        domain_sessionid\n        , min(derived_tstamp) as start_tstamp\n        , max(derived_tstamp) as end_tstamp\n        , count(*) as total_events\n\n        -- engagement fields\n        , count(distinct case when event_name in ('page_ping', 'page_view') and page_view_id is not null then page_view_id else null end) as page_views\n            -- (hb * (#page pings - # distinct page view ids ON page pings)) + (# distinct page view ids ON page pings * min visit length)\n        , (10 * (\n                -- number of (unqiue in heartbeat increment) pages pings following a page ping (gap of heartbeat)\n                count(distinct case\n                        when event_name = 'page_ping' and page_view_id is not null then\n                        -- need to get a unique list of floored time PER page view, so create a dummy surrogate key...\n                            page_view_id || cast(floor(date_part('epoch_seconds', dvce_created_tstamp)/10) as TEXT)\n                        else\n                            null end) -\n                    count(distinct case when event_name = 'page_ping' and page_view_id is not null then page_view_id else null end)\n                ))  +\n            -- number of page pings following a page view (or no event) (gap of min visit length)\n            (count(distinct case when event_name = 'page_ping' and page_view_id is not null then page_view_id else null end) * 5) as engaged_time_in_s\n        , datediff(\n        second,\n        min(derived_tstamp),\n        max(derived_tstamp)\n        ) as absolute_time_in_s\n    from embucket.public_scratch.snowplow_web_base_events_this_run\n    where\n        1 = 1\n        \n            \n  and not rlike(lower(useragent), '.*(bot|crawl|slurp|spider|archiv|spinn|sniff|seo|audit|survey|pingdom|worm|capture|(browser|screen)shots|analyz|index|thumb|check|facebook|pingdombot|phantomjs|yandexbot|twitterbot|a_archiver|facebookexternalhit|bingbot|bingpreview|googlebot|baiduspider|360(spider|user-agent)|semalt).*')\n\n        \n    group by\n        domain_sessionid\n)\n\nselect\n    -- app id\n    a.app_id,\n\n    a.platform,\n\n    -- session fields\n    a.domain_sessionid,\n    a.original_domain_sessionid,\n    a.domain_sessionidx,\n\n    -- when the session starts with a ping we need to add the min visit length to get when the session actually started\n    case when a.event_name = 'page_ping' then\n        \n\n    dateadd(\n        second,\n        -5,\n        c.start_tstamp\n        )\n\n\n    else c.start_tstamp end as start_tstamp,\n    c.end_tstamp,\n    a.model_tstamp,\n\n    -- user fields\n    a.user_id,\n    a.domain_userid,\n    a.original_domain_userid,\n    a.stitched_user_id,\n    a.network_userid,\n\n    -- engagement fields\n    c.page_views,\n    c.engaged_time_in_s,\n    c.total_events,\n    \n    page_views >= 2 or engaged_time_in_s / 10 >= 2\n as is_engaged,\n    -- when the session starts with a ping we need to add the min visit length to get when the session actually started\n    c.absolute_time_in_s + case when a.event_name = 'page_ping' then 5 else 0 end as absolute_time_in_s,\n\n    -- first page fields\n    a.first_page_title,\n    a.first_page_url,\n    a.first_page_urlscheme,\n    a.first_page_urlhost,\n    a.first_page_urlpath,\n    a.first_page_urlquery,\n    a.first_page_urlfragment,\n\n    -- only take the first value when the last is genuinely missing (base on url as has to always be populated)\n    case when b.last_page_url is null then coalesce(b.last_page_title, a.first_page_title) else b.last_page_title end as last_page_title,\n    case when b.last_page_url is null then coalesce(b.last_page_url, a.first_page_url) else b.last_page_url end as last_page_url,\n    case when b.last_page_url is null then coalesce(b.last_page_urlscheme, a.first_page_urlscheme) else b.last_page_urlscheme end as last_page_urlscheme,\n    case when b.last_page_url is null then coalesce(b.last_page_urlhost, a.first_page_urlhost) else b.last_page_urlhost end as last_page_urlhost,\n    case when b.last_page_url is null then coalesce(b.last_page_urlpath, a.first_page_urlpath) else b.last_page_urlpath end as last_page_urlpath,\n    case when b.last_page_url is null then coalesce(b.last_page_urlquery, a.first_page_urlquery) else b.last_page_urlquery end as last_page_urlquery,\n    case when b.last_page_url is null then coalesce(b.last_page_urlfragment, a.first_page_urlfragment) else b.last_page_urlfragment end as last_page_urlfragment,\n\n    -- referrer fields\n    a.referrer,\n    a.refr_urlscheme,\n    a.refr_urlhost,\n    a.refr_urlpath,\n    a.refr_urlquery,\n    a.refr_urlfragment,\n    a.refr_medium,\n    a.refr_source,\n    a.refr_term,\n\n    -- marketing fields\n    a.mkt_medium,\n    a.mkt_source,\n    a.mkt_term,\n    a.mkt_content,\n    a.mkt_campaign,\n    a.mkt_clickid,\n    a.mkt_network,\n    a.mkt_source_platform,\n    a.default_channel_group,\n\n    -- geo fields\n    a.geo_country,\n    a.geo_region,\n    a.geo_region_name,\n    a.geo_city,\n    a.geo_zipcode,\n    a.geo_latitude,\n    a.geo_longitude,\n    a.geo_timezone,\n    a.geo_country_name,\n    a.geo_continent,\n    case when b.last_geo_country is null then coalesce(b.last_geo_country, a.geo_country) else b.last_geo_country end as last_geo_country,\n    case when b.last_geo_country is null then coalesce(b.last_geo_region_name, a.geo_region_name) else b.last_geo_region_name end as last_geo_region_name,\n    case when b.last_geo_country is null then coalesce(b.last_geo_city, a.geo_city) else b.last_geo_city end as last_geo_city,\n    case when b.last_geo_country is null then coalesce(b.last_geo_country_name,a.geo_country_name) else b.last_geo_country_name end as last_geo_country_name,\n    case when b.last_geo_country is null then coalesce(b.last_geo_continent, a.geo_continent) else b.last_geo_continent end as last_geo_continent,\n\n    -- ip address\n    a.user_ipaddress,\n\n    -- user agent\n    a.useragent,\n\n    a.br_renderengine,\n    a.br_lang,\n    a.br_lang_name,\n    case when b.last_br_lang is null then coalesce(b.last_br_lang, a.br_lang) else b.last_br_lang end as last_br_lang,\n    case when b.last_br_lang is null then coalesce(b.last_br_lang_name, a.br_lang_name) else b.last_br_lang_name end as last_br_lang_name,\n\n    a.os_timezone,\n\n    -- optional fields, only populated if enabled.\n\n    -- iab enrichment fields\n    a.category,\n    a.primary_impact,\n    a.reason,\n    a.spider_or_robot,\n\n    -- ua parser enrichment fields\n    a.useragent_family,\n    a.useragent_major,\n    a.useragent_minor,\n    a.useragent_patch,\n    a.useragent_version,\n    a.os_family,\n    a.os_major,\n    a.os_minor,\n    a.os_patch,\n    a.os_patch_minor,\n    a.os_version,\n    a.device_family,\n\n    -- yauaa enrichment fields\n    a.device_class,\n    case when a.device_class = 'Desktop' THEN 'Desktop'\n        when a.device_class = 'Phone' then 'Mobile'\n        when a.device_class = 'Tablet' then 'Tablet'\n        else 'Other' end as device_category,\n    a.screen_resolution,\n    a.agent_class,\n    a.agent_name,\n    a.agent_name_version,\n    a.agent_name_version_major,\n    a.agent_version,\n    a.agent_version_major,\n    a.device_brand,\n    a.device_name,\n    a.device_version,\n    a.layout_engine_class,\n    a.layout_engine_name,\n    a.layout_engine_name_version,\n    a.layout_engine_name_version_major,\n    a.layout_engine_version,\n    a.layout_engine_version_major,\n    a.operating_system_class,\n    a.operating_system_name,\n    a.operating_system_name_version,\n    a.operating_system_version\n\n    -- conversion fields\n\n    -- passthrough fields\nfrom\n    session_firsts a\nleft join\n    session_lasts b on a.domain_sessionid = b.domain_sessionid\nleft join\n    session_aggs c on a.domain_sessionid = c.domain_sessionid",
       "relation_name": "embucket.public_scratch.snowplow_web_sessions_this_run",
       "batch_results": null,
-      "actual_row_count": 2825
+      "actual_row_count": 5695
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:10.122243Z",
-          "completed_at": "2025-11-01T15:59:10.131190Z"
+          "started_at": "2025-11-02T11:14:01.222530Z",
+          "completed_at": "2025-11-02T11:14:01.227359Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:10.131661Z",
-          "completed_at": "2025-11-01T15:59:10.929562Z"
+          "started_at": "2025-11-02T11:14:01.227652Z",
+          "completed_at": "2025-11-02T11:14:01.932349Z"
         }
       ],
-      "thread_id": "Thread-4 (worker)",
-      "execution_time": 0.808466911315918,
+      "thread_id": "Thread-2 (worker)",
+      "execution_time": 0.7105789184570312,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5325b32"
-      },
-      "message": "02000 1",
-      "failures": null,
-      "unique_id": "model.snowplow_web.snowplow_web_consent_cmp_stats",
-      "compiled": true,
-      "compiled_code": "\n\nwith events as (\n\n  select\n    event_id,\n    domain_userid,\n    original_domain_userid,\n    page_view_id,\n    domain_sessionid,\n    original_domain_sessionid,\n    derived_tstamp,\n    event_name,\n    event_type,\n    cmp_load_time,\n    last_value(case when event_name = 'cmp_visible' then event_id else null end ignore nulls)\n    over (partition by domain_userid order by derived_tstamp\n    rows between unbounded preceding and current row) as cmp_id\n\n  from embucket.public_derived.snowplow_web_consent_log\n\n  where event_type <> 'pending' or event_type is null\n\n), event_orders as (\n\n  select\n    event_id,\n    event_type,\n    cmp_id,\n    derived_tstamp,\n    row_number() over(partition by cmp_id order by derived_tstamp) as row_num\n\n  from events\n\n)\n\n, first_consent_events as (\n\n  select\n    event_id,\n    cmp_id,\n    event_type,\n    derived_tstamp as first_consent_event_tstamp\n\n  from event_orders\n\n  where row_num = 2\n\n)\n\n, cmp_events as (\n\n  select distinct\n    event_id,\n    domain_userid,\n    original_domain_userid,\n    page_view_id,\n    domain_sessionid,\n    original_domain_sessionid,\n    cmp_load_time,\n    derived_tstamp as cmp_tstamp\n\n  from events\n\n  where event_name = 'cmp_visible'\n\n)\n\nselect\n  e.event_id,\n  e.domain_userid,\n  e.original_domain_userid,\n  e.page_view_id,\n  e.domain_sessionid,\n  e.original_domain_sessionid,\n  e.cmp_load_time,\n  e.cmp_tstamp,\n  f.first_consent_event_tstamp,\n  f.event_type as first_consent_event_type,\n  datediff(\n        second,\n        e.cmp_tstamp,\n        f.first_consent_event_tstamp\n        ) as cmp_interaction_time\n\nfrom cmp_events e\n\nleft join first_consent_events f\non e.event_id = f.cmp_id",
-      "relation_name": "embucket.public_derived.snowplow_web_consent_cmp_stats",
-      "batch_results": null,
-      "actual_row_count": 1406
-    },
-    {
-      "status": "success",
-      "timing": [
-        {
-          "name": "compile",
-          "started_at": "2025-11-01T15:59:10.361208Z",
-          "completed_at": "2025-11-01T15:59:10.370463Z"
-        },
-        {
-          "name": "execute",
-          "started_at": "2025-11-01T15:59:10.370905Z",
-          "completed_at": "2025-11-01T15:59:10.988100Z"
-        }
-      ],
-      "thread_id": "Thread-1 (worker)",
-      "execution_time": 0.6278970241546631,
-      "adapter_response": {
-        "_message": "02000 1",
-        "code": "02000",
-        "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e52eba36"
+        "query_id": "00000000-0000-0000-001d-4457c32356c8"
       },
       "message": "02000 1",
       "failures": null,
@@ -502,177 +533,22 @@
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:09.847949Z",
-          "completed_at": "2025-11-01T15:59:09.858706Z"
+          "started_at": "2025-11-02T11:14:00.869825Z",
+          "completed_at": "2025-11-02T11:14:00.876806Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:09.858975Z",
-          "completed_at": "2025-11-01T15:59:11.534070Z"
-        }
-      ],
-      "thread_id": "Thread-3 (worker)",
-      "execution_time": 1.6868438720703125,
-      "adapter_response": {
-        "_message": "02000 1",
-        "code": "02000",
-        "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5347c1c"
-      },
-      "message": "02000 1",
-      "failures": null,
-      "unique_id": "model.snowplow_web.snowplow_web_page_views_this_run",
-      "compiled": true,
-      "compiled_code": "\n\n\n\nwith prep as (\nselect\n  ev.page_view_id,\n  ev.event_id,\n\n  ev.app_id,\n  ev.platform,\n\n  -- user fields\n  ev.user_id,\n  ev.domain_userid,\n  ev.original_domain_userid,\n  \n    cast(null as TEXT) as stitched_user_id,\n  \n  ev.network_userid,\n\n  -- session fields\n  ev.domain_sessionid,\n  ev.original_domain_sessionid,\n  ev.domain_sessionidx,\n\n  -- timestamp fields\n  ev.dvce_created_tstamp,\n  ev.collector_tstamp,\n  ev.derived_tstamp,\n  ev.derived_tstamp as start_tstamp,\n\n  ev.doc_width,\n  ev.doc_height,\n\n  ev.page_title,\n  \n  case when ev.page_url like '%/product%' then 'PDP'\n      when ev.page_url like '%/list%' then 'PLP'\n      when ev.page_url like '%/checkout%' then 'checkout'\n      when ev.page_url like '%/home%' then 'homepage'\n      else 'other'\n  end\n\n as content_group,\n  ev.page_url,\n  ev.page_urlscheme,\n  ev.page_urlhost,\n  ev.page_urlpath,\n  ev.page_urlquery,\n  ev.page_urlfragment,\n\n  -- marketing fields\n  ev.mkt_medium,\n  ev.mkt_source,\n  ev.mkt_term,\n  ev.mkt_content,\n  ev.mkt_campaign,\n  ev.mkt_clickid,\n  ev.mkt_network,\n  \ncase\n   when lower(trim(mkt_source)) = '(direct)' and lower(trim(mkt_medium)) in ('(not set)', '(none)') then 'Direct'\n   when lower(trim(mkt_medium)) like '%cross-network%' then 'Cross-network'\n   when regexp_like(lower(trim(mkt_medium)), '^(.*cp.*|ppc|retargeting|paid.*)$') then\n      case\n         when upper(source_category) = 'SOURCE_CATEGORY_SHOPPING'\n            or regexp_like(lower(trim(mkt_campaign)), '^(.*(([^a-df-z]|^)shop|shopping).*)$') then 'Paid Shopping'\n         when upper(source_category) = 'SOURCE_CATEGORY_SEARCH' then 'Paid Search'\n         when upper(source_category) = 'SOURCE_CATEGORY_SOCIAL' then 'Paid Social'\n         when upper(source_category) = 'SOURCE_CATEGORY_VIDEO' then 'Paid Video'\n         else 'Paid Other'\n      end\n   when lower(trim(mkt_medium)) in ('display', 'banner', 'expandable', 'intersitial', 'cpm') then 'Display'\n   when upper(source_category) = 'SOURCE_CATEGORY_SHOPPING'\n      or regexp_like(lower(trim(mkt_campaign)), '^(.*(([^a-df-z]|^)shop|shopping).*)$') then 'Organic Shopping'\n   when upper(source_category) = 'SOURCE_CATEGORY_SOCIAL' or lower(trim(mkt_medium)) in ('social', 'social-network', 'sm', 'social network', 'social media') then 'Organic Social'\n   when upper(source_category) = 'SOURCE_CATEGORY_VIDEO'\n      or regexp_like(lower(trim(mkt_medium)), '^(.*video.*)$') then 'Organic Video'\n   when upper(source_category) = 'SOURCE_CATEGORY_SEARCH' or lower(trim(mkt_medium)) = 'organic' then 'Organic Search'\n   when lower(trim(mkt_medium)) in ('referral', 'app', 'link') then 'Referral'\n   when lower(trim(mkt_source)) in ('email', 'e-mail', 'e_mail', 'e mail') or lower(trim(mkt_medium)) in ('email', 'e-mail', 'e_mail', 'e mail') then 'Email'\n   when lower(trim(mkt_medium)) = 'affiliate' then 'Affiliates'\n   when lower(trim(mkt_medium)) = 'audio' then 'Audio'\n   when lower(trim(mkt_source)) = 'sms' or lower(trim(mkt_medium)) = 'sms' then 'SMS'\n   when lower(trim(mkt_medium)) like '%push' or regexp_like(lower(trim(mkt_medium)), '.*(mobile|notification).*') or lower(trim(mkt_source)) = 'firebase' then 'Mobile Push Notifications'\n   else 'Unassigned'\nend\n as default_channel_group,\n\n  -- referrer fields\n  ev.page_referrer,\n  ev.refr_urlscheme,\n  ev.refr_urlhost,\n  ev.refr_urlpath,\n  ev.refr_urlquery,\n  ev.refr_urlfragment,\n  ev.refr_medium,\n  ev.refr_source,\n  ev.refr_term,\n\n  -- geo fields\n  ev.geo_country,\n  ev.geo_region,\n  ev.geo_region_name,\n  ev.geo_city,\n  ev.geo_zipcode,\n  ev.geo_latitude,\n  ev.geo_longitude,\n  ev.geo_timezone ,\n\n  ev.user_ipaddress,\n\n  ev.useragent,\n\n  ev.dvce_screenwidth || 'x' || ev.dvce_screenheight as screen_resolution,\n\n  ev.br_lang,\n  ev.br_viewwidth,\n  ev.br_viewheight,\n  ev.br_colordepth,\n  ev.br_renderengine,\n  ev.os_timezone,\n\n  -- optional fields, only populated if enabled.\n\n  -- iab enrichment fields: set iab variable to true to enable\n  \n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:category::VARCHAR as category,\n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:primaryImpact::VARCHAR as primary_impact,\n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:reason::VARCHAR as reason,\n        contexts_com_iab_snowplow_spiders_and_robots_1[0]:spiderOrRobot::BOOLEAN as spider_or_robot,\n\n  -- ua parser enrichment fields\n  contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentFamily::VARCHAR as useragent_family,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentMajor::VARCHAR as useragent_major,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentMinor::VARCHAR as useragent_minor,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentPatch::VARCHAR as useragent_patch,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:useragentVersion::VARCHAR as useragent_version,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osFamily::VARCHAR as os_family,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osMajor::VARCHAR as os_major,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osMinor::VARCHAR as os_minor,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osPatch::VARCHAR as os_patch,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osPatchMinor::VARCHAR as os_patch_minor,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:osVersion::VARCHAR as os_version,\n        contexts_com_snowplowanalytics_snowplow_ua_parser_context_1[0]:deviceFamily::VARCHAR as device_family\n\n,\n\n  -- yauaa enrichment fields\n  contexts_nl_basjes_yauaa_context_1[0]:deviceClass::VARCHAR as device_class,\n        contexts_nl_basjes_yauaa_context_1[0]:agentClass::VARCHAR as agent_class,\n        contexts_nl_basjes_yauaa_context_1[0]:agentName::VARCHAR as agent_name,\n        contexts_nl_basjes_yauaa_context_1[0]:agentNameVersion::VARCHAR as agent_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:agentNameVersionMajor::VARCHAR as agent_name_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:agentVersion::VARCHAR as agent_version,\n        contexts_nl_basjes_yauaa_context_1[0]:agentVersionMajor::VARCHAR as agent_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceBrand::VARCHAR as device_brand,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceName::VARCHAR as device_name,\n        contexts_nl_basjes_yauaa_context_1[0]:deviceVersion::VARCHAR as device_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineClass::VARCHAR as layout_engine_class,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineName::VARCHAR as layout_engine_name,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineNameVersion::VARCHAR as layout_engine_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineNameVersionMajor::VARCHAR as layout_engine_name_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineVersion::VARCHAR as layout_engine_version,\n        contexts_nl_basjes_yauaa_context_1[0]:layoutEngineVersionMajor::VARCHAR as layout_engine_version_major,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemClass::VARCHAR as operating_system_class,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemName::VARCHAR as operating_system_name,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemNameVersion::VARCHAR as operating_system_name_version,\n        contexts_nl_basjes_yauaa_context_1[0]:operatingSystemVersion::VARCHAR as operating_system_version\n\n  from embucket.public_scratch.snowplow_web_base_events_this_run as ev\n\n  left join embucket.public_snowplow_manifest.snowplow_web_dim_ga4_source_categories c on lower(trim(ev.mkt_source)) = lower(c.source)\n\n  where ev.event_name = 'page_view'\n  and ev.page_view_id is not null\n\n  \n     \n  and not rlike(lower(ev.useragent), '.*(bot|crawl|slurp|spider|archiv|spinn|sniff|seo|audit|survey|pingdom|worm|capture|(browser|screen)shots|analyz|index|thumb|check|facebook|pingdombot|phantomjs|yandexbot|twitterbot|a_archiver|facebookexternalhit|bingbot|bingpreview|googlebot|baiduspider|360(spider|user-agent)|semalt).*')\n\n  \n\n  qualify row_number() over (partition by ev.page_view_id order by ev.derived_tstamp, ev.dvce_created_tstamp) = 1\n)\n\n, page_view_events as (\n  select\n    p.page_view_id,\n    p.event_id,\n\n    p.app_id,\n    p.platform,\n\n    -- user fields\n    p.user_id,\n    p.domain_userid,\n    p.original_domain_userid,\n    p.stitched_user_id,\n    p.network_userid,\n\n    -- session fields\n    p.domain_sessionid,\n    p.original_domain_sessionid,\n    p.domain_sessionidx,\n\n    row_number() over (partition by p.domain_sessionid order by p.derived_tstamp, p.dvce_created_tstamp, p.event_id) AS page_view_in_session_index,\n\n    -- timestamp fields\n    p.dvce_created_tstamp,\n    p.collector_tstamp,\n    p.derived_tstamp,\n    p.start_tstamp,\n    coalesce(t.end_tstamp, p.derived_tstamp) as end_tstamp, -- only page views with pings will have a row in table t\n    \n    convert_timezone('UTC', convert_timezone('UTC', current_timestamp()))::timestamp\n as model_tstamp,\n\n    coalesce(t.engaged_time_in_s, 0) as engaged_time_in_s, -- where there are no pings, engaged time is 0.\n    datediff(\n        second,\n        p.derived_tstamp,\n        coalesce(t.end_tstamp, p.derived_tstamp)\n        ) as absolute_time_in_s,\n\n    sd.hmax as horizontal_pixels_scrolled,\n    sd.vmax as vertical_pixels_scrolled,\n\n    sd.relative_hmax as horizontal_percentage_scrolled,\n    sd.relative_vmax as vertical_percentage_scrolled,\n\n    p.doc_width,\n    p.doc_height,\n\n    p.content_group,\n\n    p.page_title,\n    p.page_url,\n    p.page_urlscheme,\n    p.page_urlhost,\n    p.page_urlpath,\n    p.page_urlquery,\n    p.page_urlfragment,\n\n    p.mkt_medium,\n    p.mkt_source,\n    p.mkt_term,\n    p.mkt_content,\n    p.mkt_campaign,\n    p.mkt_clickid,\n    p.mkt_network,\n    p.default_channel_group,\n\n    p.page_referrer,\n    p.refr_urlscheme,\n    p.refr_urlhost,\n    p.refr_urlpath,\n    p.refr_urlquery,\n    p.refr_urlfragment,\n    p.refr_medium,\n    p.refr_source,\n    p.refr_term,\n\n    p.geo_country,\n    p.geo_region,\n    p.geo_region_name,\n    p.geo_city,\n    p.geo_zipcode,\n    p.geo_latitude,\n    p.geo_longitude,\n    p.geo_timezone,\n\n    p.user_ipaddress,\n\n    p.useragent,\n\n    p.screen_resolution,\n\n    p.br_lang,\n    p.br_viewwidth,\n    p.br_viewheight,\n    p.br_colordepth,\n    p.br_renderengine,\n\n    p.os_timezone,\n\n    p.category,\n    p.primary_impact,\n    p.reason,\n    p.spider_or_robot,\n\n    p.useragent_family,\n    p.useragent_major,\n    p.useragent_minor,\n    p.useragent_patch,\n    p.useragent_version,\n    p.os_family,\n    p.os_major,\n    p.os_minor,\n    p.os_patch,\n    p.os_patch_minor,\n    p.os_version,\n    p.device_family,\n\n    p.device_class,\n    p.agent_class,\n    p.agent_name,\n    p.agent_name_version,\n    p.agent_name_version_major,\n    p.agent_version,\n    p.agent_version_major,\n    p.device_brand,\n    p.device_name,\n    p.device_version,\n    p.layout_engine_class,\n    p.layout_engine_name,\n    p.layout_engine_name_version,\n    p.layout_engine_name_version_major,\n    p.layout_engine_version,\n    p.layout_engine_version_major,\n    p.operating_system_class,\n    p.operating_system_name,\n    p.operating_system_name_version,\n    p.operating_system_version\n\n  from prep p\n\n  left join embucket.public_scratch.snowplow_web_pv_engaged_time t\n  on p.page_view_id = t.page_view_id  and p.domain_sessionid = t.domain_sessionid \n\n  left join embucket.public_scratch.snowplow_web_pv_scroll_depth sd\n  on p.page_view_id = sd.page_view_id  and p.domain_sessionid = sd.domain_sessionid \n)\n\nselect\n  pve.page_view_id,\n  pve.event_id,\n\n  pve.app_id,\n  pve.platform,\n\n  -- user fields\n  pve.user_id,\n  pve.domain_userid,\n  pve.original_domain_userid,\n  pve.stitched_user_id,\n  pve.network_userid,\n\n  -- session fields\n  pve.domain_sessionid,\n  pve.original_domain_sessionid,\n  pve.domain_sessionidx,\n\n  pve.page_view_in_session_index,\n  max(pve.page_view_in_session_index) over (partition by pve.domain_sessionid) as page_views_in_session,\n\n  -- timestamp fields\n  pve.dvce_created_tstamp,\n  pve.collector_tstamp,\n  pve.derived_tstamp,\n  pve.start_tstamp,\n  pve.end_tstamp,\n  pve.model_tstamp,\n\n  pve.engaged_time_in_s,\n  pve.absolute_time_in_s,\n\n  pve.horizontal_pixels_scrolled,\n  pve.vertical_pixels_scrolled,\n\n  pve.horizontal_percentage_scrolled,\n  pve.vertical_percentage_scrolled,\n\n  pve.doc_width,\n  pve.doc_height,\n  pve.content_group,\n\n  pve.page_title,\n  pve.page_url,\n  pve.page_urlscheme,\n  pve.page_urlhost,\n  pve.page_urlpath,\n  pve.page_urlquery,\n  pve.page_urlfragment,\n\n  pve.mkt_medium,\n  pve.mkt_source,\n  pve.mkt_term,\n  pve.mkt_content,\n  pve.mkt_campaign,\n  pve.mkt_clickid,\n  pve.mkt_network,\n  pve.default_channel_group,\n\n  pve.page_referrer,\n  pve.refr_urlscheme,\n  pve.refr_urlhost,\n  pve.refr_urlpath,\n  pve.refr_urlquery,\n  pve.refr_urlfragment,\n  pve.refr_medium,\n  pve.refr_source,\n  pve.refr_term,\n\n  pve.geo_country,\n  pve.geo_region,\n  pve.geo_region_name,\n  pve.geo_city,\n  pve.geo_zipcode,\n  pve.geo_latitude,\n  pve.geo_longitude,\n  pve.geo_timezone,\n\n  pve.user_ipaddress,\n\n  pve.useragent,\n\n  pve.br_lang,\n  pve.br_viewwidth,\n  pve.br_viewheight,\n  pve.br_colordepth,\n  pve.br_renderengine,\n\n  pve.os_timezone,\n\n  pve.category,\n  pve.primary_impact,\n  pve.reason,\n  pve.spider_or_robot,\n\n  pve.useragent_family,\n  pve.useragent_major,\n  pve.useragent_minor,\n  pve.useragent_patch,\n  pve.useragent_version,\n  pve.os_family,\n  pve.os_major,\n  pve.os_minor,\n  pve.os_patch,\n  pve.os_patch_minor,\n  pve.os_version,\n  pve.device_family,\n\n  pve.device_class,\n  case when pve.device_class = 'Desktop' then 'Desktop'\n    when pve.device_class = 'Phone' then 'Mobile'\n    when pve.device_class = 'Tablet' then 'Tablet'\n    else 'Other' end as device_category,\n  pve.screen_resolution,\n  pve.agent_class,\n  pve.agent_name,\n  pve.agent_name_version,\n  pve.agent_name_version_major,\n  pve.agent_version,\n  pve.agent_version_major,\n  pve.device_brand,\n  pve.device_name,\n  pve.device_version,\n  pve.layout_engine_class,\n  pve.layout_engine_name,\n  pve.layout_engine_name_version,\n  pve.layout_engine_name_version_major,\n  pve.layout_engine_version,\n  pve.layout_engine_version_major,\n  pve.operating_system_class,\n  pve.operating_system_name,\n  pve.operating_system_name_version,\n  pve.operating_system_version\n\nfrom page_view_events pve",
-      "relation_name": "embucket.public_scratch.snowplow_web_page_views_this_run",
-      "batch_results": null,
-      "actual_row_count": 1440
-    },
-    {
-      "status": "success",
-      "timing": [
-        {
-          "name": "compile",
-          "started_at": "2025-11-01T15:59:10.599226Z",
-          "completed_at": "2025-11-01T15:59:10.607102Z"
-        },
-        {
-          "name": "execute",
-          "started_at": "2025-11-01T15:59:10.607556Z",
-          "completed_at": "2025-11-01T15:59:11.666067Z"
-        }
-      ],
-      "thread_id": "Thread-2 (worker)",
-      "execution_time": 1.068235158920288,
-      "adapter_response": {
-        "_message": "02000 1",
-        "code": "02000",
-        "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e52b3064"
-      },
-      "message": "02000 1",
-      "failures": null,
-      "unique_id": "model.snowplow_web.snowplow_web_vitals_this_run",
-      "compiled": true,
-      "compiled_code": "\n\n\n\nwith prep as (\n\n  select\n    e.event_id,\n    e.event_name,\n    e.app_id,\n    e.platform,\n    e.domain_userid,\n    e.original_domain_userid,\n    e.user_id,\n    e.page_view_id,\n    e.domain_sessionid,\n    e.original_domain_sessionid,\n    e.collector_tstamp,\n    e.derived_tstamp,\n    e.load_tstamp,\n    coalesce(e.geo_country, 'unknown_geo_country') as geo_country,\n    coalesce(e.page_url, 'unknown_page_url') as page_url,\n    \n\n  case when page_url like '%/product%' then 'PDP'\n      when page_url like '%/list%' then 'PLP'\n      when page_url like '%/checkout%' then 'checkout'\n      when page_url like '%/home%' then 'homepage'\n      else 'other' end\n\n as url_group,\n    e.page_title,\n    e.useragent,\n    coalesce(e.device_class, 'unknown_device_class') as device_class,\n    e.device_name,\n    e.agent_name,\n    e.agent_version,\n    e.operating_system_name,\n    e.lcp,\n    e.fcp,\n    e.fid,\n    e.cls,\n    e.inp,\n    e.ttfb,\n    e.navigation_type,\n    row_number() over (partition by e.page_view_id order by e.derived_tstamp, e.dvce_created_tstamp, e.event_id) dedupe_index\n\n  from embucket.public_scratch.snowplow_web_vital_events_this_run as e\n\n  where True --returns false if run doesn't contain new events.\n\n\n)\n\nselect\n  *,\n  \n  case when lcp is null then 'not measurable'\n    when  lcp < 2.5 then 'good'\n    when lcp < 4 then 'needs improvement'\n    else 'poor' end as lcp_result,\n\n  case when fid is null then 'not measurable'\n    when fid < 100 then 'good'\n    when fid < 300 then 'needs improvement'\n    else 'poor' end as fid_result,\n\n  case when cls is null then 'not measurable'\n    when cls < 0.1 then 'good'\n    when cls < 0.25 then 'needs improvement'\n    else 'poor' end as cls_result,\n\n  case when ttfb is null then 'not measurable'\n    when ttfb < 800 then 'good'\n    when ttfb < 1800 then 'needs improvement'\n    else 'poor' end as ttfb_result,\n\n  case when inp is null then 'not measurable'\n    when inp < 200 then 'good'\n    when inp < 500 then 'needs improvement'\n    else 'poor' end as inp_result\n\n\n\nfrom prep p\n\nwhere dedupe_index = 1",
-      "relation_name": "embucket.public_scratch.snowplow_web_vitals_this_run",
-      "batch_results": null,
-      "actual_row_count": 1427
-    },
-    {
-      "status": "success",
-      "timing": [
-        {
-          "name": "compile",
-          "started_at": "2025-11-01T15:59:10.992121Z",
-          "completed_at": "2025-11-01T15:59:10.999783Z"
-        },
-        {
-          "name": "execute",
-          "started_at": "2025-11-01T15:59:11.000080Z",
-          "completed_at": "2025-11-01T15:59:11.948297Z"
-        }
-      ],
-      "thread_id": "Thread-1 (worker)",
-      "execution_time": 0.9570679664611816,
-      "adapter_response": {
-        "_message": "02000 1",
-        "code": "02000",
-        "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5251bc0"
-      },
-      "message": "02000 1",
-      "failures": null,
-      "unique_id": "model.snowplow_web.snowplow_web_consent_users",
-      "compiled": true,
-      "compiled_code": "\n\n\n\n\n\n\nwith base as (\n\n  select\n    domain_userid,\n    user_id,\n    geo_country,\n    max(load_tstamp) as last_processed_event,\n    count(case when event_name = 'cmp_visible' then 1 end) as cmp_events,\n    count(case when event_name = 'consent_preferences' then 1 end) as consent_events,\n    max(case when event_name = 'cmp_visible' then derived_tstamp end) as last_cmp_event_tstamp,\n    row_number() over(partition by domain_userid order by max(load_tstamp) desc) as latest_event_by_user_rank\n\n  from embucket.public_derived.snowplow_web_consent_log\n\n  \n\n  group by 1,2,3\n\n)\n\n, latest_consents as (\n\n  select\n    domain_userid,\n    derived_tstamp as last_consent_event_tstamp,\n    event_type as last_consent_event_type,\n    consent_scopes as last_consent_scopes,\n    consent_version as last_consent_version,\n    consent_url as last_consent_url,\n    domains_applied as last_domains_applied,\n    row_number() over(partition by domain_userid order by load_tstamp desc) as latest_consent_event_by_user_rank\n\n  from embucket.public_derived.snowplow_web_consent_log\n\n  where event_name = 'consent_preferences'\n\n  \n\n)\n\n\n\nselect\n  b.domain_userid,\n  b.user_id,\n  b.geo_country,\n  b.cmp_events,\n  b.consent_events,\n  b.last_cmp_event_tstamp,\n  l.last_consent_event_tstamp,\n  l.last_consent_event_type,\n  l.last_consent_scopes,\n  l.last_consent_version,\n  l.last_consent_url,\n  l.last_domains_applied,\n  b.last_processed_event,\n  case when v.is_latest_version then True else False end as is_latest_version\n\nfrom base b\n\nleft join latest_consents l\non b.domain_userid = l.domain_userid\n\nleft join embucket.public_derived.snowplow_web_consent_versions v\non v.consent_version = l.last_consent_version\n\nwhere (l.latest_consent_event_by_user_rank = 1 or l.domain_userid is null)\nand b.latest_event_by_user_rank = 1\n\n",
-      "relation_name": "embucket.public_derived.snowplow_web_consent_users",
-      "batch_results": null,
-      "actual_row_count": 2846
-    },
-    {
-      "status": "success",
-      "timing": [
-        {
-          "name": "compile",
-          "started_at": "2025-11-01T15:59:10.934883Z",
-          "completed_at": "2025-11-01T15:59:10.945061Z"
-        },
-        {
-          "name": "execute",
-          "started_at": "2025-11-01T15:59:10.945439Z",
-          "completed_at": "2025-11-01T15:59:12.264233Z"
+          "started_at": "2025-11-02T11:14:00.877183Z",
+          "completed_at": "2025-11-02T11:14:02.045945Z"
         }
       ],
       "thread_id": "Thread-4 (worker)",
-      "execution_time": 1.3303678035736084,
+      "execution_time": 1.1771960258483887,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e51b697c"
-      },
-      "message": "02000 1",
-      "failures": null,
-      "unique_id": "model.snowplow_web.snowplow_web_sessions",
-      "compiled": true,
-      "compiled_code": "\n\n\n\n\nselect *\n  \nfrom embucket.public_scratch.snowplow_web_sessions_this_run\nwhere True --returns false if run doesn't contain new events.",
-      "relation_name": "embucket.public_derived.snowplow_web_sessions",
-      "batch_results": null,
-      "actual_row_count": 2825
-    },
-    {
-      "status": "success",
-      "timing": [
-        {
-          "name": "compile",
-          "started_at": "2025-11-01T15:59:11.963458Z",
-          "completed_at": "2025-11-01T15:59:11.969849Z"
-        },
-        {
-          "name": "execute",
-          "started_at": "2025-11-01T15:59:11.970250Z",
-          "completed_at": "2025-11-01T15:59:12.292652Z"
-        }
-      ],
-      "thread_id": "Thread-1 (worker)",
-      "execution_time": 0.3305699825286865,
-      "adapter_response": {
-        "_message": "02000 1",
-        "code": "02000",
-        "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e518a5c3"
-      },
-      "message": "02000 1",
-      "failures": null,
-      "unique_id": "model.snowplow_web.snowplow_web_consent_scope_status",
-      "compiled": true,
-      "compiled_code": "\n\n\n\nwith arrays as (\n\n  select\n    u.domain_userid,\n    \n    split(u.last_consent_scopes, ', ')\n as scope_array\n\n  from embucket.public_derived.snowplow_web_consent_users u\n\n  where is_latest_version\n\n  )\n\n  , unnesting as (\n\n    \n    select t.domain_userid, replace(r.value, '\"', '') as consent_scope\n    from arrays t, table(flatten(t.scope_array)) r\n\n\n  )\n\nselect\n  replace(replace(replace(cast(consent_scope as \n    TEXT\n), '\"', ''), '[', ''), ']', '') as scope,\n  count(*) as total_consent\n\nfrom unnesting\n\ngroup by 1",
-      "relation_name": "embucket.public_derived.snowplow_web_consent_scope_status",
-      "batch_results": null,
-      "actual_row_count": 0
-    },
-    {
-      "status": "success",
-      "timing": [
-        {
-          "name": "compile",
-          "started_at": "2025-11-01T15:59:11.537120Z",
-          "completed_at": "2025-11-01T15:59:11.544756Z"
-        },
-        {
-          "name": "execute",
-          "started_at": "2025-11-01T15:59:11.545035Z",
-          "completed_at": "2025-11-01T15:59:12.718034Z"
-        }
-      ],
-      "thread_id": "Thread-3 (worker)",
-      "execution_time": 1.1816320419311523,
-      "adapter_response": {
-        "_message": "02000 1",
-        "code": "02000",
-        "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5122b25"
+        "query_id": "00000000-0000-0000-001d-4457c31dd5fa"
       },
       "message": "02000 1",
       "failures": null,
@@ -681,29 +557,60 @@
       "compiled_code": "\n\n\n\n\nselect *\n  \nfrom embucket.public_scratch.snowplow_web_page_views_this_run\nwhere True --returns false if run doesn't contain new events.",
       "relation_name": "embucket.public_derived.snowplow_web_page_views",
       "batch_results": null,
-      "actual_row_count": 1440
+      "actual_row_count": 2904
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:11.670373Z",
-          "completed_at": "2025-11-01T15:59:11.679102Z"
+          "started_at": "2025-11-02T11:14:01.191127Z",
+          "completed_at": "2025-11-02T11:14:01.196375Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:11.679562Z",
-          "completed_at": "2025-11-01T15:59:12.869093Z"
+          "started_at": "2025-11-02T11:14:01.196718Z",
+          "completed_at": "2025-11-02T11:14:02.152948Z"
         }
       ],
-      "thread_id": "Thread-2 (worker)",
-      "execution_time": 1.1997790336608887,
+      "thread_id": "Thread-1 (worker)",
+      "execution_time": 0.9625308513641357,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5103fd3"
+        "query_id": "00000000-0000-0000-001d-4457c323eaea"
+      },
+      "message": "02000 1",
+      "failures": null,
+      "unique_id": "model.snowplow_web.snowplow_web_consent_cmp_stats",
+      "compiled": true,
+      "compiled_code": "\n\nwith events as (\n\n  select\n    event_id,\n    domain_userid,\n    original_domain_userid,\n    page_view_id,\n    domain_sessionid,\n    original_domain_sessionid,\n    derived_tstamp,\n    event_name,\n    event_type,\n    cmp_load_time,\n    last_value(case when event_name = 'cmp_visible' then event_id else null end ignore nulls)\n    over (partition by domain_userid order by derived_tstamp\n    rows between unbounded preceding and current row) as cmp_id\n\n  from embucket.public_derived.snowplow_web_consent_log\n\n  where event_type <> 'pending' or event_type is null\n\n), event_orders as (\n\n  select\n    event_id,\n    event_type,\n    cmp_id,\n    derived_tstamp,\n    row_number() over(partition by cmp_id order by derived_tstamp) as row_num\n\n  from events\n\n)\n\n, first_consent_events as (\n\n  select\n    event_id,\n    cmp_id,\n    event_type,\n    derived_tstamp as first_consent_event_tstamp\n\n  from event_orders\n\n  where row_num = 2\n\n)\n\n, cmp_events as (\n\n  select distinct\n    event_id,\n    domain_userid,\n    original_domain_userid,\n    page_view_id,\n    domain_sessionid,\n    original_domain_sessionid,\n    cmp_load_time,\n    derived_tstamp as cmp_tstamp\n\n  from events\n\n  where event_name = 'cmp_visible'\n\n)\n\nselect\n  e.event_id,\n  e.domain_userid,\n  e.original_domain_userid,\n  e.page_view_id,\n  e.domain_sessionid,\n  e.original_domain_sessionid,\n  e.cmp_load_time,\n  e.cmp_tstamp,\n  f.first_consent_event_tstamp,\n  f.event_type as first_consent_event_type,\n  datediff(\n        second,\n        e.cmp_tstamp,\n        f.first_consent_event_tstamp\n        ) as cmp_interaction_time\n\nfrom cmp_events e\n\nleft join first_consent_events f\non e.event_id = f.cmp_id",
+      "relation_name": "embucket.public_derived.snowplow_web_consent_cmp_stats",
+      "batch_results": null,
+      "actual_row_count": 2803
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2025-11-02T11:14:01.084757Z",
+          "completed_at": "2025-11-02T11:14:01.090072Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2025-11-02T11:14:01.090321Z",
+          "completed_at": "2025-11-02T11:14:02.176499Z"
+        }
+      ],
+      "thread_id": "Thread-3 (worker)",
+      "execution_time": 1.0922510623931885,
+      "adapter_response": {
+        "_message": "02000 1",
+        "code": "02000",
+        "rows_affected": 1,
+        "query_id": "00000000-0000-0000-001d-4457c31bcbe0"
       },
       "message": "02000 1",
       "failures": null,
@@ -712,91 +619,29 @@
       "compiled_code": "\n\n\n\nselect\n  *\n  \n\nfrom embucket.public_scratch.snowplow_web_vitals_this_run\n\nwhere True --returns false if run doesn't contain new events.",
       "relation_name": "embucket.public_derived.snowplow_web_vitals",
       "batch_results": null,
-      "actual_row_count": 1427
+      "actual_row_count": 2934
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:12.294751Z",
-          "completed_at": "2025-11-01T15:59:12.298248Z"
+          "started_at": "2025-11-02T11:14:02.179295Z",
+          "completed_at": "2025-11-02T11:14:02.191297Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:12.298456Z",
-          "completed_at": "2025-11-01T15:59:13.287323Z"
+          "started_at": "2025-11-02T11:14:02.191590Z",
+          "completed_at": "2025-11-02T11:14:02.921061Z"
         }
       ],
       "thread_id": "Thread-1 (worker)",
-      "execution_time": 0.9931068420410156,
+      "execution_time": 0.7422771453857422,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e5117f44"
-      },
-      "message": "02000 1",
-      "failures": null,
-      "unique_id": "model.snowplow_web.snowplow_web_users_sessions_this_run",
-      "compiled": true,
-      "compiled_code": "\n\n\n\nselect\n  a.*,\n  min(a.start_tstamp) over(partition by a.domain_userid) as user_start_tstamp,\n  max(a.end_tstamp) over(partition by a.domain_userid) as user_end_tstamp\n\nfrom embucket.public_derived.snowplow_web_sessions a\nwhere exists (select 1 from embucket.public_scratch.snowplow_web_base_sessions_this_run b where a.domain_userid = b.user_identifier)",
-      "relation_name": "embucket.public_scratch.snowplow_web_users_sessions_this_run",
-      "batch_results": null,
-      "actual_row_count": 2825
-    },
-    {
-      "status": "success",
-      "timing": [
-        {
-          "name": "compile",
-          "started_at": "2025-11-01T15:59:12.266234Z",
-          "completed_at": "2025-11-01T15:59:12.269941Z"
-        },
-        {
-          "name": "execute",
-          "started_at": "2025-11-01T15:59:12.270157Z",
-          "completed_at": "2025-11-01T15:59:12.782744Z"
-        }
-      ],
-      "thread_id": "Thread-4 (worker)",
-      "execution_time": 0.5169720649719238,
-      "adapter_response": {
-        "_message": "02000 1",
-        "code": "02000",
-        "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e511e826"
-      },
-      "message": "02000 1",
-      "failures": null,
-      "unique_id": "model.snowplow_web.snowplow_web_consent_totals",
-      "compiled": true,
-      "compiled_code": "\n\n\n\nwith totals as (\n\n  select\n    last_consent_version,\n    count(distinct domain_userid) as total_visitors,\n    count(case when last_consent_event_type ='allow_all' then 1 end) as allow_all,\n    count(case when last_consent_event_type ='allow_selected' then 1 end) as allow_selected,\n    count(case when last_consent_event_type IN ('allow_all', 'allow_selected') then 1 end) as allow,\n    count(case when last_consent_event_type = 'pending' then 1 end) as pending,\n    count(case when last_consent_event_type = 'deny_all'  then 1 end) as denied,\n    count(case when last_consent_event_type = 'expired'  then 1 end) as expired,\n    count(case when last_consent_event_type = 'withdrawn'  then 1 end) as withdrawn,\n    count(case when last_consent_event_type = 'implicit_consent'  then 1 end) as implicit_consent,\n    count(case when \n\n    dateadd(\n        year,\n        1,\n        last_consent_event_tstamp\n        )\n\n <= \n\n    dateadd(\n        month,\n        6,\n        current_date\n        )\n\n\n          and last_consent_event_type <> 'expired'\n          and \n\n    dateadd(\n        year,\n        1,\n        last_consent_event_tstamp\n        )\n\n > current_date then 1 end) as expires_in_six_months\n\n  from embucket.public_derived.snowplow_web_consent_users\n\n  where last_consent_event_type is not null\n\n  group by 1\n\n)\n\nselect\n  v.*,\n  t.total_visitors,\n  t.allow_all,\n  t.allow_selected,\n  t.allow,\n  t.pending,\n  t.denied,\n  t.expired,\n  t.withdrawn,\n  t.implicit_consent,\n  t.expires_in_six_months\n\nfrom embucket.public_derived.snowplow_web_consent_versions v\n\nleft join totals t\non t.last_consent_version = v.consent_version\n\norder by v.version_start_tstamp desc",
-      "relation_name": "embucket.public_derived.snowplow_web_consent_totals",
-      "batch_results": null,
-      "actual_row_count": 0
-    },
-    {
-      "status": "success",
-      "timing": [
-        {
-          "name": "compile",
-          "started_at": "2025-11-01T15:59:13.524077Z",
-          "completed_at": "2025-11-01T15:59:13.535851Z"
-        },
-        {
-          "name": "execute",
-          "started_at": "2025-11-01T15:59:13.536090Z",
-          "completed_at": "2025-11-01T15:59:14.283948Z"
-        }
-      ],
-      "thread_id": "Thread-2 (worker)",
-      "execution_time": 0.768712043762207,
-      "adapter_response": {
-        "_message": "02000 1",
-        "code": "02000",
-        "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e4fe6688"
+        "query_id": "00000000-0000-0000-001d-4457c314b19a"
       },
       "message": "02000 1",
       "failures": null,
@@ -812,22 +657,177 @@
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:13.516993Z",
-          "completed_at": "2025-11-01T15:59:13.537777Z"
+          "started_at": "2025-11-02T11:14:02.049335Z",
+          "completed_at": "2025-11-02T11:14:02.057065Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:13.538032Z",
-          "completed_at": "2025-11-01T15:59:14.466392Z"
+          "started_at": "2025-11-02T11:14:02.057346Z",
+          "completed_at": "2025-11-02T11:14:03.077311Z"
         }
       ],
-      "thread_id": "Thread-3 (worker)",
-      "execution_time": 0.951718807220459,
+      "thread_id": "Thread-4 (worker)",
+      "execution_time": 1.0290131568908691,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e4fe62aa"
+        "query_id": "00000000-0000-0000-001d-4457c316dcff"
+      },
+      "message": "02000 1",
+      "failures": null,
+      "unique_id": "model.snowplow_web.snowplow_web_consent_users",
+      "compiled": true,
+      "compiled_code": "\n\n\n\n\n\n\nwith base as (\n\n  select\n    domain_userid,\n    user_id,\n    geo_country,\n    max(load_tstamp) as last_processed_event,\n    count(case when event_name = 'cmp_visible' then 1 end) as cmp_events,\n    count(case when event_name = 'consent_preferences' then 1 end) as consent_events,\n    max(case when event_name = 'cmp_visible' then derived_tstamp end) as last_cmp_event_tstamp,\n    row_number() over(partition by domain_userid order by max(load_tstamp) desc) as latest_event_by_user_rank\n\n  from embucket.public_derived.snowplow_web_consent_log\n\n  \n\n  group by 1,2,3\n\n)\n\n, latest_consents as (\n\n  select\n    domain_userid,\n    derived_tstamp as last_consent_event_tstamp,\n    event_type as last_consent_event_type,\n    consent_scopes as last_consent_scopes,\n    consent_version as last_consent_version,\n    consent_url as last_consent_url,\n    domains_applied as last_domains_applied,\n    row_number() over(partition by domain_userid order by load_tstamp desc) as latest_consent_event_by_user_rank\n\n  from embucket.public_derived.snowplow_web_consent_log\n\n  where event_name = 'consent_preferences'\n\n  \n\n)\n\n\n\nselect\n  b.domain_userid,\n  b.user_id,\n  b.geo_country,\n  b.cmp_events,\n  b.consent_events,\n  b.last_cmp_event_tstamp,\n  l.last_consent_event_tstamp,\n  l.last_consent_event_type,\n  l.last_consent_scopes,\n  l.last_consent_version,\n  l.last_consent_url,\n  l.last_domains_applied,\n  b.last_processed_event,\n  case when v.is_latest_version then True else False end as is_latest_version\n\nfrom base b\n\nleft join latest_consents l\non b.domain_userid = l.domain_userid\n\nleft join embucket.public_derived.snowplow_web_consent_versions v\non v.consent_version = l.last_consent_version\n\nwhere (l.latest_consent_event_by_user_rank = 1 or l.domain_userid is null)\nand b.latest_event_by_user_rank = 1\n\n",
+      "relation_name": "embucket.public_derived.snowplow_web_consent_users",
+      "batch_results": null,
+      "actual_row_count": 5666
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2025-11-02T11:14:03.093160Z",
+          "completed_at": "2025-11-02T11:14:03.106504Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2025-11-02T11:14:03.109146Z",
+          "completed_at": "2025-11-02T11:14:03.459481Z"
+        }
+      ],
+      "thread_id": "Thread-3 (worker)",
+      "execution_time": 0.36890697479248047,
+      "adapter_response": {
+        "_message": "02000 1",
+        "code": "02000",
+        "rows_affected": 1,
+        "query_id": "00000000-0000-0000-001d-4457c308f8d2"
+      },
+      "message": "02000 1",
+      "failures": null,
+      "unique_id": "model.snowplow_web.snowplow_web_consent_scope_status",
+      "compiled": true,
+      "compiled_code": "\n\n\n\nwith arrays as (\n\n  select\n    u.domain_userid,\n    \n    split(u.last_consent_scopes, ', ')\n as scope_array\n\n  from embucket.public_derived.snowplow_web_consent_users u\n\n  where is_latest_version\n\n  )\n\n  , unnesting as (\n\n    \n    select t.domain_userid, replace(r.value, '\"', '') as consent_scope\n    from arrays t, table(flatten(t.scope_array)) r\n\n\n  )\n\nselect\n  replace(replace(replace(cast(consent_scope as \n    TEXT\n), '\"', ''), '[', ''), ']', '') as scope,\n  count(*) as total_consent\n\nfrom unnesting\n\ngroup by 1",
+      "relation_name": "embucket.public_derived.snowplow_web_consent_scope_status",
+      "batch_results": null,
+      "actual_row_count": 0
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2025-11-02T11:14:03.101023Z",
+          "completed_at": "2025-11-02T11:14:03.106145Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2025-11-02T11:14:03.106768Z",
+          "completed_at": "2025-11-02T11:14:03.592314Z"
+        }
+      ],
+      "thread_id": "Thread-1 (worker)",
+      "execution_time": 0.5009942054748535,
+      "adapter_response": {
+        "_message": "02000 1",
+        "code": "02000",
+        "rows_affected": 1,
+        "query_id": "00000000-0000-0000-001d-4457c306b5fc"
+      },
+      "message": "02000 1",
+      "failures": null,
+      "unique_id": "model.snowplow_web.snowplow_web_consent_totals",
+      "compiled": true,
+      "compiled_code": "\n\n\n\nwith totals as (\n\n  select\n    last_consent_version,\n    count(distinct domain_userid) as total_visitors,\n    count(case when last_consent_event_type ='allow_all' then 1 end) as allow_all,\n    count(case when last_consent_event_type ='allow_selected' then 1 end) as allow_selected,\n    count(case when last_consent_event_type IN ('allow_all', 'allow_selected') then 1 end) as allow,\n    count(case when last_consent_event_type = 'pending' then 1 end) as pending,\n    count(case when last_consent_event_type = 'deny_all'  then 1 end) as denied,\n    count(case when last_consent_event_type = 'expired'  then 1 end) as expired,\n    count(case when last_consent_event_type = 'withdrawn'  then 1 end) as withdrawn,\n    count(case when last_consent_event_type = 'implicit_consent'  then 1 end) as implicit_consent,\n    count(case when \n\n    dateadd(\n        year,\n        1,\n        last_consent_event_tstamp\n        )\n\n <= \n\n    dateadd(\n        month,\n        6,\n        current_date\n        )\n\n\n          and last_consent_event_type <> 'expired'\n          and \n\n    dateadd(\n        year,\n        1,\n        last_consent_event_tstamp\n        )\n\n > current_date then 1 end) as expires_in_six_months\n\n  from embucket.public_derived.snowplow_web_consent_users\n\n  where last_consent_event_type is not null\n\n  group by 1\n\n)\n\nselect\n  v.*,\n  t.total_visitors,\n  t.allow_all,\n  t.allow_selected,\n  t.allow,\n  t.pending,\n  t.denied,\n  t.expired,\n  t.withdrawn,\n  t.implicit_consent,\n  t.expires_in_six_months\n\nfrom embucket.public_derived.snowplow_web_consent_versions v\n\nleft join totals t\non t.last_consent_version = v.consent_version\n\norder by v.version_start_tstamp desc",
+      "relation_name": "embucket.public_derived.snowplow_web_consent_totals",
+      "batch_results": null,
+      "actual_row_count": 0
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2025-11-02T11:14:01.937033Z",
+          "completed_at": "2025-11-02T11:14:01.947232Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2025-11-02T11:14:01.947731Z",
+          "completed_at": "2025-11-02T11:14:03.403343Z"
+        }
+      ],
+      "thread_id": "Thread-2 (worker)",
+      "execution_time": 1.467289686203003,
+      "adapter_response": {
+        "_message": "02000 1",
+        "code": "02000",
+        "rows_affected": 1,
+        "query_id": "00000000-0000-0000-001d-4457c30bdaa1"
+      },
+      "message": "02000 1",
+      "failures": null,
+      "unique_id": "model.snowplow_web.snowplow_web_sessions",
+      "compiled": true,
+      "compiled_code": "\n\n\n\n\nselect *\n  \nfrom embucket.public_scratch.snowplow_web_sessions_this_run\nwhere True --returns false if run doesn't contain new events.",
+      "relation_name": "embucket.public_derived.snowplow_web_sessions",
+      "batch_results": null,
+      "actual_row_count": 5695
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2025-11-02T11:14:04.144513Z",
+          "completed_at": "2025-11-02T11:14:04.152285Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2025-11-02T11:14:04.152803Z",
+          "completed_at": "2025-11-02T11:14:05.258132Z"
+        }
+      ],
+      "thread_id": "Thread-4 (worker)",
+      "execution_time": 1.1147398948669434,
+      "adapter_response": {
+        "_message": "02000 1",
+        "code": "02000",
+        "rows_affected": 1,
+        "query_id": "00000000-0000-0000-001d-4457c2f6d2bb"
+      },
+      "message": "02000 1",
+      "failures": null,
+      "unique_id": "model.snowplow_web.snowplow_web_users_sessions_this_run",
+      "compiled": true,
+      "compiled_code": "\n\n\n\nselect\n  a.*,\n  min(a.start_tstamp) over(partition by a.domain_userid) as user_start_tstamp,\n  max(a.end_tstamp) over(partition by a.domain_userid) as user_end_tstamp\n\nfrom embucket.public_derived.snowplow_web_sessions a\nwhere exists (select 1 from embucket.public_scratch.snowplow_web_base_sessions_this_run b where a.domain_userid = b.user_identifier)",
+      "relation_name": "embucket.public_scratch.snowplow_web_users_sessions_this_run",
+      "batch_results": null,
+      "actual_row_count": 5695
+    },
+    {
+      "status": "success",
+      "timing": [
+        {
+          "name": "compile",
+          "started_at": "2025-11-02T11:14:05.262737Z",
+          "completed_at": "2025-11-02T11:14:05.269598Z"
+        },
+        {
+          "name": "execute",
+          "started_at": "2025-11-02T11:14:05.269962Z",
+          "completed_at": "2025-11-02T11:14:06.181052Z"
+        }
+      ],
+      "thread_id": "Thread-1 (worker)",
+      "execution_time": 0.9192538261413574,
+      "adapter_response": {
+        "_message": "02000 1",
+        "code": "02000",
+        "rows_affected": 1,
+        "query_id": "00000000-0000-0000-001d-4457c2e5a05a"
       },
       "message": "02000 1",
       "failures": null,
@@ -836,29 +836,29 @@
       "compiled_code": "\n\n\n\nselect\n  domain_userid,\n  -- time\n  user_start_tstamp as start_tstamp,\n  user_end_tstamp as end_tstamp,\n  -- first/last session. Max to resolve edge case with multiple sessions with the same start/end tstamp\n  max(case when start_tstamp = user_start_tstamp then domain_sessionid end) as first_domain_sessionid,\n  max(case when end_tstamp = user_end_tstamp then domain_sessionid end) as last_domain_sessionid,\n  -- engagement\n  sum(page_views) as page_views,\n  count(distinct domain_sessionid) as sessions,\n  sum(engaged_time_in_s) as engaged_time_in_s\n\nfrom embucket.public_scratch.snowplow_web_users_sessions_this_run\n\ngroup by 1,2,3",
       "relation_name": "embucket.public_scratch.snowplow_web_users_aggs",
       "batch_results": null,
-      "actual_row_count": 2825
+      "actual_row_count": 5695
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:14.472172Z",
-          "completed_at": "2025-11-01T15:59:14.479942Z"
+          "started_at": "2025-11-02T11:14:06.184045Z",
+          "completed_at": "2025-11-02T11:14:06.188856Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:14.480334Z",
-          "completed_at": "2025-11-01T15:59:15.328752Z"
+          "started_at": "2025-11-02T11:14:06.189161Z",
+          "completed_at": "2025-11-02T11:14:06.974248Z"
         }
       ],
-      "thread_id": "Thread-4 (worker)",
-      "execution_time": 0.8577172756195068,
+      "thread_id": "Thread-3 (worker)",
+      "execution_time": 0.7911288738250732,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e4effbe8"
+        "query_id": "00000000-0000-0000-001d-4457c2d7c526"
       },
       "message": "02000 1",
       "failures": null,
@@ -867,29 +867,29 @@
       "compiled_code": "\n\n\n\n\nselect\n  a.domain_userid,\n  a.last_page_title,\n\n  a.last_page_url,\n\n  a.last_page_urlscheme,\n  a.last_page_urlhost,\n  a.last_page_urlpath,\n  a.last_page_urlquery,\n  a.last_page_urlfragment,\n\n  a.last_geo_country,\n  a.last_geo_country_name,\n  a.last_geo_continent,\n  a.last_geo_city,\n  a.last_geo_region_name,\n  a.last_br_lang,\n  a.last_br_lang_name\n\nfrom embucket.public_scratch.snowplow_web_users_sessions_this_run a\n\ninner join embucket.public_scratch.snowplow_web_users_aggs b\non a.domain_sessionid = b.last_domain_sessionid",
       "relation_name": "embucket.public_scratch.snowplow_web_users_lasts",
       "batch_results": null,
-      "actual_row_count": 2825
+      "actual_row_count": 5695
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:15.334219Z",
-          "completed_at": "2025-11-01T15:59:15.344666Z"
+          "started_at": "2025-11-02T11:14:06.980398Z",
+          "completed_at": "2025-11-02T11:14:06.991647Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:15.345136Z",
-          "completed_at": "2025-11-01T15:59:16.186819Z"
+          "started_at": "2025-11-02T11:14:06.992197Z",
+          "completed_at": "2025-11-02T11:14:07.824086Z"
         }
       ],
       "thread_id": "Thread-2 (worker)",
-      "execution_time": 0.8536391258239746,
+      "execution_time": 0.8448917865753174,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e4e2ce09"
+        "query_id": "00000000-0000-0000-001d-4457c2cb4daa"
       },
       "message": "02000 1",
       "failures": null,
@@ -898,29 +898,29 @@
       "compiled_code": "\n\n\n\nselect\n  -- user fields\n  a.user_id,\n  a.domain_userid,\n  a.original_domain_userid,\n  a.network_userid,\n\n  b.start_tstamp,\n  b.end_tstamp,\n  \n    convert_timezone('UTC', convert_timezone('UTC', current_timestamp()))::timestamp\n as model_tstamp,\n\n  -- engagement fields\n  b.page_views,\n  b.sessions,\n\n  b.engaged_time_in_s,\n\n  -- first page fields\n  a.first_page_title,\n  a.first_page_url,\n  a.first_page_urlscheme,\n  a.first_page_urlhost,\n  a.first_page_urlpath,\n  a.first_page_urlquery,\n  a.first_page_urlfragment,\n\n  a.geo_country as first_geo_country,\n  a.geo_country_name as first_geo_country_name,\n  a.geo_continent as first_geo_continent,\n  a.geo_city as first_geo_city,\n  a.geo_region_name as first_geo_region_name,\n  a.br_lang as first_br_lang,\n  a.br_lang_name as first_br_lang_name,\n\n  c.last_page_title,\n  c.last_page_url,\n  c.last_page_urlscheme,\n  c.last_page_urlhost,\n  c.last_page_urlpath,\n  c.last_page_urlquery,\n  c.last_page_urlfragment,\n\n  c.last_geo_country,\n  c.last_geo_country_name,\n  c.last_geo_continent,\n  c.last_geo_city,\n  c.last_geo_region_name,\n  c.last_br_lang,\n  c.last_br_lang_name,\n\n\n  -- referrer fields\n  a.referrer,\n\n  a.refr_urlscheme,\n  a.refr_urlhost,\n  a.refr_urlpath,\n  a.refr_urlquery,\n  a.refr_urlfragment,\n\n  a.refr_medium,\n  a.refr_source,\n  a.refr_term,\n\n  -- marketing fields\n  a.mkt_medium,\n  a.mkt_source,\n  a.mkt_term,\n  a.mkt_content,\n  a.mkt_campaign,\n  a.mkt_clickid,\n  a.mkt_network,\n  a.mkt_source_platform,\n  a.default_channel_group\n\nfrom embucket.public_scratch.snowplow_web_users_aggs as b\n\ninner join embucket.public_scratch.snowplow_web_users_sessions_this_run as a\non a.domain_sessionid = b.first_domain_sessionid\n\ninner join embucket.public_scratch.snowplow_web_users_lasts c\non b.domain_userid = c.domain_userid",
       "relation_name": "embucket.public_scratch.snowplow_web_users_this_run",
       "batch_results": null,
-      "actual_row_count": 2825
+      "actual_row_count": 5695
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:16.192847Z",
-          "completed_at": "2025-11-01T15:59:16.204064Z"
+          "started_at": "2025-11-02T11:14:07.829612Z",
+          "completed_at": "2025-11-02T11:14:07.839443Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:16.204474Z",
-          "completed_at": "2025-11-01T15:59:17.349934Z"
+          "started_at": "2025-11-02T11:14:07.839920Z",
+          "completed_at": "2025-11-02T11:14:09.052493Z"
         }
       ],
-      "thread_id": "Thread-1 (worker)",
-      "execution_time": 1.1581530570983887,
+      "thread_id": "Thread-4 (worker)",
+      "execution_time": 1.2240550518035889,
       "adapter_response": {
         "_message": "02000 1",
         "code": "02000",
         "rows_affected": 1,
-        "query_id": "00000000-0000-0000-001d-4467e4cb2e35"
+        "query_id": "00000000-0000-0000-001d-4457c2b3005d"
       },
       "message": "02000 1",
       "failures": null,
@@ -929,84 +929,84 @@
       "compiled_code": "\n\n\n\nselect *\n  \nfrom embucket.public_scratch.snowplow_web_users_this_run\nwhere True --returns false if run doesn't contain new events.",
       "relation_name": "embucket.public_derived.snowplow_web_users",
       "batch_results": null,
-      "actual_row_count": 2825
+      "actual_row_count": 5695
     },
     {
       "status": "success",
       "timing": [
         {
           "name": "compile",
-          "started_at": "2025-11-01T15:59:17.352450Z",
-          "completed_at": "2025-11-01T15:59:17.357370Z"
+          "started_at": "2025-11-02T11:14:09.057076Z",
+          "completed_at": "2025-11-02T11:14:09.064117Z"
         },
         {
           "name": "execute",
-          "started_at": "2025-11-01T15:59:17.357740Z",
-          "completed_at": "2025-11-01T15:59:18.266159Z"
+          "started_at": "2025-11-02T11:14:09.064623Z",
+          "completed_at": "2025-11-02T11:14:12.057898Z"
         }
       ],
       "thread_id": "main",
-      "execution_time": 0.913709,
+      "execution_time": 3.000822,
       "adapter_response": {},
       "message": "snowplow_web.on-run-end.0 passed",
       "failures": 0,
       "unique_id": "operation.snowplow_web.snowplow_web-on-run-end-0",
       "compiled": true,
-      "compiled_code": "\n\n  \n\n    \n\n    merge into embucket.public_snowplow_manifest.snowplow_web_incremental_manifest m\n    using ( \n      select\n        b.model,\n        a.last_success\n\n      from\n        (select max(collector_tstamp) as last_success from embucket.public_scratch.snowplow_web_base_events_this_run) a,\n        ( select 'snowplow_web_pv_engaged_time' as model union all   select 'snowplow_web_pv_scroll_depth' as model union all   select 'snowplow_web_consent_events_this_run' as model union all   select 'snowplow_web_user_mapping' as model union all   select 'snowplow_web_consent_log' as model union all   select 'snowplow_web_vital_events_this_run' as model union all   select 'snowplow_web_sessions_this_run' as model union all   select 'snowplow_web_consent_cmp_stats' as model union all   select 'snowplow_web_consent_versions' as model union all   select 'snowplow_web_page_views_this_run' as model union all   select 'snowplow_web_vitals_this_run' as model union all   select 'snowplow_web_consent_users' as model union all   select 'snowplow_web_sessions' as model union all   select 'snowplow_web_consent_scope_status' as model union all   select 'snowplow_web_page_views' as model union all   select 'snowplow_web_vitals' as model union all   select 'snowplow_web_users_sessions_this_run' as model union all   select 'snowplow_web_consent_totals' as model union all   select 'snowplow_web_vital_measurements' as model union all   select 'snowplow_web_users_aggs' as model union all   select 'snowplow_web_users_lasts' as model union all   select 'snowplow_web_users_this_run' as model union all   select 'snowplow_web_users' as model ) b\n\n      where a.last_success is not null -- if run contains no data don't add to manifest\n     ) s\n    on m.model = s.model\n    when matched then\n        update set last_success = greatest(m.last_success, s.last_success)\n    when not matched then\n        insert (model, last_success) values(model, last_success);\n\n    \n      commit;\n    \n\n  \n\n",
+      "compiled_code": "\n\n  \n\n    \n\n    merge into embucket.public_snowplow_manifest.snowplow_web_incremental_manifest m\n    using ( \n      select\n        b.model,\n        a.last_success\n\n      from\n        (select max(collector_tstamp) as last_success from embucket.public_scratch.snowplow_web_base_events_this_run) a,\n        ( select 'snowplow_web_pv_engaged_time' as model union all   select 'snowplow_web_pv_scroll_depth' as model union all   select 'snowplow_web_consent_events_this_run' as model union all   select 'snowplow_web_vital_events_this_run' as model union all   select 'snowplow_web_user_mapping' as model union all   select 'snowplow_web_page_views_this_run' as model union all   select 'snowplow_web_vitals_this_run' as model union all   select 'snowplow_web_consent_log' as model union all   select 'snowplow_web_sessions_this_run' as model union all   select 'snowplow_web_consent_versions' as model union all   select 'snowplow_web_page_views' as model union all   select 'snowplow_web_consent_cmp_stats' as model union all   select 'snowplow_web_vitals' as model union all   select 'snowplow_web_vital_measurements' as model union all   select 'snowplow_web_consent_users' as model union all   select 'snowplow_web_consent_scope_status' as model union all   select 'snowplow_web_consent_totals' as model union all   select 'snowplow_web_sessions' as model union all   select 'snowplow_web_users_sessions_this_run' as model union all   select 'snowplow_web_users_aggs' as model union all   select 'snowplow_web_users_lasts' as model union all   select 'snowplow_web_users_this_run' as model union all   select 'snowplow_web_users' as model ) b\n\n      where a.last_success is not null -- if run contains no data don't add to manifest\n     ) s\n    on m.model = s.model\n    when matched then\n        update set last_success = greatest(m.last_success, s.last_success)\n    when not matched then\n        insert (model, last_success) values(model, last_success);\n\n    \n      commit;\n    \n\n  \n\n",
       "relation_name": null,
       "batch_results": null
     }
   ],
-  "elapsed_time": 22.446386098861694,
+  "elapsed_time": 28.58228302001953,
   "args": {
-    "static_parser": true,
-    "project_dir": "/Users/oleksandrmazur/repos/benchmarks/dbt-snowplow-web/embucket/dbt-snowplow-web",
-    "cache_selected_only": false,
-    "defer": false,
-    "source_freshness_run_project_hooks": false,
-    "require_explicit_package_overrides_for_builtin_materializations": true,
-    "exclude": [],
-    "log_file_max_bytes": 10485760,
-    "state_modified_compare_more_unrendered_values": false,
-    "partial_parse_file_diff": true,
-    "full_refresh": true,
-    "skip_nodes_if_on_run_start_fails": false,
-    "version_check": true,
-    "profiles_dir": "/Users/oleksandrmazur/repos/benchmarks/dbt-snowplow-web/embucket/dbt-snowplow-web",
-    "select": [],
+    "show_resource_report": false,
+    "strict_mode": false,
     "require_nested_cumulative_type_params": false,
-    "which": "run",
-    "require_batched_execution_for_custom_microbatch_strategy": false,
-    "log_path": "/Users/oleksandrmazur/repos/benchmarks/dbt-snowplow-web/embucket/dbt-snowplow-web/logs",
-    "log_format": "default",
-    "send_anonymous_usage_stats": true,
-    "indirect_selection": "eager",
-    "introspect": true,
-    "print": true,
-    "use_colors_file": true,
-    "log_format_file": "debug",
-    "log_level": "info",
-    "empty": false,
-    "state_modified_compare_vars": false,
-    "write_json": true,
-    "printer_width": 80,
     "require_resource_names_without_spaces": false,
-    "macro_debugging": false,
-    "quiet": false,
+    "printer_width": 80,
+    "send_anonymous_usage_stats": true,
+    "cache_selected_only": false,
+    "source_freshness_run_project_hooks": false,
+    "target": "embucket",
+    "log_path": "/Users/oleksandrmazur/repos/benchmarks/dbt-snowplow-web/embucket/dbt-snowplow-web/logs",
+    "project_dir": "/Users/oleksandrmazur/repos/benchmarks/dbt-snowplow-web/embucket/dbt-snowplow-web",
+    "print": true,
+    "partial_parse_file_diff": true,
+    "use_colors": true,
+    "full_refresh": true,
     "warn_error_options": {
       "include": [],
       "exclude": []
     },
-    "strict_mode": false,
-    "populate_cache": true,
+    "invocation_command": "dbt run --target embucket --full-refresh --vars {snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: 2025-09-01, snowplow__backfill_limit_days: 50, snowplow__cwv_days_to_measure: 999}",
+    "version_check": true,
+    "exclude": [],
     "partial_parse": true,
-    "target": "embucket",
-    "use_colors": true,
+    "log_file_max_bytes": 10485760,
+    "defer": false,
+    "log_format_file": "debug",
+    "static_parser": true,
+    "select": [],
+    "require_batched_execution_for_custom_microbatch_strategy": false,
     "require_yaml_configuration_for_mf_time_spines": false,
     "log_level_file": "debug",
-    "invocation_command": "dbt run --target embucket --full-refresh --vars {snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: 2025-09-01, snowplow__backfill_limit_days: 50, snowplow__cwv_days_to_measure: 999}",
+    "require_explicit_package_overrides_for_builtin_materializations": true,
+    "write_json": true,
+    "log_level": "info",
+    "empty": false,
+    "profiles_dir": "/Users/oleksandrmazur/repos/benchmarks/dbt-snowplow-web/embucket/dbt-snowplow-web",
+    "use_colors_file": true,
+    "state_modified_compare_more_unrendered_values": false,
+    "indirect_selection": "eager",
+    "populate_cache": true,
     "favor_state": false,
-    "show_resource_report": false,
+    "state_modified_compare_vars": false,
+    "which": "run",
+    "log_format": "default",
+    "skip_nodes_if_on_run_start_fails": false,
+    "introspect": true,
+    "macro_debugging": false,
+    "quiet": false,
     "vars": {
       "snowplow__enable_consent": true,
       "snowplow__enable_cwv": true,

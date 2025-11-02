@@ -14,7 +14,7 @@ def create_snowflake_connection():
     user = os.getenv("SNOWFLAKE_USER")
     password = os.getenv("SNOWFLAKE_PASSWORD")
     account = os.getenv("SNOWFLAKE_ACCOUNT")
-    database = os.getenv("SNOWFLAKE_DATABASE", "dbt_snowplow_web")
+    database = os.getenv("SNOWFLAKE_DATABASE", "embucket")
     schema = "atomic"  # Hardcoded to atomic schema
     warehouse = os.getenv("SNOWFLAKE_WAREHOUSE", "COMPUTE_WH")
     role = os.getenv("SNOWFLAKE_ROLE", "ACCOUNTADMIN")
@@ -140,7 +140,7 @@ def manage_warehouse(conn, warehouse_name, action):
 
 def drop_schemas(conn):
     """Drop the specified schemas."""
-    database = os.getenv("SNOWFLAKE_DATABASE", "dbt_snowplow_web")
+    database = os.getenv("SNOWFLAKE_DATABASE", "embucket")
     schemas_to_drop = ['PUBLIC_DERIVED', 'PUBLIC_SCRATCH', 'PUBLIC_SNOWPLOW_MANIFEST']
     
     cursor = conn.cursor()
@@ -268,7 +268,7 @@ def main():
 
     # Configuration
     script_dir = Path(__file__).parent
-    sql_script = script_dir / "create.sql"
+    sql_script = script_dir / "../create.sql"
     # CSV files are in the parent directory
     parent_dir = script_dir.parent
     input_files = [str(parent_dir / file) for file in input_files]

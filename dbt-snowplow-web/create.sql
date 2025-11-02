@@ -9,8 +9,8 @@ USE DATABASE embucket;
 CREATE SCHEMA IF NOT EXISTS atomic;
 USE SCHEMA atomic;
 
--- Drop existing table if it exists (using fully qualified name to ensure it works)
-DROP TABLE IF EXISTS embucket.atomic.events;
+-- Drop existing table if it exists
+DROP TABLE IF EXISTS events;
 
 -- Step 2: Create the events table with appropriate data types
 CREATE TABLE IF NOT EXISTS events (
