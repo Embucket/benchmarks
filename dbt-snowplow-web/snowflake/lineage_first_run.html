@@ -100,7 +100,7 @@
 <body>
     <div class="container">
         <h1>dbt-snowplow-web First Run - Snowflake</h1>
-        <p>Generated: 2025-11-02 14:05:20</p>
+        <p>Generated: 2025-11-02 22:39:12</p>
         
         <h2>Summary Statistics</h2>
         <div class="summary">
@@ -110,15 +110,15 @@
             </div>
             <div class="stat-card">
                 <div class="stat-label">Total Execution Time</div>
-                <div class="stat-value">107.6s</div>
+                <div class="stat-value">79.6s</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Average Time</div>
-                <div class="stat-value">3.7s</div>
+                <div class="stat-value">2.7s</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Slowest Model</div>
-                <div class="stat-value">8.3s</div>
+                <div class="stat-value">5.6s</div>
             </div>
         </div>
         
@@ -152,35 +152,35 @@
         <div class="diagram-container">
             <div class="mermaid">
 graph TD
-    page_views["page_views<br/>3.2s"]
-    pv_scroll_depth["pv_scroll_depth<br/>5.9s"]
-    pv_engaged_time["pv_engaged_time<br/>5.2s"]
-    page_views_this_run["page_views_this_run<br/>4.6s"]
-    consent_scope_status["consent_scope_status<br/>2.0s"]
-    consent_log["consent_log<br/>4.2s"]
-    consent_cmp_stats["consent_cmp_stats<br/>2.8s"]
-    consent_users["consent_users<br/>2.8s"]
-    consent_versions["consent_versions<br/>2.4s"]
-    consent_totals["consent_totals<br/>2.2s"]
-    consent_events_this_run["consent_events_this_run<br/>5.0s"]
-    vitals["vitals<br/>3.1s"]
-    vital_measurements["vital_measurements<br/>3.0s"]
-    vitals_this_run["vitals_this_run<br/>2.3s"]
-    vital_events_this_run["vital_events_this_run<br/>4.9s"]
-    user_mapping["user_mapping<br/>5.4s"]
-    sessions["sessions<br/>4.0s"]
-    sessions_this_run["sessions_this_run<br/>8.3s"]
-    users["users<br/>5.8s"]
-    users_sessions_this_run["users_sessions_this_run<br/>2.7s"]
-    users_this_run["users_this_run<br/>2.6s"]
-    users_aggs["users_aggs<br/>2.7s"]
-    users_lasts["users_lasts<br/>3.3s"]
-    incremental_manifest["incremental_manifest<br/>2.8s"]
-    base_sessions_lifecycle_manifest["base_sessions_lifecycle_manifest<br/>3.6s"]
-    base_quarantined_sessions["base_quarantined_sessions<br/>2.3s"]
-    base_new_event_limits["base_new_event_limits<br/>3.1s"]
-    base_sessions_this_run["base_sessions_this_run<br/>3.2s"]
-    base_events_this_run["base_events_this_run<br/>4.2s"]
+    page_views["page_views<br/>2.5s"]
+    pv_scroll_depth["pv_scroll_depth<br/>2.4s"]
+    pv_engaged_time["pv_engaged_time<br/>2.4s"]
+    page_views_this_run["page_views_this_run<br/>5.3s"]
+    consent_scope_status["consent_scope_status<br/>1.5s"]
+    consent_log["consent_log<br/>2.7s"]
+    consent_cmp_stats["consent_cmp_stats<br/>3.6s"]
+    consent_users["consent_users<br/>1.9s"]
+    consent_versions["consent_versions<br/>2.9s"]
+    consent_totals["consent_totals<br/>1.7s"]
+    consent_events_this_run["consent_events_this_run<br/>2.2s"]
+    vitals["vitals<br/>2.3s"]
+    vital_measurements["vital_measurements<br/>2.0s"]
+    vitals_this_run["vitals_this_run<br/>3.7s"]
+    vital_events_this_run["vital_events_this_run<br/>1.9s"]
+    user_mapping["user_mapping<br/>2.8s"]
+    sessions["sessions<br/>5.6s"]
+    sessions_this_run["sessions_this_run<br/>4.2s"]
+    users["users<br/>2.6s"]
+    users_sessions_this_run["users_sessions_this_run<br/>2.1s"]
+    users_this_run["users_this_run<br/>2.4s"]
+    users_aggs["users_aggs<br/>2.1s"]
+    users_lasts["users_lasts<br/>2.0s"]
+    incremental_manifest["incremental_manifest<br/>2.0s"]
+    base_sessions_lifecycle_manifest["base_sessions_lifecycle_manifest<br/>3.5s"]
+    base_quarantined_sessions["base_quarantined_sessions<br/>2.0s"]
+    base_new_event_limits["base_new_event_limits<br/>3.3s"]
+    base_sessions_this_run["base_sessions_this_run<br/>2.7s"]
+    base_events_this_run["base_events_this_run<br/>3.5s"]
     events["events<br/>(source)"]
     page_views_this_run --> page_views
     base_new_event_limits --> page_views
@@ -290,217 +290,217 @@ graph TD
             <tbody>
                 
         <tr>
-            <td>snowplow_web_sessions_this_run</td>
-            <td>scratch</td>
-            <td>8.25s</td>
-            <td>2,825</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_pv_scroll_depth</td>
-            <td>scratch</td>
-            <td>5.95s</td>
-            <td>2,825</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_users</td>
+            <td>snowplow_web_sessions</td>
             <td>derived</td>
-            <td>5.84s</td>
-            <td>2,825</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_user_mapping</td>
-            <td>derived</td>
-            <td>5.39s</td>
-            <td>10,000</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_pv_engaged_time</td>
-            <td>scratch</td>
-            <td>5.15s</td>
-            <td>1,385</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_consent_events_this_run</td>
-            <td>scratch</td>
-            <td>5.03s</td>
-            <td>2,846</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_vital_events_this_run</td>
-            <td>scratch</td>
-            <td>4.91s</td>
-            <td>1,427</td>
+            <td>5.64s</td>
+            <td>12,258</td>
             <td>success</td>
         </tr>
         
         <tr>
             <td>snowplow_web_page_views_this_run</td>
             <td>scratch</td>
-            <td>4.56s</td>
-            <td>1,440</td>
+            <td>5.28s</td>
+            <td>12,258</td>
             <td>success</td>
         </tr>
         
         <tr>
-            <td>snowplow_web_base_events_this_run</td>
+            <td>snowplow_web_sessions_this_run</td>
             <td>scratch</td>
-            <td>4.19s</td>
-            <td>10,000</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_consent_log</td>
-            <td>derived</td>
-            <td>4.16s</td>
-            <td>2,846</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_sessions</td>
-            <td>derived</td>
-            <td>3.96s</td>
-            <td>2,825</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_base_sessions_lifecycle_manifest</td>
-            <td>snowplow_manifest</td>
-            <td>3.60s</td>
-            <td>10,000</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_users_lasts</td>
-            <td>scratch</td>
-            <td>3.32s</td>
-            <td>2,825</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_page_views</td>
-            <td>derived</td>
-            <td>3.22s</td>
-            <td>1,440</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_base_sessions_this_run</td>
-            <td>scratch</td>
-            <td>3.18s</td>
-            <td>10,000</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_vitals</td>
-            <td>derived</td>
-            <td>3.12s</td>
-            <td>1,427</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_base_new_event_limits</td>
-            <td>scratch</td>
-            <td>3.05s</td>
-            <td>1</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_vital_measurements</td>
-            <td>derived</td>
-            <td>3.02s</td>
-            <td>46</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_consent_cmp_stats</td>
-            <td>derived</td>
-            <td>2.80s</td>
-            <td>1,406</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_consent_users</td>
-            <td>derived</td>
-            <td>2.80s</td>
-            <td>2,846</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_incremental_manifest</td>
-            <td>snowplow_manifest</td>
-            <td>2.77s</td>
-            <td>23</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_users_sessions_this_run</td>
-            <td>scratch</td>
-            <td>2.74s</td>
-            <td>2,825</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_users_aggs</td>
-            <td>scratch</td>
-            <td>2.70s</td>
-            <td>2,825</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_users_this_run</td>
-            <td>scratch</td>
-            <td>2.61s</td>
-            <td>2,825</td>
-            <td>success</td>
-        </tr>
-        
-        <tr>
-            <td>snowplow_web_consent_versions</td>
-            <td>derived</td>
-            <td>2.43s</td>
-            <td>1</td>
+            <td>4.15s</td>
+            <td>12,258</td>
             <td>success</td>
         </tr>
         
         <tr>
             <td>snowplow_web_vitals_this_run</td>
             <td>scratch</td>
-            <td>2.34s</td>
-            <td>1,427</td>
+            <td>3.65s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_cmp_stats</td>
+            <td>derived</td>
+            <td>3.61s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_base_events_this_run</td>
+            <td>scratch</td>
+            <td>3.52s</td>
+            <td>86,237</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_base_sessions_lifecycle_manifest</td>
+            <td>snowplow_manifest</td>
+            <td>3.45s</td>
+            <td>12,258</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_base_new_event_limits</td>
+            <td>scratch</td>
+            <td>3.25s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_versions</td>
+            <td>derived</td>
+            <td>2.86s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_user_mapping</td>
+            <td>derived</td>
+            <td>2.76s</td>
+            <td>12,258</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_base_sessions_this_run</td>
+            <td>scratch</td>
+            <td>2.73s</td>
+            <td>12,258</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_log</td>
+            <td>derived</td>
+            <td>2.67s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_users</td>
+            <td>derived</td>
+            <td>2.61s</td>
+            <td>12,258</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_page_views</td>
+            <td>derived</td>
+            <td>2.48s</td>
+            <td>12,258</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_pv_engaged_time</td>
+            <td>scratch</td>
+            <td>2.44s</td>
+            <td>11,274</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_pv_scroll_depth</td>
+            <td>scratch</td>
+            <td>2.41s</td>
+            <td>12,258</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_users_this_run</td>
+            <td>scratch</td>
+            <td>2.36s</td>
+            <td>12,258</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_vitals</td>
+            <td>derived</td>
+            <td>2.27s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_events_this_run</td>
+            <td>scratch</td>
+            <td>2.24s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_users_aggs</td>
+            <td>scratch</td>
+            <td>2.13s</td>
+            <td>12,258</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_users_sessions_this_run</td>
+            <td>scratch</td>
+            <td>2.12s</td>
+            <td>12,258</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_vital_measurements</td>
+            <td>derived</td>
+            <td>2.01s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_users_lasts</td>
+            <td>scratch</td>
+            <td>2.00s</td>
+            <td>12,258</td>
             <td>success</td>
         </tr>
         
         <tr>
             <td>snowplow_web_base_quarantined_sessions</td>
             <td>snowplow_manifest</td>
-            <td>2.34s</td>
+            <td>1.99s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_incremental_manifest</td>
+            <td>snowplow_manifest</td>
+            <td>1.98s</td>
+            <td>23</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_consent_users</td>
+            <td>derived</td>
+            <td>1.92s</td>
+            <td>1</td>
+            <td>success</td>
+        </tr>
+        
+        <tr>
+            <td>snowplow_web_vital_events_this_run</td>
+            <td>scratch</td>
+            <td>1.90s</td>
             <td>1</td>
             <td>success</td>
         </tr>
@@ -508,7 +508,7 @@ graph TD
         <tr>
             <td>snowplow_web_consent_totals</td>
             <td>derived</td>
-            <td>2.24s</td>
+            <td>1.69s</td>
             <td>1</td>
             <td>success</td>
         </tr>
@@ -516,7 +516,7 @@ graph TD
         <tr>
             <td>snowplow_web_consent_scope_status</td>
             <td>derived</td>
-            <td>1.96s</td>
+            <td>1.46s</td>
             <td>1</td>
             <td>success</td>
         </tr>
