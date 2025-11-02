@@ -13,7 +13,7 @@ USE SCHEMA atomic;
 DROP TABLE IF EXISTS embucket.atomic.events;
 
 -- Step 2: Create the events table with appropriate data types
-CREATE TABLE IF NOT EXISTS events (
+CREATE TABLE IF NOT EXISTS embucket.atomic.events (
     app_id STRING,
     platform STRING,
     etl_tstamp TIMESTAMP_NTZ,
