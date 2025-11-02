@@ -63,24 +63,25 @@ async def main():
     args = parser.parse_args()
     
     html_dir = Path(args.html_dir).resolve()
-    script_dir = Path(__file__).parent
-    visualizations_dir = script_dir.parent / 'visualizations'
+    script_dir = Path(__file__).parent.resolve()
+    visualizations_dir = (script_dir.parent / 'visualizations').resolve()
     
     # Define input HTML files and output PNG files
     screenshots = [
         {
-            'html': html_dir / 'lineage_first_run.html',
-            'png': visualizations_dir / f'dbt_snowplow_web_first_run_{args.suffix}.png',
+            'html': (html_dir / 'lineage_first_run.html').resolve(),
+            'png': (visualizations_dir / f'dbt_snowplow_web_first_run_{args.suffix}.png').resolve(),
             'name': 'First Run'
         },
         {
-            'html': html_dir / 'lineage_incremental_run.html',
-            'png': visualizations_dir / f'dbt_snowplow_web_incremental_run_{args.suffix}.png',
+            'html': (html_dir / 'lineage_incremental_run.html').resolve(),
+            'png': (visualizations_dir / f'dbt_snowplow_web_incremental_run_{args.suffix}.png').resolve(),
             'name': 'Incremental Run'
         }
     ]
     
     print(f"Generating screenshots for dbt-snowplow-web visualizations (suffix: {args.suffix})...")
+    print(f"Output directory: {visualizations_dir}")
     print("")
     
     success_count = 0
