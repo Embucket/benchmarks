@@ -193,7 +193,7 @@ echo "=========================================="
 echo "Generating Screenshots for README"
 echo "=========================================="
 cd ..
-env/bin/python3 generate_screenshots.py
+env/bin/python3 ../generate_screenshots.py --suffix embucket --html-dir .
 cd dbt-snowplow-web
 
 # Summary
@@ -208,6 +208,6 @@ echo "  - First run:       lineage_first_run.html"
 echo "  - Incremental run: lineage_incremental_run.html"
 echo ""
 echo "Screenshots for README:"
-echo "  - ../../visualizations/dbt_snowplow_web_first_run_sf.png"
-echo "  - ../../visualizations/dbt_snowplow_web_incremental_run_sf.png"
+echo "  - ../../visualizations/dbt_snowplow_web_first_run_embucket.png"
+echo "  - ../../visualizations/dbt_snowplow_web_incremental_run_embucket.png"
 echo ""

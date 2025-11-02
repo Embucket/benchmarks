@@ -4,6 +4,7 @@ Script to convert HTML visualizations to PNG images for embedding in README.
 Uses Playwright to take screenshots of the HTML files.
 """
 
+import argparse
 import asyncio
 import sys
 from pathlib import Path
@@ -43,24 +44,43 @@ async def capture_screenshot(html_path: str, output_path: str, width: int = 1400
 
 async def main():
     """Generate screenshots for both visualizations."""
+    parser = argparse.ArgumentParser(
+        description='Generate PNG screenshots from HTML lineage visualizations'
+    )
+    parser.add_argument(
+        '--suffix',
+        type=str,
+        required=True,
+        help='Suffix for PNG filenames (e.g., "embucket" or "sf")'
+    )
+    parser.add_argument(
+        '--html-dir',
+        type=str,
+        default='.',
+        help='Directory containing lineage_first_run.html and lineage_incremental_run.html (default: current directory)'
+    )
+    
+    args = parser.parse_args()
+    
+    html_dir = Path(args.html_dir).resolve()
     script_dir = Path(__file__).parent
-    visualizations_dir = script_dir.parent.parent / 'visualizations'
+    visualizations_dir = script_dir.parent / 'visualizations'
     
     # Define input HTML files and output PNG files
     screenshots = [
         {
-            'html': script_dir / 'lineage_first_run.html',
-            'png': visualizations_dir / 'dbt_snowplow_web_first_run_sf.png',
+            'html': html_dir / 'lineage_first_run.html',
+            'png': visualizations_dir / f'dbt_snowplow_web_first_run_{args.suffix}.png',
             'name': 'First Run'
         },
         {
-            'html': script_dir / 'lineage_incremental_run.html',
-            'png': visualizations_dir / 'dbt_snowplow_web_incremental_run_sf.png',
+            'html': html_dir / 'lineage_incremental_run.html',
+            'png': visualizations_dir / f'dbt_snowplow_web_incremental_run_{args.suffix}.png',
             'name': 'Incremental Run'
         }
     ]
     
-    print("Generating screenshots for dbt-snowplow-web visualizations...")
+    print(f"Generating screenshots for dbt-snowplow-web visualizations (suffix: {args.suffix})...")
     print("")
     
     success_count = 0

@@ -193,7 +193,7 @@ echo "=========================================="
 echo "Generating Screenshots for README"
 echo "=========================================="
 cd ..
-env/bin/python3 generate_screenshots.py
+env/bin/python3 ../generate_screenshots.py --suffix sf --html-dir .
 cd dbt-snowplow-web
 
 # Summary

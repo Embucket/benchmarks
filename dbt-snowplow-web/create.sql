@@ -10,7 +10,7 @@ CREATE SCHEMA IF NOT EXISTS atomic;
 USE SCHEMA atomic;
 
 -- Drop existing table if it exists
-DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS embucket.atomic.events;
 
 -- Step 2: Create the events table with appropriate data types
 CREATE TABLE IF NOT EXISTS events (
