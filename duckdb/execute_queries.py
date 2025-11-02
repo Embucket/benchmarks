@@ -382,6 +382,8 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
             ["sudo", "tee", "/proc/sys/vm/drop_caches"],
             input="3\n", text=True, check=True
         )
+        print('Giving system 3s to drop caches...')
+        time.sleep(3)
         for i in range(iterations):
             print(f"  Iteration {i + 1}/{iterations}...", end=' ', flush=True)
 
