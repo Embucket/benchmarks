@@ -14,7 +14,7 @@ def create_snowflake_connection():
     user = os.getenv("SNOWFLAKE_USER")
     password = os.getenv("SNOWFLAKE_PASSWORD")
     account = os.getenv("SNOWFLAKE_ACCOUNT")
-    database = os.getenv("SNOWFLAKE_DATABASE", "dbt_snowplow_web")
+    database = os.getenv("SNOWFLAKE_DATABASE", "embucket")
     schema = "atomic"  # Hardcoded to atomic schema
     warehouse = os.getenv("SNOWFLAKE_WAREHOUSE", "COMPUTE_WH")
     role = os.getenv("SNOWFLAKE_ROLE", "ACCOUNTADMIN")
@@ -140,7 +140,7 @@ def manage_warehouse(conn, warehouse_name, action):
 
 def drop_schemas(conn):
     """Drop the specified schemas."""
-    database = os.getenv("SNOWFLAKE_DATABASE", "dbt_snowplow_web")
+    database = os.getenv("SNOWFLAKE_DATABASE", "embucket")
     schemas_to_drop = ['PUBLIC_DERIVED', 'PUBLIC_SCRATCH', 'PUBLIC_SNOWPLOW_MANIFEST']
     
     cursor = conn.cursor()
@@ -186,13 +186,15 @@ def load_multiple_files(conn, files):
     total_rows_loaded = 0
 
     for file in files:
+        # Extract just the filename for the stage path
+        filename = Path(file).name
         print(f"Uploading {file} to stage...")
         cursor.execute(f"PUT file://{file} @my_stage")
 
         print(f"Loading {file} into events table...")
         result = cursor.execute(f"""
             COPY INTO events
-            FROM @my_stage/{file}
+            FROM @my_stage/{filename}
             FILE_FORMAT = (
                 TYPE = 'CSV'
                 FIELD_DELIMITER = ','
@@ -214,10 +216,12 @@ def load_multiple_files(conn, files):
         # Get row count from COPY result
         # Result format: (file, status, rows_parsed, rows_loaded, error_limit, errors_seen, first_error, first_error_line, first_error_character, first_error_column_name)
         copy_result = result.fetchone()
-        if copy_result:
+        if copy_result and len(copy_result) > 3:
             rows_loaded = int(copy_result[3])  # Fourth column is rows_loaded
             total_rows_loaded += rows_loaded
             print(f"✓ Loaded {rows_loaded:,} rows from {file}")
+        else:
+            print(f"⚠ Warning: Could not get row count from COPY result for {file}")
 
     # Clean up: Remove all files from stage to avoid storage costs
     print("Cleaning up stage files...")
@@ -264,7 +268,10 @@ def main():
 
     # Configuration
     script_dir = Path(__file__).parent
-    sql_script = script_dir / "create.sql"
+    sql_script = script_dir / "../create.sql"
+    # CSV files are in the parent directory
+    parent_dir = script_dir.parent
+    input_files = [str(parent_dir / file) for file in input_files]
 
     # Check if required files exist
     for file in input_files:

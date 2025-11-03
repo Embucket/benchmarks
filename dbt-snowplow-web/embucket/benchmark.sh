@@ -10,7 +10,7 @@ echo ""
 # Check if .env file exists
 if [ ! -f .env ]; then
     echo "Error: .env file not found"
-    echo "Please create .env file from env.template and configure Snowflake credentials"
+    echo "Please create .env file from env.template and configure Embucket credentials"
     exit 1
 fi
 
@@ -22,8 +22,8 @@ SCALE_FACTOR=${1:-0.2}
 
 echo "Configuration:"
 echo "  Scale Factor: ${SCALE_FACTOR} GB"
-echo "  Database: ${SNOWFLAKE_DATABASE}"
-echo "  Warehouse: ${SNOWFLAKE_WAREHOUSE}"
+echo "  Database: ${EMBUCKET_DATABASE}"
+echo "  Warehouse: ${EMBUCKET_WAREHOUSE}"
 echo ""
 
 # Step 1: Setup Python environment and install dependencies
@@ -84,11 +84,11 @@ python3 load_events.py --yesterday
 cd dbt-snowplow-web/
 
 echo "Preparing dbt environment..."
-dbt debug --target snowflake
-dbt clean --target snowflake
-dbt deps --target snowflake
+dbt debug --target embucket
+dbt clean --target embucket
+dbt deps --target embucket
 echo "Loading seed files (reference data)..."
-dbt seed --full-refresh --target snowflake
+dbt seed --full-refresh --target embucket
 
 echo ""
 echo "=========================================="
@@ -101,16 +101,16 @@ echo "Press ENTER to run dbt and build the models..."
 read -r
 
 echo "Running dbt to build models (first run)..."
-dbt run --full-refresh --target snowflake --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-09-01', snowplow__backfill_limit_days: 100, snowplow__cwv_days_to_measure: 999}'
+dbt run --target embucket --full-refresh --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-09-01', snowplow__backfill_limit_days: 100, snowplow__cwv_days_to_measure: 999}'
 
 # Save run results for first run (outside target/ to survive dbt clean)
 echo "Saving first run results..."
 cp target/run_results.json ../run_results_first_run.json
 
-# Enrich run results with actual row counts from Snowflake
-echo "Querying Snowflake for actual row counts..."
+# Enrich run results with actual row counts from Embucket
+echo "Querying Embucket for actual row counts..."
 cd ..
-# Source environment variables for Snowflake connection
+# Source environment variables for Embucket connection
 set -a
 source .env
 set +a
@@ -126,7 +126,7 @@ python3 ../visualize_lineage.py \
   --manifest dbt-snowplow-web/target/manifest.json \
   --run-results run_results_first_run_enriched.json \
   --output lineage_first_run.html \
-  --title "dbt-snowplow-web First Run - Snowflake" \
+  --title "dbt-snowplow-web First Run - Embucket" \
   --row-label "Rows Created"
 cd dbt-snowplow-web
 
@@ -139,7 +139,7 @@ echo "PAUSED - Review First Run Results"
 echo "=========================================="
 echo "You can now review the first run results:"
 echo "  - Lineage visualization: lineage_first_run.html"
-echo "  - Query Snowflake to check table contents"
+echo "  - Query Embucket to check table contents"
 echo ""
 echo "Press ENTER to continue with the incremental run..."
 read -r
@@ -157,11 +157,11 @@ python3 load_events.py --combined
 cd dbt-snowplow-web/
 
 echo "Running dbt (incremental run)..."
-dbt debug --target snowflake
-#dbt clean --target snowflake
-dbt deps --target snowflake
-dbt seed --target snowflake
-dbt run --target snowflake --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-09-01', snowplow__backfill_limit_days: 100, snowplow__cwv_days_to_measure: 999}'
+dbt debug --target embucket
+#dbt clean
+dbt deps --target embucket
+dbt seed --target embucket
+dbt run --target embucket --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-09-01', snowplow__backfill_limit_days: 100, snowplow__cwv_days_to_measure: 999}'
 
 # Save run results for incremental run (outside target/ for consistency)
 echo "Saving incremental run results..."
@@ -174,7 +174,7 @@ python3 ../visualize_lineage.py \
   --manifest dbt-snowplow-web/target/manifest.json \
   --run-results run_results_incremental_run.json \
   --output lineage_incremental_run.html \
-  --title "dbt-snowplow-web Incremental Run - Snowflake" \
+  --title "dbt-snowplow-web Incremental Run - Embucket" \
   --row-label "Rows Affected"
 cd dbt-snowplow-web
 
@@ -193,7 +193,7 @@ echo "=========================================="
 echo "Generating Screenshots for README"
 echo "=========================================="
 cd ..
-env/bin/python3 ../generate_screenshots.py --suffix sf --html-dir .
+env/bin/python3 ../generate_screenshots.py --suffix embucket --html-dir .
 cd dbt-snowplow-web
 
 # Summary
@@ -208,6 +208,6 @@ echo "  - First run:       lineage_first_run.html"
 echo "  - Incremental run: lineage_incremental_run.html"
 echo ""
 echo "Screenshots for README:"
-echo "  - ../../visualizations/dbt_snowplow_web_first_run_sf.png"
-echo "  - ../../visualizations/dbt_snowplow_web_incremental_run_sf.png"
+echo "  - ../../visualizations/dbt_snowplow_web_first_run_embucket.png"
+echo "  - ../../visualizations/dbt_snowplow_web_incremental_run_embucket.png"
 echo ""

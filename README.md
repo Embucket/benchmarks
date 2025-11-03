@@ -8,7 +8,11 @@
 
 ## dbt-snowplow-web Lineage Visualizations
 
-![dbt-snowplow-web First Run](visualizations/dbt_snowplow_web_first_run.png)
+![dbt-snowplow-web First Run Snowflake](visualizations/dbt_snowplow_web_first_run_sf.png)
 
-![dbt-snowplow-web Incremental Run](visualizations/dbt_snowplow_web_incremental_run.png)
+![dbt-snowplow-web Incremental Run Snowflake](visualizations/dbt_snowplow_web_incremental_run_sf.png)
+
+![dbt-snowplow-web First Run Embucket](visualizations/dbt_snowplow_web_first_run_embucket.png)
+
+![dbt-snowplow-web Incremental Run Embucket](visualizations/dbt_snowplow_web_incremental_run_embucket.png)
 

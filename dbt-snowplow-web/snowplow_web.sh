@@ -22,5 +22,18 @@ default:
       warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
       schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
       client_session_keep_alive: True
+    embucket:
+      type: snowflake
+      host: "{{ env_var('EMBUCKET_HOST') }}"
+      port: 3000
+      protocol: "{{ env_var('EMBUCKET_PROTOCOL') }}"
+      account: "test"
+      user: "{{ env_var('EMBUCKET_USER') }}"
+      password: "{{ env_var('EMBUCKET_PASSWORD') }}"
+      role: "{{ env_var('EMBUCKET_ROLE') }}"
+      database: "{{ env_var('EMBUCKET_DATABASE') }}"  
+      warehouse: "{{ env_var('EMBUCKET_WAREHOUSE') }}"
+      schema: "{{ env_var('EMBUCKET_SCHEMA') }}"
+      threads: 4
 EOF
  
