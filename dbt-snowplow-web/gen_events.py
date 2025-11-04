@@ -584,9 +584,10 @@ def main():
                 print_usage()
                 sys.exit(1)
     
-    # Calculate dates
-    today = datetime.now().date()
-    yesterday = today - timedelta(days=1)
+    # Set specific dates: November 1st (yesterday) and November 2nd (today)
+    current_year = datetime.now().year
+    yesterday = datetime(current_year, 11, 1).date()  # November 1st
+    today = datetime(current_year, 11, 2).date()  # November 2nd
     
     print("="*60)
     print("Snowplow Event Data Generator")
