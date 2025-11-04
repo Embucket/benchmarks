@@ -387,7 +387,6 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
         for i in range(iterations):
             print(f"  Iteration {i + 1}/{iterations}...", end=' ', flush=True)
 
-            start = time.time()
             try:
                 # Ensure profiling is disabled before configuring it for this run
                 conn.execute("SET profiling_output = ''")
@@ -401,14 +400,17 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
                 # Execute the query
                 result = conn.execute(query).fetchall()
 
-                elapsed = time.time() - start
+                # Get execution time from breakdown for first iteration
+                if i == 0 and os.path.exists(profile_path):
+                    breakdown = get_execution_time_breakdown(profile_path)
+                    elapsed = breakdown.get('overall_time')
+
                 iteration_times.append(elapsed)
                 print(f"{elapsed:.2f}s ({len(result)} rows)")
 
                 # After first iteration, parse and save the execution breakdown
                 if i == 0 and os.path.exists(profile_path):
                     try:
-                        breakdown = get_execution_time_breakdown(profile_path)
                         breakdown_file = os.path.join(output_dir, f"query_{query_num}_breakdown.json")
                         with open(breakdown_file, 'w') as fout:
                             json.dump({"EXECUTION_TIME_BREAKDOWN": breakdown}, fout, indent=2)
