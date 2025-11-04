@@ -172,14 +172,13 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
 
         # Parse execution time from EXPLAIN ANALYZE output
         import re
-        execution_time = wall_clock_time  # Default to wall clock time
+        execution_time = None
         explain_output = result.stdout  # Capture the full EXPLAIN ANALYZE output
 
         if result.stdout:
             # Debug: print first 500 chars of output
             print(f"  Output preview (first 500 chars):")
             print(f"  {result.stdout[:500]}")
-            print()
 
             # Look for execution time in EXPLAIN ANALYZE output
             # Pattern: "total_time=XXXms" or "Execution Time: XXX ms"
@@ -187,6 +186,13 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
                 r'total_time=(\d+(?:\.\d+)?)ms',
                 r'(?:Total )?Execution Time:\s+([\d.]+)\s*ms',
             ]
+
+            # Find all elapsed times in the output
+            elapsed_matches = re.findall(r'Elapsed ([\d.]+) seconds\.', result.stdout)
+
+            # Use the last occurrence as the total query time
+            execution_time = float(elapsed_matches[-1])
+            print(f"  Parsed execution time from EXPLAIN ANALYZE: {execution_time:.2f}s")
 
             for pattern in time_patterns:
                 time_match = re.search(pattern, result.stdout, re.IGNORECASE)
@@ -283,6 +289,14 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
         print(f"{'='*80}\n")
 
         for query_num in queries_list:
+            print('Flushing disk buffers and dropping OS caches for cold-start query execution...')
+            subprocess.run(["sudo", "sync"], check=True)
+            subprocess.run(
+                ["sudo", "tee", "/proc/sys/vm/drop_caches"],
+                input="3\n", text=True, check=True
+            )
+            print('Waiting 3 seconds for the system to finalize cache drop...')
+            time.sleep(3)
             # Check if this is query 21 and use replacement query if available
             if query_num == 21:
                 replacement_path = os.path.join(os.path.dirname(__file__), "21_query_replacement.sql")
