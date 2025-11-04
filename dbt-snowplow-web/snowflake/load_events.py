@@ -14,7 +14,7 @@ def create_snowflake_connection():
     user = os.getenv("SNOWFLAKE_USER")
     password = os.getenv("SNOWFLAKE_PASSWORD")
     account = os.getenv("SNOWFLAKE_ACCOUNT")
-    database = os.getenv("SNOWFLAKE_DATABASE", "embucket")
+    database = os.getenv("SNOWFLAKE_DATABASE", "dbt_snowplow_web")
     schema = "atomic"  # Hardcoded to atomic schema
     warehouse = os.getenv("SNOWFLAKE_WAREHOUSE", "COMPUTE_WH")
     role = os.getenv("SNOWFLAKE_ROLE", "ACCOUNTADMIN")
@@ -52,7 +52,11 @@ def execute_sql_script(conn, script_path, filename=None):
     """Execute SQL script against the database."""
     with open(script_path, 'r') as f:
         sql_content = f.read()
-    
+
+    # Replace database name placeholder with actual database name from environment
+    database = os.getenv("SNOWFLAKE_DATABASE", "dbt_snowplow_web")
+    sql_content = sql_content.replace('{DATABASE_NAME}', database)
+
     # Replace filename placeholders if filename is provided
     if filename:
         sql_content = sql_content.replace('events_yesterday.csv', filename)

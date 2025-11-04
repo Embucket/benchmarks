@@ -53,28 +53,32 @@ def authenticate(base_url, username='embucket', password='embucket'):
 def run_sql_file(base_url, headers, sql_file_path):
     """Run a SQL file to set up database, schema, and table."""
     print(f"\n📊 Running SQL setup file: {sql_file_path}")
-    
+
     try:
         with open(sql_file_path, 'r') as f:
             sql_content = f.read()
-        
+
+        # Replace database name placeholder with actual database name from environment
+        database = os.getenv("EMBUCKET_DATABASE", "embucket")
+        sql_content = sql_content.replace('{DATABASE_NAME}', database)
+
         # Split into individual statements and execute them one by one
         statements = []
         current_statement = ""
-        
+
         for line in sql_content.split('\n'):
             # Skip comments and empty lines
             line_stripped = line.strip()
             if not line_stripped or line_stripped.startswith('--'):
                 continue
-            
+
             current_statement += line + "\n"
-            
+
             # If line ends with semicolon, it's end of statement
             if line_stripped.endswith(';'):
                 statements.append(current_statement.strip())
                 current_statement = ""
-        
+
         # Add any remaining statement
         if current_statement.strip():
             statements.append(current_statement.strip())
@@ -339,7 +343,7 @@ def main():
     
     username = os.getenv('EMBUCKET_USER', 'embucket')
     password = os.getenv('EMBUCKET_PASSWORD', 'embucket')
-    database = 'embucket'
+    database = os.getenv('EMBUCKET_DATABASE', 'embucket')
     schema = 'atomic'
     table_name = 'events'
     
