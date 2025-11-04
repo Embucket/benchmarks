@@ -386,40 +386,27 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
         time.sleep(3)
         for i in range(iterations):
             print(f"  Iteration {i + 1}/{iterations}...", end=' ', flush=True)
-
-            start = time.time()
             try:
-                # Ensure profiling is disabled before configuring it for this run
-                conn.execute("SET profiling_output = ''")
-
-                # Profile only the first actual execution
                 profile_path = os.path.join(temp_dir, f"duck_profile_q{query_num:02d}_iter{i + 1}.json")
-                if i == 0:
-                    os.makedirs(os.path.dirname(profile_path), exist_ok=True)
-                    conn.execute(f"SET profiling_output = '{profile_path}'")
+                os.makedirs(os.path.dirname(profile_path), exist_ok=True)
+                conn.execute("SET profiling_output = ''")
+                conn.execute(f"SET profiling_output = '{profile_path}'")
 
-                # Execute the query
                 result = conn.execute(query).fetchall()
 
-                elapsed = time.time() - start
+                breakdown = get_execution_time_breakdown(profile_path)
+                elapsed = breakdown.get('overall_time')
                 iteration_times.append(elapsed)
                 print(f"{elapsed:.2f}s ({len(result)} rows)")
 
-                # After first iteration, parse and save the execution breakdown
+                # Save breakdown for first iteration
                 if i == 0 and os.path.exists(profile_path):
-                    try:
-                        breakdown = get_execution_time_breakdown(profile_path)
-                        breakdown_file = os.path.join(output_dir, f"query_{query_num}_breakdown.json")
-                        with open(breakdown_file, 'w') as fout:
-                            json.dump({"EXECUTION_TIME_BREAKDOWN": breakdown}, fout, indent=2)
-                        print(f"  ✓ Breakdown saved to: {breakdown_file}")
-                    except Exception as pe:
-                        print(f"  ⚠ Failed to parse breakdown: {pe}")
-                elif i == 0:
-                    print(f"  ⚠ Profile file not found: {profile_path}")
+                    breakdown_file = os.path.join(output_dir, f"query_{query_num}_breakdown.json")
+                    with open(breakdown_file, 'w') as fout:
+                        json.dump({"EXECUTION_TIME_BREAKDOWN": breakdown}, fout, indent=2)
+                    print(f"  ✓ Breakdown saved to: {breakdown_file}")
 
             except Exception as e:
-                # Ensure profiling is disabled after an error
                 try:
                     conn.execute("SET profiling_output = ''")
                 except Exception:
