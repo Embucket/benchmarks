@@ -5,15 +5,15 @@
 -- Step 1: Database and schema are created by the connection function
 -- The connection will automatically create dbt_snowplow_web database and atomic schema
 
-USE DATABASE embucket;
+USE DATABASE {DATABASE_NAME};
 CREATE SCHEMA IF NOT EXISTS atomic;
 USE SCHEMA atomic;
 
 -- Drop existing table if it exists
-DROP TABLE IF EXISTS embucket.atomic.events;
+DROP TABLE IF EXISTS {DATABASE_NAME}.atomic.events;
 
 -- Step 2: Create the events table with appropriate data types
-CREATE TABLE IF NOT EXISTS embucket.atomic.events (
+CREATE TABLE IF NOT EXISTS {DATABASE_NAME}.atomic.events (
     app_id STRING,
     platform STRING,
     etl_tstamp TIMESTAMP_NTZ,
