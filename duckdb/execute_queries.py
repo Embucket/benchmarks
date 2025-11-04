@@ -1,3 +1,5 @@
+import subprocess
+
 import duckdb
 import time
 import json
@@ -372,7 +374,16 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
             query = f.read()
 
         iteration_times = []
-
+        # Flush disk buffers and drop OS caches to ensure cold-start conditions before query execution
+        print('Flushing disk buffers and dropping OS caches for cold-start query execution...')
+        subprocess.run(["sudo", "sync"], check=True)
+        subprocess.run(
+            ["sudo", "tee", "/proc/sys/vm/drop_caches"],
+            input="3\n", text=True, check=True
+        )
+        # Give the system a short delay to complete cache drop operations
+        print('Waiting 3 seconds for the system to finalize cache drop...')
+        time.sleep(3)
         for i in range(iterations):
             print(f"  Iteration {i + 1}/{iterations}...", end=' ', flush=True)
 
