@@ -8,6 +8,7 @@ import csv
 import uuid
 import random
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 import json
 import os
 import sys
@@ -99,15 +100,15 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
         iab_context = [{'category': 'BROWSER', 'spiderOrRobot': False}]
         yauaa_context = [{'agentClass': 'Browser', 'deviceClass': 'Phone' if 'Mobile' in user_agent else 'Desktop'}]
         
-        # Generate web vitals
+        # Generate web vitals (following SNOWPLOW_DATA_GUIDE.md)
         web_vitals = [{
-            'cls': round(random.uniform(0.01, 0.1), 3),
-            'fcp': random.randint(100, 500),
-            'fid': random.randint(10, 100),
-            'inp': random.randint(10, 100),
-            'lcp': random.randint(1000, 3000),
-            'navigation_type': 'navigate',
-            'ttfb': random.randint(50, 300)
+            'cls': round(random.uniform(0.0, 0.25), 3),  # Cumulative Layout Shift (0-1, typically 0-0.25 for good pages)
+            'fcp': random.randint(500, 3000),  # First Contentful Paint (ms)
+            'fid': random.randint(1, 300),  # First Input Delay (ms)
+            'inp': random.randint(1, 300),  # Interaction to Next Paint (ms)
+            'lcp': random.randint(1000, 4000),  # Largest Contentful Paint (ms)
+            'navigation_type': 'navigate',  # Navigation type
+            'ttfb': random.randint(50, 500)  # Time to First Byte (ms)
         }]
 
         # Create page_view event
@@ -247,10 +248,490 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
             json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
             json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
             json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
-            json.dumps(web_vitals)  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1
+            ''  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1 (web_vitals is a separate event)
         ]
 
         events.append(page_view_event)
+
+        # Generate cmp_visible event for some sessions (typically early in session, before consent)
+        # CMP visible events occur 35% of the time, right after page_view
+        if random.randint(1, 100) <= 35:
+            cmp_delay_ms = random.randint(50, 300)  # CMP banner appears shortly after page_view
+            cmp_time = base_time + timedelta(microseconds=cmp_delay_ms * 1000)
+            cmp_collector_tstamp = cmp_time
+            cmp_dvce_created_tstamp = cmp_time - timedelta(microseconds=random.randint(1, 20) * 1000)
+            cmp_etl_tstamp = cmp_time + timedelta(microseconds=random.randint(1, 20) * 1000)
+            cmp_event_id = str(uuid.uuid4())
+            
+            # Generate CMP visible data (simple structure with elapsed_time as string)
+            cmp_visible = [{
+                'elapsed_time': str(round(random.uniform(0.5, 3.0), 1))
+            }]
+            
+            cmp_event = [
+                'default',  # app_id
+                'web',      # platform
+                cmp_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # etl_tstamp
+                cmp_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # collector_tstamp
+                cmp_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_created_tstamp
+                'unstruct',  # event - unstruct for cmp_visible
+                cmp_event_id,  # event_id
+                '',  # txn_id
+                'eng.gcp-dev1',  # name_tracker
+                'js-2.17.2',  # v_tracker
+                'ssc-2.1.2-googlepubsub',  # v_collector
+                'beam-enrich-1.4.2-rc1-common-1.4.2-rc1',  # v_etl
+                user_id,  # user_id (same as page_view)
+                '',  # user_ipaddress
+                str(uuid.uuid4()),  # user_fingerprint
+                domain_userid,  # domain_userid (same as page_view)
+                '1',  # domain_sessionidx
+                network_userid,  # network_userid (same as page_view)
+                country,  # geo_country
+                '',  # geo_region
+                city,  # geo_city
+                '',  # geo_zipcode
+                str(random.uniform(-90, 90)),  # geo_latitude
+                str(random.uniform(-180, 180)),  # geo_longitude
+                '',  # geo_region_name
+                '',  # ip_isp
+                '',  # ip_organization
+                '',  # ip_domain
+                '',  # ip_netspeed
+                page_url,  # page_url (same as page_view)
+                'Sample Page',  # page_title
+                'https://www.google.com/',  # page_referrer
+                'https',  # page_urlscheme
+                'example.com',  # page_urlhost
+                '443',  # page_urlport
+                '/',  # page_urlpath
+                '',  # page_urlquery
+                '',  # page_urlfragment
+                'https',  # refr_urlscheme
+                'www.google.com',  # refr_urlhost
+                '443',  # refr_urlport
+                '/',  # refr_urlpath
+                '',  # refr_urlquery
+                '',  # refr_urllfragment
+                'search',  # refr_medium
+                'Google',  # refr_source
+                '',  # refr_term
+                '',  # mkt_medium
+                '',  # mkt_source
+                '',  # mkt_term
+                '',  # mkt_content
+                '',  # mkt_campaign
+                '',  # se_category
+                '',  # se_action
+                '',  # se_label
+                '',  # se_property
+                '',  # se_value
+                '',  # tr_orderid
+                '',  # tr_affiliation
+                '',  # tr_total
+                '',  # tr_tax
+                '',  # tr_shipping
+                '',  # tr_city
+                '',  # tr_state
+                '',  # tr_country
+                '',  # ti_orderid
+                '',  # ti_sku
+                '',  # ti_name
+                '',  # ti_category
+                '',  # ti_price
+                '',  # ti_quantity
+                '',  # pp_xoffset_min
+                '',  # pp_xoffset_max
+                '',  # pp_yoffset_min
+                '',  # pp_yoffset_max
+                user_agent,  # useragent
+                '',  # br_name
+                '',  # br_family
+                '',  # br_version
+                '',  # br_type
+                '',  # br_renderengine
+                'en-US',  # br_lang
+                '',  # br_features_pdf
+                '',  # br_features_flash
+                '',  # br_features_java
+                '',  # br_features_director
+                '',  # br_features_quicktime
+                '',  # br_features_realplayer
+                '',  # br_features_windowsmedia
+                '',  # br_features_gears
+                '',  # br_features_silverlight
+                'TRUE',  # br_cookies
+                '24',  # br_colordepth
+                str(random.randint(800, 1920)),  # br_viewwidth
+                str(random.randint(600, 1080)),  # br_viewheight
+                '',  # os_name
+                '',  # os_family
+                '',  # os_manufacturer
+                'America/New_York',  # os_timezone
+                '',  # dvce_type
+                'TRUE' if 'Mobile' in user_agent else 'FALSE',  # dvce_ismobile
+                str(random.randint(320, 1920)),  # dvce_screenwidth
+                str(random.randint(568, 1080)),  # dvce_screenheight
+                'UTF-8',  # doc_charset
+                str(random.randint(800, 1920)),  # doc_width
+                str(random.randint(600, 1080)),  # doc_height
+                '',  # tr_currency
+                '',  # tr_total_base
+                '',  # tr_tax_base
+                '',  # tr_shipping_base
+                '',  # ti_currency
+                '',  # ti_price_base
+                '',  # base_currency
+                'America/New_York',  # geo_timezone
+                '',  # mkt_clickid
+                '',  # mkt_network
+                '',  # etl_tags
+                cmp_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_sent_tstamp
+                '',  # refr_domain_userid
+                '',  # refr_dvce_tstamp
+                domain_sessionid,  # domain_sessionid (same as page_view)
+                cmp_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # derived_tstamp
+                'com.snowplowanalytics.snowplow',  # event_vendor
+                'cmp_visible',  # event_name - cmp_visible for unstruct event
+                'jsonschema',  # event_format
+                '1-0-0',  # event_version
+                str(uuid.uuid4()),  # event_fingerprint
+                '',  # true_tstamp
+                '',  # load_tstamp
+                json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
+                '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
+                json.dumps(cmp_visible),  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
+                json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
+                json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
+                json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
+                ''  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1
+            ]
+            
+            events.append(cmp_event)
+
+        # Generate consent_preferences event for some sessions (typically early in session)
+        # Consent events occur 30% of the time, right after page_view
+        if random.randint(1, 100) <= 30:
+            consent_delay_ms = random.randint(100, 500)  # Consent happens shortly after page_view
+            consent_time = base_time + timedelta(microseconds=consent_delay_ms * 1000)
+            consent_collector_tstamp = consent_time
+            consent_dvce_created_tstamp = consent_time - timedelta(microseconds=random.randint(1, 20) * 1000)
+            consent_etl_tstamp = consent_time + timedelta(microseconds=random.randint(1, 20) * 1000)
+            consent_event_id = str(uuid.uuid4())
+            
+            # Generate consent preferences data
+            consent_scopes = random.choice([
+                ['necessary'],
+                ['necessary', 'preferences'],
+                ['necessary', 'preferences', 'statistics'],
+                ['necessary', 'preferences', 'statistics', 'marketing']
+            ])
+            consent_event_type = random.choice(['allow_all', 'allow_selected', 'deny_all'])
+            
+            # Extract base domain from page_url for domains_applied
+            parsed_url = urlparse(page_url)
+            base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}/"
+            
+            consent_preferences = [{
+                'basis_for_processing': 'consent',
+                'consent_scopes': consent_scopes,
+                'consent_url': page_url,
+                'consent_version': '1.0',
+                'domains_applied': [base_domain],
+                'event_type': consent_event_type,
+                'gdpr_applies': random.choice([True, False])
+            }]
+            
+            consent_event = [
+                'default',  # app_id
+                'web',      # platform
+                consent_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # etl_tstamp
+                consent_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # collector_tstamp
+                consent_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_created_tstamp
+                'unstruct',  # event - unstruct for consent_preferences
+                consent_event_id,  # event_id
+                '',  # txn_id
+                'eng.gcp-dev1',  # name_tracker
+                'js-2.17.2',  # v_tracker
+                'ssc-2.1.2-googlepubsub',  # v_collector
+                'beam-enrich-1.4.2-rc1-common-1.4.2-rc1',  # v_etl
+                user_id,  # user_id (same as page_view)
+                '',  # user_ipaddress
+                str(uuid.uuid4()),  # user_fingerprint
+                domain_userid,  # domain_userid (same as page_view)
+                '1',  # domain_sessionidx
+                network_userid,  # network_userid (same as page_view)
+                country,  # geo_country
+                '',  # geo_region
+                city,  # geo_city
+                '',  # geo_zipcode
+                str(random.uniform(-90, 90)),  # geo_latitude
+                str(random.uniform(-180, 180)),  # geo_longitude
+                '',  # geo_region_name
+                '',  # ip_isp
+                '',  # ip_organization
+                '',  # ip_domain
+                '',  # ip_netspeed
+                page_url,  # page_url (same as page_view)
+                'Sample Page',  # page_title
+                'https://www.google.com/',  # page_referrer
+                'https',  # page_urlscheme
+                'example.com',  # page_urlhost
+                '443',  # page_urlport
+                '/',  # page_urlpath
+                '',  # page_urlquery
+                '',  # page_urlfragment
+                'https',  # refr_urlscheme
+                'www.google.com',  # refr_urlhost
+                '443',  # refr_urlport
+                '/',  # refr_urlpath
+                '',  # refr_urlquery
+                '',  # refr_urllfragment
+                'search',  # refr_medium
+                'Google',  # refr_source
+                '',  # refr_term
+                '',  # mkt_medium
+                '',  # mkt_source
+                '',  # mkt_term
+                '',  # mkt_content
+                '',  # mkt_campaign
+                '',  # se_category
+                '',  # se_action
+                '',  # se_label
+                '',  # se_property
+                '',  # se_value
+                '',  # tr_orderid
+                '',  # tr_affiliation
+                '',  # tr_total
+                '',  # tr_tax
+                '',  # tr_shipping
+                '',  # tr_city
+                '',  # tr_state
+                '',  # tr_country
+                '',  # ti_orderid
+                '',  # ti_sku
+                '',  # ti_name
+                '',  # ti_category
+                '',  # ti_price
+                '',  # ti_quantity
+                '',  # pp_xoffset_min
+                '',  # pp_xoffset_max
+                '',  # pp_yoffset_min
+                '',  # pp_yoffset_max
+                user_agent,  # useragent
+                '',  # br_name
+                '',  # br_family
+                '',  # br_version
+                '',  # br_type
+                '',  # br_renderengine
+                'en-US',  # br_lang
+                '',  # br_features_pdf
+                '',  # br_features_flash
+                '',  # br_features_java
+                '',  # br_features_director
+                '',  # br_features_quicktime
+                '',  # br_features_realplayer
+                '',  # br_features_windowsmedia
+                '',  # br_features_gears
+                '',  # br_features_silverlight
+                'TRUE',  # br_cookies
+                '24',  # br_colordepth
+                str(random.randint(800, 1920)),  # br_viewwidth
+                str(random.randint(600, 1080)),  # br_viewheight
+                '',  # os_name
+                '',  # os_family
+                '',  # os_manufacturer
+                'America/New_York',  # os_timezone
+                '',  # dvce_type
+                'TRUE' if 'Mobile' in user_agent else 'FALSE',  # dvce_ismobile
+                str(random.randint(320, 1920)),  # dvce_screenwidth
+                str(random.randint(568, 1080)),  # dvce_screenheight
+                'UTF-8',  # doc_charset
+                str(random.randint(800, 1920)),  # doc_width
+                str(random.randint(600, 1080)),  # doc_height
+                '',  # tr_currency
+                '',  # tr_total_base
+                '',  # tr_tax_base
+                '',  # tr_shipping_base
+                '',  # ti_currency
+                '',  # ti_price_base
+                '',  # base_currency
+                'America/New_York',  # geo_timezone
+                '',  # mkt_clickid
+                '',  # mkt_network
+                '',  # etl_tags
+                consent_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_sent_tstamp
+                '',  # refr_domain_userid
+                '',  # refr_dvce_tstamp
+                domain_sessionid,  # domain_sessionid (same as page_view)
+                consent_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # derived_tstamp
+                'com.snowplowanalytics.snowplow',  # event_vendor
+                'consent_preferences',  # event_name - consent_preferences for unstruct event
+                'jsonschema',  # event_format
+                '1-0-0',  # event_version
+                str(uuid.uuid4()),  # event_fingerprint
+                '',  # true_tstamp
+                '',  # load_tstamp
+                json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
+                json.dumps(consent_preferences),  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
+                '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
+                json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
+                json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
+                json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
+                ''  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1
+            ]
+            
+            events.append(consent_event)
+
+        # Generate web_vitals event as separate unstruct event
+        # Web vitals occur 100-2000ms after page_view (measures page load performance)
+        vitals_delay_ms = random.randint(100, 2000)
+        vitals_time = base_time + timedelta(microseconds=vitals_delay_ms * 1000)
+        vitals_collector_tstamp = vitals_time
+        vitals_dvce_created_tstamp = vitals_time - timedelta(microseconds=random.randint(1, 50) * 1000)
+        vitals_etl_tstamp = vitals_time + timedelta(microseconds=random.randint(1, 50) * 1000)
+        vitals_event_id = str(uuid.uuid4())
+
+        web_vitals_event = [
+            'default',  # app_id
+            'web',      # platform
+            vitals_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # etl_tstamp
+            vitals_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # collector_tstamp
+            vitals_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_created_tstamp
+            'unstruct',  # event - unstruct for web_vitals
+            vitals_event_id,  # event_id
+            '',  # txn_id
+            'eng.gcp-dev1',  # name_tracker
+            'js-2.17.2',  # v_tracker
+            'ssc-2.1.2-googlepubsub',  # v_collector
+            'beam-enrich-1.4.2-rc1-common-1.4.2-rc1',  # v_etl
+            user_id,  # user_id (same as page_view)
+            '',  # user_ipaddress
+            str(uuid.uuid4()),  # user_fingerprint
+            domain_userid,  # domain_userid (same as page_view)
+            '1',  # domain_sessionidx
+            network_userid,  # network_userid (same as page_view)
+            country,  # geo_country
+            '',  # geo_region
+            city,  # geo_city
+            '',  # geo_zipcode
+            str(random.uniform(-90, 90)),  # geo_latitude
+            str(random.uniform(-180, 180)),  # geo_longitude
+            '',  # geo_region_name
+            '',  # ip_isp
+            '',  # ip_organization
+            '',  # ip_domain
+            '',  # ip_netspeed
+            page_url,  # page_url (same as page_view)
+            'Sample Page',  # page_title
+            'https://www.google.com/',  # page_referrer
+            'https',  # page_urlscheme
+            'example.com',  # page_urlhost
+            '443',  # page_urlport
+            '/',  # page_urlpath
+            '',  # page_urlquery
+            '',  # page_urlfragment
+            'https',  # refr_urlscheme
+            'www.google.com',  # refr_urlhost
+            '443',  # refr_urlport
+            '/',  # refr_urlpath
+            '',  # refr_urlquery
+            '',  # refr_urllfragment
+            'search',  # refr_medium
+            'Google',  # refr_source
+            '',  # refr_term
+            '',  # mkt_medium
+            '',  # mkt_source
+            '',  # mkt_term
+            '',  # mkt_content
+            '',  # mkt_campaign
+            '',  # se_category
+            '',  # se_action
+            '',  # se_label
+            '',  # se_property
+            '',  # se_value
+            '',  # tr_orderid
+            '',  # tr_affiliation
+            '',  # tr_total
+            '',  # tr_tax
+            '',  # tr_shipping
+            '',  # tr_city
+            '',  # tr_state
+            '',  # tr_country
+            '',  # ti_orderid
+            '',  # ti_sku
+            '',  # ti_name
+            '',  # ti_category
+            '',  # ti_price
+            '',  # ti_quantity
+            '',  # pp_xoffset_min
+            '',  # pp_xoffset_max
+            '',  # pp_yoffset_min
+            '',  # pp_yoffset_max
+            user_agent,  # useragent
+            '',  # br_name
+            '',  # br_family
+            '',  # br_version
+            '',  # br_type
+            '',  # br_renderengine
+            'en-US',  # br_lang
+            '',  # br_features_pdf
+            '',  # br_features_flash
+            '',  # br_features_java
+            '',  # br_features_director
+            '',  # br_features_quicktime
+            '',  # br_features_realplayer
+            '',  # br_features_windowsmedia
+            '',  # br_features_gears
+            '',  # br_features_silverlight
+            'TRUE',  # br_cookies
+            '24',  # br_colordepth
+            str(random.randint(800, 1920)),  # br_viewwidth
+            str(random.randint(600, 1080)),  # br_viewheight
+            '',  # os_name
+            '',  # os_family
+            '',  # os_manufacturer
+            'America/New_York',  # os_timezone
+            '',  # dvce_type
+            'TRUE' if 'Mobile' in user_agent else 'FALSE',  # dvce_ismobile
+            str(random.randint(320, 1920)),  # dvce_screenwidth
+            str(random.randint(568, 1080)),  # dvce_screenheight
+            'UTF-8',  # doc_charset
+            str(random.randint(800, 1920)),  # doc_width
+            str(random.randint(600, 1080)),  # doc_height
+            '',  # tr_currency
+            '',  # tr_total_base
+            '',  # tr_tax_base
+            '',  # tr_shipping_base
+            '',  # ti_currency
+            '',  # ti_price_base
+            '',  # base_currency
+            'America/New_York',  # geo_timezone
+            '',  # mkt_clickid
+            '',  # mkt_network
+            '',  # etl_tags
+            vitals_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_sent_tstamp
+            '',  # refr_domain_userid
+            '',  # refr_dvce_tstamp
+            domain_sessionid,  # domain_sessionid (same as page_view)
+            vitals_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # derived_tstamp
+            'com.snowplowanalytics.snowplow',  # event_vendor
+            'web_vitals',  # event_name - web_vitals for unstruct event
+            'jsonschema',  # event_format
+            '1-0-0',  # event_version
+            str(uuid.uuid4()),  # event_fingerprint
+            '',  # true_tstamp
+            '',  # load_tstamp
+            json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
+            '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
+            '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
+            json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
+            json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
+            json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
+            json.dumps(web_vitals)  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1
+        ]
+
+        events.append(web_vitals_event)
 
         # Generate page_ping events for engagement tracking
         # Snowplow sends page_ping every 10 seconds by default (heartbeat)
@@ -394,14 +875,14 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
                 '1-0-0',  # event_version
                 str(uuid.uuid4()),  # event_fingerprint
                 '',  # true_tstamp
-                '',  # load_tstamp
-                json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
-                '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
-                '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
-                json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
-                json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
-                json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
-                ''  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1 (no web vitals for pings)
+                                        '',  # load_tstamp
+            json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
+            '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
+            '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
+            json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
+            json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
+            json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
+            ''  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1 (no web vitals for pings)
             ]
 
             events.append(page_ping_event)
