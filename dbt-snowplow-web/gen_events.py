@@ -13,7 +13,7 @@ import json
 import os
 import sys
 
-def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
+def generate_event_data(target_date, num_events=1000, mobile_percentage=50, time_offset_hours=0, consent_version_preference=None):
     """Generate sample Snowplow event data for a specific date.
 
     For each page view, generates:
@@ -24,6 +24,8 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
         target_date: Date for the events
         num_events: Number of page views to generate
         mobile_percentage: Percentage of events that should be mobile (0-100)
+        time_offset_hours: Hours to add to all timestamps (useful for ensuring today's events are after yesterday's)
+        consent_version_preference: If '1.0' or '2.0', use that version more often. If None, use random distribution.
     """
 
     # Sample data for variety
@@ -65,6 +67,9 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
         base_time = datetime.combine(target_date, datetime.min.time().replace(hour=hour, minute=minute, second=second))
         # Add milliseconds for compatibility with dbt models
         base_time = base_time.replace(microsecond=random.randint(0, 999999))
+        # Add time offset if specified (ensures today's events have later timestamps)
+        if time_offset_hours > 0:
+            base_time = base_time + timedelta(hours=time_offset_hours)
 
         # Generate event data
         user_id = str(uuid.uuid4())
@@ -428,15 +433,34 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
             ])
             consent_event_type = random.choice(['allow_all', 'allow_selected', 'deny_all'])
             
+            # Randomly choose consent version based on preference
+            if consent_version_preference == '1.0':
+                # Always use 1.0 for yesterday's data to avoid duplicates
+                consent_version = '1.0'
+            elif consent_version_preference == '2.0':
+                # Always use 2.0 for today's data to avoid duplicates
+                consent_version = '2.0'
+            else:
+                # Default: more likely to be 2.0
+                consent_version = random.choice(['1.0', '2.0', '2.0', '2.0'])
+            
             # Extract base domain from page_url for domains_applied
             parsed_url = urlparse(page_url)
             base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}/"
             
+            # Add version suffix to consent_url to ensure uniqueness across runs
+            # This prevents duplicate combinations when same consent_version appears
+            if consent_version_preference == '2.0':
+                # For today's events, add version suffix to make URL unique
+                consent_url = f"{page_url}?v={consent_version}"
+            else:
+                consent_url = page_url
+            
             consent_preferences = {
                 'basisForProcessing': 'consent',
                 'consentScopes': consent_scopes,
-                'consentUrl': page_url,
-                'consentVersion': '1.0',
+                'consentUrl': consent_url,
+                'consentVersion': consent_version,
                 'domainsApplied': [base_domain],
                 'eventType': consent_event_type,
                 'gdprApplies': random.choice([True, False])
@@ -922,7 +946,7 @@ def write_events_csv(filename, events):
     file_size = os.path.getsize(filename) / (1024 * 1024)  # Size in MB
     print(f"Generated {len(events)} events in {filename} ({file_size:.2f} MB)")
 
-def generate_events_by_size(filename, target_date, target_size_gb, mobile_percentage=50):
+def generate_events_by_size(filename, target_date, target_size_gb, mobile_percentage=50, time_offset_hours=0, consent_version_preference=None):
     """
     Generate events to reach a target file size in GB.
 
@@ -931,6 +955,7 @@ def generate_events_by_size(filename, target_date, target_size_gb, mobile_percen
         target_date: Date for the events
         target_size_gb: Target file size in GB
         mobile_percentage: Percentage of events that should be mobile (0-100)
+        time_offset_hours: Hours to add to all timestamps (useful for ensuring today's events are after yesterday's)
 
     Returns:
         List of generated events
@@ -940,7 +965,7 @@ def generate_events_by_size(filename, target_date, target_size_gb, mobile_percen
 
     # Generate a small sample to estimate row size
     # Note: generate_event_data returns ALL events (page_view + page_pings)
-    sample_events = generate_event_data(target_date, num_events=100, mobile_percentage=mobile_percentage)
+    sample_events = generate_event_data(target_date, num_events=100, mobile_percentage=mobile_percentage, time_offset_hours=time_offset_hours, consent_version_preference=consent_version_preference)
 
     # Write sample to temp file to measure size
     temp_file = f"{filename}.tmp"
@@ -987,7 +1012,7 @@ def generate_events_by_size(filename, target_date, target_size_gb, mobile_percen
             remaining = estimated_page_views - page_views_generated
             current_batch_size = min(batch_size, remaining)
 
-            batch_events = generate_event_data(target_date, num_events=current_batch_size, mobile_percentage=mobile_percentage)
+            batch_events = generate_event_data(target_date, num_events=current_batch_size, mobile_percentage=mobile_percentage, time_offset_hours=time_offset_hours, consent_version_preference=consent_version_preference)
             writer.writerows(batch_events)
             all_events.extend(batch_events)
 
@@ -1081,14 +1106,14 @@ def main():
         print(f"  - events_today.csv: {scale_factor_gb/2} GB (50% mobile)")
         print()
 
-        # Generate events_yesterday.csv (half of total size, 66% mobile)
+        # Generate events_yesterday.csv (half of total size, 66% mobile) - prefer version 1.0
         print(f"Generating events_yesterday.csv ({scale_factor_gb/2} GB, 66% mobile)...")
-        yesterday_events = generate_events_by_size('events_yesterday.csv', yesterday, scale_factor_gb/2, mobile_percentage=66)
+        yesterday_events = generate_events_by_size('events_yesterday.csv', yesterday, scale_factor_gb/2, mobile_percentage=66, consent_version_preference='1.0')
 
         print()
-        # Generate events_today.csv (half of total size, 50% mobile)
+        # Generate events_today.csv (half of total size, 50% mobile) with 24-hour offset and version 2.0 to avoid duplicates
         print(f"Generating events_today.csv ({scale_factor_gb/2} GB, 50% mobile)...")
-        today_events = generate_events_by_size('events_today.csv', today, scale_factor_gb/2, mobile_percentage=50)
+        today_events = generate_events_by_size('events_today.csv', today, scale_factor_gb/2, mobile_percentage=50, time_offset_hours=24, consent_version_preference='2.0')
         
     else:
         print(f"Mode: Row-based generation")
@@ -1098,13 +1123,13 @@ def main():
         print(f"  Today: {today} (50% mobile)")
         print()
 
-        # Generate events for yesterday (66% mobile)
+        # Generate events for yesterday (66% mobile) - prefer version 1.0
         print(f"Generating yesterday's events ({num_events:,} page views, 66% mobile)...")
-        yesterday_events = generate_event_data(yesterday, num_events=num_events, mobile_percentage=66)
+        yesterday_events = generate_event_data(yesterday, num_events=num_events, mobile_percentage=66, consent_version_preference='1.0')
 
-        # Generate events for today (50% mobile)
+        # Generate events for today (50% mobile) with 24-hour offset and version 2.0 to avoid duplicates
         print(f"Generating today's events ({num_events:,} page views, 50% mobile)...")
-        today_events = generate_event_data(today, num_events=num_events, mobile_percentage=50)
+        today_events = generate_event_data(today, num_events=num_events, mobile_percentage=50, time_offset_hours=24, consent_version_preference='2.0')
 
         # Create the two required files
         print(f"Creating events_yesterday.csv ({len(yesterday_events):,} total events)...")
