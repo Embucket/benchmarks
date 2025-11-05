@@ -171,7 +171,7 @@ echo
 BENCHMARK_REPO_DIR="${MOUNT_POINT}/datafusion/datafusion-benchmarks"
 
 if [[ "${MODE}" == "parquet-s3" ]]; then
-  DATA_DIR="s3://embucket-testdata/tpch/${SCALE_FACTOR}"
+  DATA_DIR="s3://embucket-testdata/tpch/${SCALE_FACTOR}_partitioned"
   echo ">>> S3 data path: ${DATA_DIR}"
 else
   DATA_DIR="${MOUNT_POINT}/tpch-data/sf${SCALE_FACTOR}"
