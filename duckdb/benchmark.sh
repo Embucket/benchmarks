@@ -213,7 +213,7 @@ if [[ "${MODE}" == "parquet" ]]; then
   echo ">>> Temp directory (for spill): ${TEMP_DIR}"
   echo
 elif [[ "${MODE}" == "parquet-s3" ]]; then
-  DATA_DIR="s3://embucket-testdata/tpch/${SCALE_FACTOR}"
+  DATA_DIR="s3://embucket-testdata/tpch/${SCALE_FACTOR}_partitioned"
   DB_FILE=""
 
   echo ">>> S3 data path: ${DATA_DIR}"

@@ -47,33 +47,37 @@ def create_table_registration_script(data_dir, mode, table_names):
         String containing SQL commands to register tables
     """
     sql_commands = []
-    
+
     for table in table_names:
         if mode == 'parquet-s3':
-            # For S3 mode, use direct S3 path (single file per table)
-            path = f"{data_dir}/{table}.parquet"
+            candidate_paths = [
+                f"{data_dir}/{table}/{table}.1.parquet",
+                f"{data_dir}/{table}/*.parquet"
+            ]
+            # Try both S3 patterns
+            for path in candidate_paths:
+                # Always add both, DataFusion will ignore missing ones
+                sql_commands.append(
+                    f"CREATE EXTERNAL TABLE IF NOT EXISTS {table} STORED AS PARQUET LOCATION '{path}';"
+                )
         else:
-            # For local mode, try different possible patterns
             possible_paths = [
                 f"{data_dir}/{table}.parquet",
                 f"{data_dir}/{table}",
                 f"{data_dir}/{table}/*.parquet",
             ]
-            
-            # Find the first path that exists
             path = None
             for p in possible_paths:
                 check_path = p.replace("/*.parquet", "")
                 if os.path.exists(check_path):
                     path = p
                     break
-            
             if path is None:
                 raise FileNotFoundError(f"Could not find data for table {table} in {data_dir}")
-        
-        # Create external table using CREATE EXTERNAL TABLE
-        sql_commands.append(f"CREATE EXTERNAL TABLE {table} STORED AS PARQUET LOCATION '{path}';")
-    
+            sql_commands.append(
+                f"CREATE EXTERNAL TABLE {table} STORED AS PARQUET LOCATION '{path}';"
+            )
+
     return "\n".join(sql_commands)
 
 
