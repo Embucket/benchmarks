@@ -241,7 +241,7 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
             '1-0-0',  # event_version
             str(uuid.uuid4()),  # event_fingerprint
             '',  # true_tstamp
-            '',  # load_tstamp
+            etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # load_tstamp
             json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1
             '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
             '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
@@ -263,10 +263,10 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
             cmp_etl_tstamp = cmp_time + timedelta(microseconds=random.randint(1, 20) * 1000)
             cmp_event_id = str(uuid.uuid4())
             
-            # Generate CMP visible data (simple structure with elapsed_time as string)
-            cmp_visible = [{
-                'elapsed_time': str(round(random.uniform(0.5, 3.0), 1))
-            }]
+            # Generate CMP visible data (simple structure with elapsedTime as float)
+            cmp_visible = {
+                'elapsedTime': round(random.uniform(0.5, 3.0), 1)
+            }
             
             cmp_event = [
                 'default',  # app_id
@@ -397,7 +397,7 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
                 '1-0-0',  # event_version
                 str(uuid.uuid4()),  # event_fingerprint
                 '',  # true_tstamp
-                '',  # load_tstamp
+                cmp_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # load_tstamp
                 json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
                 '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
                 json.dumps(cmp_visible),  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
@@ -432,15 +432,15 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
             parsed_url = urlparse(page_url)
             base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}/"
             
-            consent_preferences = [{
-                'basis_for_processing': 'consent',
-                'consent_scopes': consent_scopes,
-                'consent_url': page_url,
-                'consent_version': '1.0',
-                'domains_applied': [base_domain],
-                'event_type': consent_event_type,
-                'gdpr_applies': random.choice([True, False])
-            }]
+            consent_preferences = {
+                'basisForProcessing': 'consent',
+                'consentScopes': consent_scopes,
+                'consentUrl': page_url,
+                'consentVersion': '1.0',
+                'domainsApplied': [base_domain],
+                'eventType': consent_event_type,
+                'gdprApplies': random.choice([True, False])
+            }
             
             consent_event = [
                 'default',  # app_id
@@ -571,7 +571,7 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
                 '1-0-0',  # event_version
                 str(uuid.uuid4()),  # event_fingerprint
                 '',  # true_tstamp
-                '',  # load_tstamp
+                consent_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # load_tstamp
                 json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
                 json.dumps(consent_preferences),  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
                 '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
@@ -719,9 +719,9 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
             'web_vitals',  # event_name - web_vitals for unstruct event
             'jsonschema',  # event_format
             '1-0-0',  # event_version
-            str(uuid.uuid4()),  # event_fingerprint
-            '',  # true_tstamp
-            '',  # load_tstamp
+                str(uuid.uuid4()),  # event_fingerprint
+                '',  # true_tstamp
+                vitals_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # load_tstamp
             json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
             '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
             '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
@@ -873,9 +873,9 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
                 'page_ping',  # event_name - page_ping for engagement
                 'jsonschema',  # event_format
                 '1-0-0',  # event_version
-                str(uuid.uuid4()),  # event_fingerprint
-                '',  # true_tstamp
-                                        '',  # load_tstamp
+            str(uuid.uuid4()),  # event_fingerprint
+            '',  # true_tstamp
+            ping_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # load_tstamp
             json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
             '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
             '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
