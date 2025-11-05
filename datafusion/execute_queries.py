@@ -51,8 +51,8 @@ def create_table_registration_script(data_dir, mode, table_names):
     for table in table_names:
         if mode == 'parquet-s3':
             candidate_paths = [
-                f"{data_dir}/{table}/{table}.1.parquet",
-                f"{data_dir}/{table}/*.parquet"
+                f"{data_dir}/{table}.parquet",  # single file (not partitioned)
+                f"{data_dir}/{table}/*.parquet"  # all partitioned files
             ]
             # Try both S3 patterns
             for path in candidate_paths:

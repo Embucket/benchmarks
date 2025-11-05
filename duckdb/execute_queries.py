@@ -322,7 +322,7 @@ def main(data_dir, queries_dir, temp_dir, iterations, output_file, queries_to_ru
         for table in tables:
             # Try both single file and directory pattern on S3
             candidate_paths = [
-                f"{data_dir}/{table}/{table}.1.parquet",  # single partition file
+                f"{data_dir}/{table}.parquet",  # single file (not partitioned)
                 f"{data_dir}/{table}/*.parquet"  # all partitioned files
             ]
             created = False
