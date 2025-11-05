@@ -103,7 +103,114 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50, time
         # Use the same page_view_id for all events related to this page view
         web_page_context = [{'id': page_view_id}]
         iab_context = [{'category': 'BROWSER', 'spiderOrRobot': False}]
-        yauaa_context = [{'agentClass': 'Browser', 'deviceClass': 'Phone' if 'Mobile' in user_agent else 'Desktop'}]
+        
+        # Generate rich YAUAA context based on user agent
+        is_mobile_device = 'Mobile' in user_agent or 'iPhone' in user_agent or 'Android' in user_agent
+        is_chrome = 'Chrome' in user_agent
+        is_safari = 'Safari' in user_agent and 'Chrome' not in user_agent
+        is_firefox = 'Firefox' in user_agent
+        
+        # Determine browser name and version
+        if is_chrome:
+            browser_name = 'Chrome'
+            browser_version = random.choice(['109', '110', '111', '112', '113', '114', '115'])
+        elif is_safari:
+            browser_name = 'Safari'
+            browser_version = random.choice(['14', '15', '16', '17'])
+        elif is_firefox:
+            browser_name = 'Firefox'
+            browser_version = random.choice(['89', '90', '91', '92'])
+        else:
+            browser_name = 'Chrome'
+            browser_version = '109'
+        
+        # Determine device and OS information
+        if 'iPhone' in user_agent:
+            device_brand = 'Apple'
+            device_name = 'iPhone'
+            device_class = 'Phone'
+            os_name = 'iOS'
+            os_version = random.choice(['14.6', '15.0', '15.1', '16.0'])
+            os_version_major = os_version.split('.')[0]
+            device_cpu = 'ARM'
+        elif 'Android' in user_agent:
+            device_brand = random.choice(['Samsung', 'Google', 'Huawei', 'Xiaomi'])
+            device_name = random.choice(['Galaxy S21', 'Pixel 6', 'Nexus 6', 'Mi 11'])
+            device_class = 'Phone'
+            os_name = 'Android'
+            os_version = random.choice(['11', '12', '13'])
+            os_version_major = os_version
+            device_cpu = 'ARM'
+        elif 'Macintosh' in user_agent:
+            device_brand = 'Apple'
+            device_name = 'AppleMacintosh'
+            device_class = 'Desktop'
+            os_name = 'MacOS'
+            os_version = random.choice(['10.15.7', '11.0', '12.0', '13.0'])
+            os_version_major = os_version.split('.')[0] if '.' in os_version else os_version
+            device_cpu = 'Intel'
+        elif 'Windows' in user_agent:
+            device_brand = random.choice(['Dell', 'HP', 'Lenovo', 'Microsoft'])
+            device_name = 'WindowsPC'
+            device_class = 'Desktop'
+            os_name = 'Windows'
+            os_version = random.choice(['10', '11'])
+            os_version_major = os_version
+            device_cpu = 'Intel'
+        else:
+            device_brand = 'Unknown'
+            device_name = 'Unknown'
+            device_class = 'Desktop' if not is_mobile_device else 'Phone'
+            os_name = 'Unknown'
+            os_version = '??'
+            os_version_major = '??'
+            device_cpu = 'Unknown'
+        
+        # Layout engine (Blink for Chrome, WebKit for Safari)
+        if is_chrome or is_firefox:
+            layout_engine = 'Blink'
+            layout_engine_version = browser_version
+        elif is_safari:
+            layout_engine = 'WebKit'
+            layout_engine_version = browser_version
+        else:
+            layout_engine = 'Blink'
+            layout_engine_version = browser_version
+        
+        # Build YAUAA context with all fields
+        yauaa_context = [{
+            'agentClass': 'Browser',
+            'agentInformationEmail': 'Unknown',
+            'agentName': browser_name,
+            'agentNameVersion': f'{browser_name}{browser_version}',
+            'agentNameVersionMajor': f'{browser_name}{browser_version}',
+            'agentVersion': browser_version,
+            'agentVersionMajor': browser_version,
+            'deviceBrand': device_brand,
+            'deviceClass': device_class,
+            'deviceCpu': device_cpu,
+            'deviceCpuBits': '64' if device_class == 'Desktop' else '32',
+            'deviceName': device_name,
+            'deviceVersion': 'Demo',
+            'layoutEngineClass': 'Browser',
+            'layoutEngineName': layout_engine,
+            'layoutEngineNameVersion': f'{layout_engine}{layout_engine_version}',
+            'layoutEngineNameVersionMajor': f'{layout_engine}{layout_engine_version}',
+            'layoutEngineVersion': layout_engine_version,
+            'layoutEngineVersionMajor': layout_engine_version,
+            'networkType': 'Unknown',
+            'operatingSystemClass': device_class,
+            'operatingSystemName': os_name,
+            'operatingSystemNameVersion': f'{os_name}>={os_version}' if os_name != 'Unknown' else '??',
+            'operatingSystemNameVersionMajor': f'{os_name}>={os_version_major}' if os_name != 'Unknown' else '??',
+            'operatingSystemVersion': f'>={os_version}' if os_name != 'Unknown' else '??',
+            'operatingSystemVersionBuild': '??',
+            'operatingSystemVersionMajor': f'>={os_version_major}' if os_name != 'Unknown' else '??',
+            'webviewAppName': 'Unknown',
+            'webviewAppNameVersionMajor': '??',
+            'webviewAppVersion': '??',
+            'webviewAppVersionMajor': '??'
+        }]
         
         # Generate web vitals (following SNOWPLOW_DATA_GUIDE.md)
         web_vitals = [{
