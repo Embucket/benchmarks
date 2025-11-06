@@ -226,16 +226,38 @@ def parse_datafusion_explain_text(text: str) -> Dict[str, Any]:
             except ValueError:
                 pass
 
-    # Locate plan table
+    # Locate plan table or JSON block
     plan_start_idx = None
+    json_plan_lines: Optional[List[Tuple[str, str]]] = None
+
     for i, ln in enumerate(lines):
+        # Try to parse as JSON first
+        stripped_ln = ln.strip()
+        if stripped_ln.startswith('[') and stripped_ln.endswith(']'):
+            try:
+                parsed_json = json.loads(stripped_ln)
+                if isinstance(parsed_json, list) and all(
+                        isinstance(item, dict) and 'plan_type' in item and 'plan' in item for item in parsed_json):
+                    json_plan_lines = []
+                    for item in parsed_json:
+                        plan_text = item.get('plan', '')
+                        plan_type = item.get('plan_type', '')
+                        # The plan text in JSON is a single string with newlines. Split it.
+                        for plan_line in plan_text.split('\n'):
+                            json_plan_lines.append((plan_type, plan_line))
+                    break  # Found and parsed JSON, no need to look for table
+            except json.JSONDecodeError:
+                pass  # Not a valid JSON line, continue searching
+
         if _PLAN_HEADER_RE.search(ln):
             # The useful rows start after the next border line
             plan_start_idx = i + 1
             break
 
     plan_lines: List[Tuple[str, str]] = []
-    if plan_start_idx is not None:
+    if json_plan_lines is not None:
+        plan_lines = json_plan_lines
+    elif plan_start_idx is not None:
         # Skip the header separator line (should be +----+----+)
         i = plan_start_idx
         # Advance to the line after the border
