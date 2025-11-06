@@ -37,7 +37,7 @@ def get_datafusion_version():
 def create_table_registration_script(data_dir, mode, table_names):
     """
     Create a SQL script to register all tables.
-    
+
     Args:
         data_dir: Path to data directory (local or S3)
         mode: 'parquet' or 'parquet-s3'
@@ -50,16 +50,12 @@ def create_table_registration_script(data_dir, mode, table_names):
 
     for table in table_names:
         if mode == 'parquet-s3':
-            candidate_paths = [
-                f"{data_dir}/{table}.parquet",  # single file (not partitioned)
-                f"{data_dir}/{table}/*.parquet"  # all partitioned files
-            ]
-            # Try both S3 patterns
-            for path in candidate_paths:
-                # Always add both, DataFusion will ignore missing ones
-                sql_commands.append(
-                    f"CREATE EXTERNAL TABLE IF NOT EXISTS {table} STORED AS PARQUET LOCATION '{path}';"
-                )
+            # For partitioned S3 data, pointing to the base directory is often sufficient
+            # e.g., s3://bucket/path/lineitem/
+            path = f"{data_dir}/{table}/"
+            sql_commands.append(
+                f"CREATE EXTERNAL TABLE IF NOT EXISTS {table} STORED AS PARQUET LOCATION '{path}';"
+            )
         else:
             possible_paths = [
                 f"{data_dir}/{table}.parquet",
@@ -197,13 +193,6 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
             # Use the last occurrence as the total query time
             execution_time = float(elapsed_matches[-1])
             print(f"  Parsed execution time from EXPLAIN ANALYZE: {execution_time:.2f}s")
-
-            for pattern in time_patterns:
-                time_match = re.search(pattern, result.stdout, re.IGNORECASE)
-                if time_match:
-                    execution_time = float(time_match.group(1)) / 1000.0  # Convert ms to seconds
-                    print(f"  Parsed execution time from EXPLAIN ANALYZE: {execution_time:.2f}s")
-                    break
 
         return execution_time, True, None, explain_output
 
@@ -421,7 +410,7 @@ def main():
         print("Error: datafusion-cli is not installed or not in PATH")
         print("Please install it with: cargo install datafusion-cli")
         sys.exit(1)
-    
+
     run_benchmark(
         benchmark=args.benchmark,
         data_dir=args.data_dir,
