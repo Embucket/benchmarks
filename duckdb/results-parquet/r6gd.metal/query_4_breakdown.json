@@ -1,0 +1,721 @@
+{
+  "EXECUTION_TIME_BREAKDOWN": {
+    "overall_time": 22.072773782,
+    "processing": 1320.345600757004,
+    "synchronization": 0.0,
+    "operators": [
+      {
+        "name": "READ_PARQUET ",
+        "type": "TABLE_SCAN",
+        "timing": 840.455669987003,
+        "cpu_time": 840.455669987003,
+        "blocked_time": 0.0,
+        "rows_produced": 5999989465,
+        "rows_scanned": 384007411200,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 3807.6576976128913,
+        "processing_percentage": 3807.6576976128913,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "READ_PARQUET ",
+        "type": "TABLE_SCAN",
+        "timing": 243.75618968000023,
+        "cpu_time": 243.75618968000023,
+        "blocked_time": 0.0,
+        "rows_produced": 57353602,
+        "rows_scanned": 95999965440,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 1104.3296691545836,
+        "processing_percentage": 1104.3296691545836,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "HASH_JOIN",
+        "type": "HASH_JOIN",
+        "timing": 124.25023881800149,
+        "cpu_time": 1009.5982982840039,
+        "blocked_time": 0.0,
+        "rows_produced": 145033746,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 562.9117574671363,
+        "processing_percentage": 562.9117574671363,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "FILTER",
+        "type": "FILTER",
+        "timing": 43.984216631999345,
+        "cpu_time": 884.4398866190024,
+        "blocked_time": 0.0,
+        "rows_produced": 3793363744,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 199.26909534073957,
+        "processing_percentage": 199.26909534073957,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "HASH_JOIN",
+        "type": "HASH_JOIN",
+        "timing": 41.48445687699995,
+        "cpu_time": 1054.216308794004,
+        "blocked_time": 0.0,
+        "rows_produced": 52593467,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 187.9440132296824,
+        "processing_percentage": 187.9440132296824,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "LEFT_DELIM_JOIN",
+        "type": "LEFT_DELIM_JOIN",
+        "timing": 13.289860919,
+        "cpu_time": 1318.062838852004,
+        "blocked_time": 0.0,
+        "rows_produced": 0,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 60.209292453482554,
+        "processing_percentage": 60.209292453482554,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "HASH_GROUP_BY",
+        "type": "HASH_GROUP_BY",
+        "timing": 6.800479459,
+        "cpu_time": 6.800479459,
+        "blocked_time": 0.0,
+        "rows_produced": 57353602,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 30.809356024595715,
+        "processing_percentage": 30.809356024595715,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "COLUMN_DATA_SCAN",
+        "type": "COLUMN_DATA_SCAN",
+        "timing": 2.927140560999999,
+        "cpu_time": 2.927140560999999,
+        "blocked_time": 0.0,
+        "rows_produced": 57353602,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 13.261317267642351,
+        "processing_percentage": 13.261317267642351,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "HASH_GROUP_BY",
+        "type": "HASH_GROUP_BY",
+        "timing": 2.26318332,
+        "cpu_time": 1320.3452524770041,
+        "blocked_time": 0.0,
+        "rows_produced": 5,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 10.253280092262761,
+        "processing_percentage": 10.253280092262761,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "PROJECTION",
+        "type": "PROJECTION",
+        "timing": 0.9081728470000112,
+        "cpu_time": 885.3480594660025,
+        "blocked_time": 0.0,
+        "rows_produced": 3793363744,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 4.114448215568683,
+        "processing_percentage": 4.114448215568683,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "PROJECTION",
+        "type": "PROJECTION",
+        "timing": 0.20641307199999975,
+        "cpu_time": 1009.804711356004,
+        "blocked_time": 0.0,
+        "rows_produced": 145033746,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 0.9351478615176421,
+        "processing_percentage": 0.9351478615176421,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "PROJECTION",
+        "type": "PROJECTION",
+        "timing": 0.019230305000000007,
+        "cpu_time": 1318.082069157004,
+        "blocked_time": 0.0,
+        "rows_produced": 52593467,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 0.08712228553568568,
+        "processing_percentage": 0.08712228553568568,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "ORDER_BY",
+        "type": "ORDER_BY",
+        "timing": 0.00034828,
+        "cpu_time": 1320.3456007570041,
+        "blocked_time": 0.0,
+        "rows_produced": 5,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 0.0015778714693484373,
+        "processing_percentage": 0.0015778714693484373,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "DELIM_SCAN",
+        "type": "DELIM_SCAN",
+        "timing": 0.0,
+        "cpu_time": 0.0,
+        "blocked_time": 0.0,
+        "rows_produced": 0,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 0.0,
+        "processing_percentage": 0.0,
+        "synchronization_percentage": 0.0
+      }
+    ],
+    "processing_percentage": 5981.783774877107,
+    "synchronization_percentage": 0.0,
+    "operator_tree": {
+      "tree": {
+        "name": "QUERY",
+        "type": "ROOT",
+        "timing": 22.072773782,
+        "overall_percentage": 100.0,
+        "children": [
+          {
+            "name": "ORDER_BY",
+            "type": "ORDER_BY",
+            "timing": 0.00034828,
+            "cpu_time": 1320.3456007570041,
+            "blocked_time": 0.0,
+            "rows_produced": 5,
+            "rows_scanned": 0,
+            "bytes_read": 0,
+            "bytes_written": 0,
+            "children": [
+              {
+                "name": "HASH_GROUP_BY",
+                "type": "HASH_GROUP_BY",
+                "timing": 2.26318332,
+                "cpu_time": 1320.3452524770041,
+                "blocked_time": 0.0,
+                "rows_produced": 5,
+                "rows_scanned": 0,
+                "bytes_read": 0,
+                "bytes_written": 0,
+                "children": [
+                  {
+                    "name": "PROJECTION",
+                    "type": "PROJECTION",
+                    "timing": 0.019230305000000007,
+                    "cpu_time": 1318.082069157004,
+                    "blocked_time": 0.0,
+                    "rows_produced": 52593467,
+                    "rows_scanned": 0,
+                    "bytes_read": 0,
+                    "bytes_written": 0,
+                    "children": [
+                      {
+                        "name": "LEFT_DELIM_JOIN",
+                        "type": "LEFT_DELIM_JOIN",
+                        "timing": 13.289860919,
+                        "cpu_time": 1318.062838852004,
+                        "blocked_time": 0.0,
+                        "rows_produced": 0,
+                        "rows_scanned": 0,
+                        "bytes_read": 0,
+                        "bytes_written": 0,
+                        "children": [
+                          {
+                            "name": "READ_PARQUET ",
+                            "type": "TABLE_SCAN",
+                            "timing": 243.75618968000023,
+                            "cpu_time": 243.75618968000023,
+                            "blocked_time": 0.0,
+                            "rows_produced": 57353602,
+                            "rows_scanned": 95999965440,
+                            "bytes_read": 0,
+                            "bytes_written": 0,
+                            "children": [],
+                            "overall_percentage": 1104.3296691545836,
+                            "processing_percentage": 1104.3296691545836,
+                            "synchronization_percentage": 0.0
+                          },
+                          {
+                            "name": "HASH_JOIN",
+                            "type": "HASH_JOIN",
+                            "timing": 41.48445687699995,
+                            "cpu_time": 1054.216308794004,
+                            "blocked_time": 0.0,
+                            "rows_produced": 52593467,
+                            "rows_scanned": 0,
+                            "bytes_read": 0,
+                            "bytes_written": 0,
+                            "children": [
+                              {
+                                "name": "COLUMN_DATA_SCAN",
+                                "type": "COLUMN_DATA_SCAN",
+                                "timing": 2.927140560999999,
+                                "cpu_time": 2.927140560999999,
+                                "blocked_time": 0.0,
+                                "rows_produced": 57353602,
+                                "rows_scanned": 0,
+                                "bytes_read": 0,
+                                "bytes_written": 0,
+                                "children": [],
+                                "overall_percentage": 13.261317267642351,
+                                "processing_percentage": 13.261317267642351,
+                                "synchronization_percentage": 0.0
+                              },
+                              {
+                                "name": "PROJECTION",
+                                "type": "PROJECTION",
+                                "timing": 0.20641307199999975,
+                                "cpu_time": 1009.804711356004,
+                                "blocked_time": 0.0,
+                                "rows_produced": 145033746,
+                                "rows_scanned": 0,
+                                "bytes_read": 0,
+                                "bytes_written": 0,
+                                "children": [
+                                  {
+                                    "name": "HASH_JOIN",
+                                    "type": "HASH_JOIN",
+                                    "timing": 124.25023881800149,
+                                    "cpu_time": 1009.5982982840039,
+                                    "blocked_time": 0.0,
+                                    "rows_produced": 145033746,
+                                    "rows_scanned": 0,
+                                    "bytes_read": 0,
+                                    "bytes_written": 0,
+                                    "children": [
+                                      {
+                                        "name": "PROJECTION",
+                                        "type": "PROJECTION",
+                                        "timing": 0.9081728470000112,
+                                        "cpu_time": 885.3480594660025,
+                                        "blocked_time": 0.0,
+                                        "rows_produced": 3793363744,
+                                        "rows_scanned": 0,
+                                        "bytes_read": 0,
+                                        "bytes_written": 0,
+                                        "children": [
+                                          {
+                                            "name": "FILTER",
+                                            "type": "FILTER",
+                                            "timing": 43.984216631999345,
+                                            "cpu_time": 884.4398866190024,
+                                            "blocked_time": 0.0,
+                                            "rows_produced": 3793363744,
+                                            "rows_scanned": 0,
+                                            "bytes_read": 0,
+                                            "bytes_written": 0,
+                                            "children": [
+                                              {
+                                                "name": "READ_PARQUET ",
+                                                "type": "TABLE_SCAN",
+                                                "timing": 840.455669987003,
+                                                "cpu_time": 840.455669987003,
+                                                "blocked_time": 0.0,
+                                                "rows_produced": 5999989465,
+                                                "rows_scanned": 384007411200,
+                                                "bytes_read": 0,
+                                                "bytes_written": 0,
+                                                "children": [],
+                                                "overall_percentage": 3807.6576976128913,
+                                                "processing_percentage": 3807.6576976128913,
+                                                "synchronization_percentage": 0.0
+                                              }
+                                            ],
+                                            "overall_percentage": 199.26909534073957,
+                                            "processing_percentage": 199.26909534073957,
+                                            "synchronization_percentage": 0.0
+                                          }
+                                        ],
+                                        "overall_percentage": 4.114448215568683,
+                                        "processing_percentage": 4.114448215568683,
+                                        "synchronization_percentage": 0.0
+                                      },
+                                      {
+                                        "name": "DELIM_SCAN",
+                                        "type": "DELIM_SCAN",
+                                        "timing": 0.0,
+                                        "cpu_time": 0.0,
+                                        "blocked_time": 0.0,
+                                        "rows_produced": 0,
+                                        "rows_scanned": 0,
+                                        "bytes_read": 0,
+                                        "bytes_written": 0,
+                                        "children": [],
+                                        "overall_percentage": 0.0,
+                                        "processing_percentage": 0.0,
+                                        "synchronization_percentage": 0.0
+                                      }
+                                    ],
+                                    "overall_percentage": 562.9117574671363,
+                                    "processing_percentage": 562.9117574671363,
+                                    "synchronization_percentage": 0.0
+                                  }
+                                ],
+                                "overall_percentage": 0.9351478615176421,
+                                "processing_percentage": 0.9351478615176421,
+                                "synchronization_percentage": 0.0
+                              }
+                            ],
+                            "overall_percentage": 187.9440132296824,
+                            "processing_percentage": 187.9440132296824,
+                            "synchronization_percentage": 0.0
+                          },
+                          {
+                            "name": "HASH_GROUP_BY",
+                            "type": "HASH_GROUP_BY",
+                            "timing": 6.800479459,
+                            "cpu_time": 6.800479459,
+                            "blocked_time": 0.0,
+                            "rows_produced": 57353602,
+                            "rows_scanned": 0,
+                            "bytes_read": 0,
+                            "bytes_written": 0,
+                            "children": [],
+                            "overall_percentage": 30.809356024595715,
+                            "processing_percentage": 30.809356024595715,
+                            "synchronization_percentage": 0.0
+                          }
+                        ],
+                        "overall_percentage": 60.209292453482554,
+                        "processing_percentage": 60.209292453482554,
+                        "synchronization_percentage": 0.0
+                      }
+                    ],
+                    "overall_percentage": 0.08712228553568568,
+                    "processing_percentage": 0.08712228553568568,
+                    "synchronization_percentage": 0.0
+                  }
+                ],
+                "overall_percentage": 10.253280092262761,
+                "processing_percentage": 10.253280092262761,
+                "synchronization_percentage": 0.0
+              }
+            ],
+            "overall_percentage": 0.0015778714693484373,
+            "processing_percentage": 0.0015778714693484373,
+            "synchronization_percentage": 0.0
+          }
+        ]
+      },
+      "nodes": [
+        {
+          "id": 0,
+          "parent_id": null,
+          "depth": 0,
+          "name": "QUERY",
+          "type": "ROOT",
+          "timing": 22.072773782,
+          "overall_percentage": 100.0,
+          "processing_percentage": null,
+          "synchronization_percentage": null,
+          "rows_produced": null,
+          "rows_scanned": null,
+          "bytes_read": null,
+          "bytes_written": null
+        },
+        {
+          "id": 1,
+          "parent_id": 0,
+          "depth": 1,
+          "name": "ORDER_BY",
+          "type": "ORDER_BY",
+          "timing": 0.00034828,
+          "overall_percentage": 0.0015778714693484373,
+          "processing_percentage": 0.0015778714693484373,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 5,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 2,
+          "parent_id": 1,
+          "depth": 2,
+          "name": "HASH_GROUP_BY",
+          "type": "HASH_GROUP_BY",
+          "timing": 2.26318332,
+          "overall_percentage": 10.253280092262761,
+          "processing_percentage": 10.253280092262761,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 5,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 3,
+          "parent_id": 2,
+          "depth": 3,
+          "name": "PROJECTION",
+          "type": "PROJECTION",
+          "timing": 0.019230305000000007,
+          "overall_percentage": 0.08712228553568568,
+          "processing_percentage": 0.08712228553568568,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 52593467,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 4,
+          "parent_id": 3,
+          "depth": 4,
+          "name": "LEFT_DELIM_JOIN",
+          "type": "LEFT_DELIM_JOIN",
+          "timing": 13.289860919,
+          "overall_percentage": 60.209292453482554,
+          "processing_percentage": 60.209292453482554,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 0,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 5,
+          "parent_id": 4,
+          "depth": 5,
+          "name": "READ_PARQUET ",
+          "type": "TABLE_SCAN",
+          "timing": 243.75618968000023,
+          "overall_percentage": 1104.3296691545836,
+          "processing_percentage": 1104.3296691545836,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 57353602,
+          "rows_scanned": 95999965440,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 6,
+          "parent_id": 4,
+          "depth": 5,
+          "name": "HASH_JOIN",
+          "type": "HASH_JOIN",
+          "timing": 41.48445687699995,
+          "overall_percentage": 187.9440132296824,
+          "processing_percentage": 187.9440132296824,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 52593467,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 7,
+          "parent_id": 6,
+          "depth": 6,
+          "name": "COLUMN_DATA_SCAN",
+          "type": "COLUMN_DATA_SCAN",
+          "timing": 2.927140560999999,
+          "overall_percentage": 13.261317267642351,
+          "processing_percentage": 13.261317267642351,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 57353602,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 8,
+          "parent_id": 6,
+          "depth": 6,
+          "name": "PROJECTION",
+          "type": "PROJECTION",
+          "timing": 0.20641307199999975,
+          "overall_percentage": 0.9351478615176421,
+          "processing_percentage": 0.9351478615176421,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 145033746,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 9,
+          "parent_id": 8,
+          "depth": 7,
+          "name": "HASH_JOIN",
+          "type": "HASH_JOIN",
+          "timing": 124.25023881800149,
+          "overall_percentage": 562.9117574671363,
+          "processing_percentage": 562.9117574671363,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 145033746,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 10,
+          "parent_id": 9,
+          "depth": 8,
+          "name": "PROJECTION",
+          "type": "PROJECTION",
+          "timing": 0.9081728470000112,
+          "overall_percentage": 4.114448215568683,
+          "processing_percentage": 4.114448215568683,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 3793363744,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 11,
+          "parent_id": 10,
+          "depth": 9,
+          "name": "FILTER",
+          "type": "FILTER",
+          "timing": 43.984216631999345,
+          "overall_percentage": 199.26909534073957,
+          "processing_percentage": 199.26909534073957,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 3793363744,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 12,
+          "parent_id": 11,
+          "depth": 10,
+          "name": "READ_PARQUET ",
+          "type": "TABLE_SCAN",
+          "timing": 840.455669987003,
+          "overall_percentage": 3807.6576976128913,
+          "processing_percentage": 3807.6576976128913,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 5999989465,
+          "rows_scanned": 384007411200,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 13,
+          "parent_id": 9,
+          "depth": 8,
+          "name": "DELIM_SCAN",
+          "type": "DELIM_SCAN",
+          "timing": 0.0,
+          "overall_percentage": 0.0,
+          "processing_percentage": 0.0,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 0,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 14,
+          "parent_id": 4,
+          "depth": 5,
+          "name": "HASH_GROUP_BY",
+          "type": "HASH_GROUP_BY",
+          "timing": 6.800479459,
+          "overall_percentage": 30.809356024595715,
+          "processing_percentage": 30.809356024595715,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 57353602,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        }
+      ],
+      "edges": [
+        {
+          "parent": 4,
+          "child": 5
+        },
+        {
+          "parent": 6,
+          "child": 7
+        },
+        {
+          "parent": 11,
+          "child": 12
+        },
+        {
+          "parent": 10,
+          "child": 11
+        },
+        {
+          "parent": 9,
+          "child": 10
+        },
+        {
+          "parent": 9,
+          "child": 13
+        },
+        {
+          "parent": 8,
+          "child": 9
+        },
+        {
+          "parent": 6,
+          "child": 8
+        },
+        {
+          "parent": 4,
+          "child": 6
+        },
+        {
+          "parent": 4,
+          "child": 14
+        },
+        {
+          "parent": 3,
+          "child": 4
+        },
+        {
+          "parent": 2,
+          "child": 3
+        },
+        {
+          "parent": 1,
+          "child": 2
+        },
+        {
+          "parent": 0,
+          "child": 1
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,720 @@
+{
+  "EXECUTION_TIME_BREAKDOWN": {
+    "overall_time": 24.916829798,
+    "processing": 1515.8109518220126,
+    "synchronization": 0.0,
+    "operators": [
+      {
+        "name": "READ_PARQUET ",
+        "type": "TABLE_SCAN",
+        "timing": 1212.9543691290062,
+        "cpu_time": 1212.9543691290062,
+        "blocked_time": 0.0,
+        "rows_produced": 5999989583,
+        "rows_scanned": 384007411200,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 4868.0124195669805,
+        "processing_percentage": 4868.0124195669805,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "HASH_JOIN",
+        "type": "HASH_JOIN",
+        "timing": 160.85401792800616,
+        "cpu_time": 1494.0958327940132,
+        "blocked_time": 0.0,
+        "rows_produced": 182094202,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 645.563738372999,
+        "processing_percentage": 645.563738372999,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "READ_PARQUET ",
+        "type": "TABLE_SCAN",
+        "timing": 50.350611858999976,
+        "cpu_time": 50.350611858999976,
+        "blocked_time": 0.0,
+        "rows_produced": 227571130,
+        "rows_scanned": 95999965440,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 202.0747112180438,
+        "processing_percentage": 202.0747112180438,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "READ_PARQUET ",
+        "type": "TABLE_SCAN",
+        "timing": 38.41279035500002,
+        "cpu_time": 38.41279035500002,
+        "blocked_time": 0.0,
+        "rows_produced": 84008198,
+        "rows_scanned": 9599998720,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 154.1640355792104,
+        "processing_percentage": 154.1640355792104,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "HASH_JOIN",
+        "type": "HASH_JOIN",
+        "timing": 30.80450250700073,
+        "cpu_time": 120.28744573700072,
+        "blocked_time": 0.0,
+        "rows_produced": 45523964,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 123.62930098544606,
+        "processing_percentage": 123.62930098544606,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "HASH_JOIN",
+        "type": "HASH_JOIN",
+        "timing": 20.20870133499934,
+        "cpu_time": 1514.4576332100125,
+        "blocked_time": 0.0,
+        "rows_produced": 7282311,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 81.10462486131135,
+        "processing_percentage": 81.10462486131135,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "HASH_GROUP_BY",
+        "type": "HASH_GROUP_BY",
+        "timing": 0.8556903330000002,
+        "cpu_time": 1515.8105594060125,
+        "blocked_time": 0.0,
+        "rows_produced": 5,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 3.434186210433094,
+        "processing_percentage": 3.434186210433094,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "HASH_JOIN",
+        "type": "HASH_JOIN",
+        "timing": 0.7193198670000003,
+        "cpu_time": 39.13233137100002,
+        "blocked_time": 0.0,
+        "rows_produced": 30007619,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 2.8868835756053444,
+        "processing_percentage": 2.8868835756053444,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "PROJECTION",
+        "type": "PROJECTION",
+        "timing": 0.497235863,
+        "cpu_time": 1514.9548690730126,
+        "blocked_time": 0.0,
+        "rows_produced": 7282311,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 1.9955823715580048,
+        "processing_percentage": 1.9955823715580048,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "READ_PARQUET ",
+        "type": "TABLE_SCAN",
+        "timing": 0.15309908099999997,
+        "cpu_time": 0.15309908099999997,
+        "blocked_time": 0.0,
+        "rows_produced": 10000000,
+        "rows_scanned": 640000000,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 0.6144404494519153,
+        "processing_percentage": 0.6144404494519153,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "ORDER_BY",
+        "type": "ORDER_BY",
+        "timing": 0.00039241600000000003,
+        "cpu_time": 1515.8109518220126,
+        "blocked_time": 0.0,
+        "rows_produced": 5,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 0.001574903401360867,
+        "processing_percentage": 0.001574903401360867,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "READ_PARQUET ",
+        "type": "TABLE_SCAN",
+        "timing": 9.7e-05,
+        "cpu_time": 9.7e-05,
+        "blocked_time": 0.0,
+        "rows_produced": 5,
+        "rows_scanned": 25,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 0.00038929511011784454,
+        "processing_percentage": 0.00038929511011784454,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "READ_PARQUET ",
+        "type": "TABLE_SCAN",
+        "timing": 6.7141e-05,
+        "cpu_time": 6.7141e-05,
+        "blocked_time": 0.0,
+        "rows_produced": 1,
+        "rows_scanned": 5,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 0.0002694604431796103,
+        "processing_percentage": 0.0002694604431796103,
+        "synchronization_percentage": 0.0
+      },
+      {
+        "name": "HASH_JOIN",
+        "type": "HASH_JOIN",
+        "timing": 5.7007999999999994e-05,
+        "cpu_time": 0.000221149,
+        "blocked_time": 0.0,
+        "rows_produced": 5,
+        "rows_scanned": 0,
+        "bytes_read": 0,
+        "bytes_written": 0,
+        "overall_percentage": 0.000228793150903073,
+        "processing_percentage": 0.000228793150903073,
+        "synchronization_percentage": 0.0
+      }
+    ],
+    "processing_percentage": 6083.482385643147,
+    "synchronization_percentage": 0.0,
+    "operator_tree": {
+      "tree": {
+        "name": "QUERY",
+        "type": "ROOT",
+        "timing": 24.916829798,
+        "overall_percentage": 100.0,
+        "children": [
+          {
+            "name": "ORDER_BY",
+            "type": "ORDER_BY",
+            "timing": 0.00039241600000000003,
+            "cpu_time": 1515.8109518220126,
+            "blocked_time": 0.0,
+            "rows_produced": 5,
+            "rows_scanned": 0,
+            "bytes_read": 0,
+            "bytes_written": 0,
+            "children": [
+              {
+                "name": "HASH_GROUP_BY",
+                "type": "HASH_GROUP_BY",
+                "timing": 0.8556903330000002,
+                "cpu_time": 1515.8105594060125,
+                "blocked_time": 0.0,
+                "rows_produced": 5,
+                "rows_scanned": 0,
+                "bytes_read": 0,
+                "bytes_written": 0,
+                "children": [
+                  {
+                    "name": "PROJECTION",
+                    "type": "PROJECTION",
+                    "timing": 0.497235863,
+                    "cpu_time": 1514.9548690730126,
+                    "blocked_time": 0.0,
+                    "rows_produced": 7282311,
+                    "rows_scanned": 0,
+                    "bytes_read": 0,
+                    "bytes_written": 0,
+                    "children": [
+                      {
+                        "name": "HASH_JOIN",
+                        "type": "HASH_JOIN",
+                        "timing": 20.20870133499934,
+                        "cpu_time": 1514.4576332100125,
+                        "blocked_time": 0.0,
+                        "rows_produced": 7282311,
+                        "rows_scanned": 0,
+                        "bytes_read": 0,
+                        "bytes_written": 0,
+                        "children": [
+                          {
+                            "name": "HASH_JOIN",
+                            "type": "HASH_JOIN",
+                            "timing": 160.85401792800616,
+                            "cpu_time": 1494.0958327940132,
+                            "blocked_time": 0.0,
+                            "rows_produced": 182094202,
+                            "rows_scanned": 0,
+                            "bytes_read": 0,
+                            "bytes_written": 0,
+                            "children": [
+                              {
+                                "name": "READ_PARQUET ",
+                                "type": "TABLE_SCAN",
+                                "timing": 1212.9543691290062,
+                                "cpu_time": 1212.9543691290062,
+                                "blocked_time": 0.0,
+                                "rows_produced": 5999989583,
+                                "rows_scanned": 384007411200,
+                                "bytes_read": 0,
+                                "bytes_written": 0,
+                                "children": [],
+                                "overall_percentage": 4868.0124195669805,
+                                "processing_percentage": 4868.0124195669805,
+                                "synchronization_percentage": 0.0
+                              },
+                              {
+                                "name": "HASH_JOIN",
+                                "type": "HASH_JOIN",
+                                "timing": 30.80450250700073,
+                                "cpu_time": 120.28744573700072,
+                                "blocked_time": 0.0,
+                                "rows_produced": 45523964,
+                                "rows_scanned": 0,
+                                "bytes_read": 0,
+                                "bytes_written": 0,
+                                "children": [
+                                  {
+                                    "name": "READ_PARQUET ",
+                                    "type": "TABLE_SCAN",
+                                    "timing": 50.350611858999976,
+                                    "cpu_time": 50.350611858999976,
+                                    "blocked_time": 0.0,
+                                    "rows_produced": 227571130,
+                                    "rows_scanned": 95999965440,
+                                    "bytes_read": 0,
+                                    "bytes_written": 0,
+                                    "children": [],
+                                    "overall_percentage": 202.0747112180438,
+                                    "processing_percentage": 202.0747112180438,
+                                    "synchronization_percentage": 0.0
+                                  },
+                                  {
+                                    "name": "HASH_JOIN",
+                                    "type": "HASH_JOIN",
+                                    "timing": 0.7193198670000003,
+                                    "cpu_time": 39.13233137100002,
+                                    "blocked_time": 0.0,
+                                    "rows_produced": 30007619,
+                                    "rows_scanned": 0,
+                                    "bytes_read": 0,
+                                    "bytes_written": 0,
+                                    "children": [
+                                      {
+                                        "name": "READ_PARQUET ",
+                                        "type": "TABLE_SCAN",
+                                        "timing": 38.41279035500002,
+                                        "cpu_time": 38.41279035500002,
+                                        "blocked_time": 0.0,
+                                        "rows_produced": 84008198,
+                                        "rows_scanned": 9599998720,
+                                        "bytes_read": 0,
+                                        "bytes_written": 0,
+                                        "children": [],
+                                        "overall_percentage": 154.1640355792104,
+                                        "processing_percentage": 154.1640355792104,
+                                        "synchronization_percentage": 0.0
+                                      },
+                                      {
+                                        "name": "HASH_JOIN",
+                                        "type": "HASH_JOIN",
+                                        "timing": 5.7007999999999994e-05,
+                                        "cpu_time": 0.000221149,
+                                        "blocked_time": 0.0,
+                                        "rows_produced": 5,
+                                        "rows_scanned": 0,
+                                        "bytes_read": 0,
+                                        "bytes_written": 0,
+                                        "children": [
+                                          {
+                                            "name": "READ_PARQUET ",
+                                            "type": "TABLE_SCAN",
+                                            "timing": 9.7e-05,
+                                            "cpu_time": 9.7e-05,
+                                            "blocked_time": 0.0,
+                                            "rows_produced": 5,
+                                            "rows_scanned": 25,
+                                            "bytes_read": 0,
+                                            "bytes_written": 0,
+                                            "children": [],
+                                            "overall_percentage": 0.00038929511011784454,
+                                            "processing_percentage": 0.00038929511011784454,
+                                            "synchronization_percentage": 0.0
+                                          },
+                                          {
+                                            "name": "READ_PARQUET ",
+                                            "type": "TABLE_SCAN",
+                                            "timing": 6.7141e-05,
+                                            "cpu_time": 6.7141e-05,
+                                            "blocked_time": 0.0,
+                                            "rows_produced": 1,
+                                            "rows_scanned": 5,
+                                            "bytes_read": 0,
+                                            "bytes_written": 0,
+                                            "children": [],
+                                            "overall_percentage": 0.0002694604431796103,
+                                            "processing_percentage": 0.0002694604431796103,
+                                            "synchronization_percentage": 0.0
+                                          }
+                                        ],
+                                        "overall_percentage": 0.000228793150903073,
+                                        "processing_percentage": 0.000228793150903073,
+                                        "synchronization_percentage": 0.0
+                                      }
+                                    ],
+                                    "overall_percentage": 2.8868835756053444,
+                                    "processing_percentage": 2.8868835756053444,
+                                    "synchronization_percentage": 0.0
+                                  }
+                                ],
+                                "overall_percentage": 123.62930098544606,
+                                "processing_percentage": 123.62930098544606,
+                                "synchronization_percentage": 0.0
+                              }
+                            ],
+                            "overall_percentage": 645.563738372999,
+                            "processing_percentage": 645.563738372999,
+                            "synchronization_percentage": 0.0
+                          },
+                          {
+                            "name": "READ_PARQUET ",
+                            "type": "TABLE_SCAN",
+                            "timing": 0.15309908099999997,
+                            "cpu_time": 0.15309908099999997,
+                            "blocked_time": 0.0,
+                            "rows_produced": 10000000,
+                            "rows_scanned": 640000000,
+                            "bytes_read": 0,
+                            "bytes_written": 0,
+                            "children": [],
+                            "overall_percentage": 0.6144404494519153,
+                            "processing_percentage": 0.6144404494519153,
+                            "synchronization_percentage": 0.0
+                          }
+                        ],
+                        "overall_percentage": 81.10462486131135,
+                        "processing_percentage": 81.10462486131135,
+                        "synchronization_percentage": 0.0
+                      }
+                    ],
+                    "overall_percentage": 1.9955823715580048,
+                    "processing_percentage": 1.9955823715580048,
+                    "synchronization_percentage": 0.0
+                  }
+                ],
+                "overall_percentage": 3.434186210433094,
+                "processing_percentage": 3.434186210433094,
+                "synchronization_percentage": 0.0
+              }
+            ],
+            "overall_percentage": 0.001574903401360867,
+            "processing_percentage": 0.001574903401360867,
+            "synchronization_percentage": 0.0
+          }
+        ]
+      },
+      "nodes": [
+        {
+          "id": 0,
+          "parent_id": null,
+          "depth": 0,
+          "name": "QUERY",
+          "type": "ROOT",
+          "timing": 24.916829798,
+          "overall_percentage": 100.0,
+          "processing_percentage": null,
+          "synchronization_percentage": null,
+          "rows_produced": null,
+          "rows_scanned": null,
+          "bytes_read": null,
+          "bytes_written": null
+        },
+        {
+          "id": 1,
+          "parent_id": 0,
+          "depth": 1,
+          "name": "ORDER_BY",
+          "type": "ORDER_BY",
+          "timing": 0.00039241600000000003,
+          "overall_percentage": 0.001574903401360867,
+          "processing_percentage": 0.001574903401360867,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 5,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 2,
+          "parent_id": 1,
+          "depth": 2,
+          "name": "HASH_GROUP_BY",
+          "type": "HASH_GROUP_BY",
+          "timing": 0.8556903330000002,
+          "overall_percentage": 3.434186210433094,
+          "processing_percentage": 3.434186210433094,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 5,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 3,
+          "parent_id": 2,
+          "depth": 3,
+          "name": "PROJECTION",
+          "type": "PROJECTION",
+          "timing": 0.497235863,
+          "overall_percentage": 1.9955823715580048,
+          "processing_percentage": 1.9955823715580048,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 7282311,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 4,
+          "parent_id": 3,
+          "depth": 4,
+          "name": "HASH_JOIN",
+          "type": "HASH_JOIN",
+          "timing": 20.20870133499934,
+          "overall_percentage": 81.10462486131135,
+          "processing_percentage": 81.10462486131135,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 7282311,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 5,
+          "parent_id": 4,
+          "depth": 5,
+          "name": "HASH_JOIN",
+          "type": "HASH_JOIN",
+          "timing": 160.85401792800616,
+          "overall_percentage": 645.563738372999,
+          "processing_percentage": 645.563738372999,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 182094202,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 6,
+          "parent_id": 5,
+          "depth": 6,
+          "name": "READ_PARQUET ",
+          "type": "TABLE_SCAN",
+          "timing": 1212.9543691290062,
+          "overall_percentage": 4868.0124195669805,
+          "processing_percentage": 4868.0124195669805,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 5999989583,
+          "rows_scanned": 384007411200,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 7,
+          "parent_id": 5,
+          "depth": 6,
+          "name": "HASH_JOIN",
+          "type": "HASH_JOIN",
+          "timing": 30.80450250700073,
+          "overall_percentage": 123.62930098544606,
+          "processing_percentage": 123.62930098544606,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 45523964,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 8,
+          "parent_id": 7,
+          "depth": 7,
+          "name": "READ_PARQUET ",
+          "type": "TABLE_SCAN",
+          "timing": 50.350611858999976,
+          "overall_percentage": 202.0747112180438,
+          "processing_percentage": 202.0747112180438,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 227571130,
+          "rows_scanned": 95999965440,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 9,
+          "parent_id": 7,
+          "depth": 7,
+          "name": "HASH_JOIN",
+          "type": "HASH_JOIN",
+          "timing": 0.7193198670000003,
+          "overall_percentage": 2.8868835756053444,
+          "processing_percentage": 2.8868835756053444,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 30007619,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 10,
+          "parent_id": 9,
+          "depth": 8,
+          "name": "READ_PARQUET ",
+          "type": "TABLE_SCAN",
+          "timing": 38.41279035500002,
+          "overall_percentage": 154.1640355792104,
+          "processing_percentage": 154.1640355792104,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 84008198,
+          "rows_scanned": 9599998720,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 11,
+          "parent_id": 9,
+          "depth": 8,
+          "name": "HASH_JOIN",
+          "type": "HASH_JOIN",
+          "timing": 5.7007999999999994e-05,
+          "overall_percentage": 0.000228793150903073,
+          "processing_percentage": 0.000228793150903073,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 5,
+          "rows_scanned": 0,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 12,
+          "parent_id": 11,
+          "depth": 9,
+          "name": "READ_PARQUET ",
+          "type": "TABLE_SCAN",
+          "timing": 9.7e-05,
+          "overall_percentage": 0.00038929511011784454,
+          "processing_percentage": 0.00038929511011784454,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 5,
+          "rows_scanned": 25,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 13,
+          "parent_id": 11,
+          "depth": 9,
+          "name": "READ_PARQUET ",
+          "type": "TABLE_SCAN",
+          "timing": 6.7141e-05,
+          "overall_percentage": 0.0002694604431796103,
+          "processing_percentage": 0.0002694604431796103,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 1,
+          "rows_scanned": 5,
+          "bytes_read": 0,
+          "bytes_written": 0
+        },
+        {
+          "id": 14,
+          "parent_id": 4,
+          "depth": 5,
+          "name": "READ_PARQUET ",
+          "type": "TABLE_SCAN",
+          "timing": 0.15309908099999997,
+          "overall_percentage": 0.6144404494519153,
+          "processing_percentage": 0.6144404494519153,
+          "synchronization_percentage": 0.0,
+          "rows_produced": 10000000,
+          "rows_scanned": 640000000,
+          "bytes_read": 0,
+          "bytes_written": 0
+        }
+      ],
+      "edges": [
+        {
+          "parent": 5,
+          "child": 6
+        },
+        {
+          "parent": 7,
+          "child": 8
+        },
+        {
+          "parent": 9,
+          "child": 10
+        },
+        {
+          "parent": 11,
+          "child": 12
+        },
+        {
+          "parent": 11,
+          "child": 13
+        },
+        {
+          "parent": 9,
+          "child": 11
+        },
+        {
+          "parent": 7,
+          "child": 9
+        },
+        {
+          "parent": 5,
+          "child": 7
+        },
+        {
+          "parent": 4,
+          "child": 5
+        },
+        {
+          "parent": 4,
+          "child": 14
+        },
+        {
+          "parent": 3,
+          "child": 4
+        },
+        {
+          "parent": 2,
+          "child": 3
+        },
+        {
+          "parent": 1,
+          "child": 2
+        },
+        {
+          "parent": 0,
+          "child": 1
+        }
+      ]
+    }
+  }
+}
