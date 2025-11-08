@@ -3,35 +3,35 @@ DataFusion EXPLAIN ANALYZE - Query 6
 
 DataFusion CLI v50.3.0
 0 row(s) fetched. 
-Elapsed 0.060 seconds.
+Elapsed 0.063 seconds.
 
 0 row(s) fetched. 
-Elapsed 0.067 seconds.
+Elapsed 0.396 seconds.
 
 0 row(s) fetched. 
-Elapsed 1.399 seconds.
+Elapsed 1.751 seconds.
 
 0 row(s) fetched. 
-Elapsed 0.001 seconds.
+Elapsed 0.102 seconds.
 
 0 row(s) fetched. 
-Elapsed 0.212 seconds.
+Elapsed 0.359 seconds.
 
 0 row(s) fetched. 
-Elapsed 0.032 seconds.
+Elapsed 0.182 seconds.
 
 0 row(s) fetched. 
-Elapsed 0.086 seconds.
+Elapsed 0.220 seconds.
 
 0 row(s) fetched. 
-Elapsed 0.001 seconds.
+Elapsed 0.117 seconds.
 
 0 row(s) fetched. 
-Elapsed 0.003 seconds.
+Elapsed 0.143 seconds.
 
-[{"plan_type":"Plan with Metrics","plan":"ProjectionExec: expr=[sum(lineitem.l_extendedprice * lineitem.l_discount)@0 as revenue], metrics=[output_rows=1, elapsed_compute=1.345µs]\n  AggregateExec: mode=Final, gby=[], aggr=[sum(lineitem.l_extendedprice * lineitem.l_discount)], metrics=[output_rows=1, elapsed_compute=87.422µs]\n    CoalescePartitionsExec, metrics=[output_rows=32, elapsed_compute=74.149µs]\n      AggregateExec: mode=Partial, gby=[], aggr=[sum(lineitem.l_extendedprice * lineitem.l_discount)], metrics=[output_rows=32, elapsed_compute=1.74914556s]\n        CoalesceBatchesExec: target_batch_size=8192, metrics=[output_rows=114205230, elapsed_compute=1.524087171s]\n          FilterExec: l_shipdate@3 >= 1994-01-01 AND l_shipdate@3 < 1995-01-01 AND l_discount@2 >= Some(3),15,2 AND l_discount@2 <= Some(5),15,2 AND l_quantity@0 < Some(2400),15,2, projection=[l_extendedprice@1, l_discount@2], metrics=[output_rows=114205230, elapsed_compute=111.073322145s]\n            DataSourceExec: file_groups={32 groups: [[mnt/local-ssd/tpch-data/sf1000/lineitem/lineitem.1.parquet:0..7367375164], [mnt/local-ssd/tpch-data/sf1000/lineitem/lineitem.1.parquet:7367375164..11788105644, mnt/local-ssd/tpch-data/sf1000/lineitem/lineitem.10.parquet:0..2946644684], [mnt/local-ssd/tpch-data/sf1000/lineitem/lineitem.10.parquet:2946644684..10314019848], [mnt/local-ssd/tpch-data/sf1000/lineitem/lineitem.10.parquet:10314019848..11787843635, mnt/local-ssd/tpch-data/sf1000/lineitem/lineitem.11.parquet:0..5893551377], [mnt/local-ssd/tpch-data/sf1000/lineitem/lineitem.11.parquet:5893551377..11788220878, mnt/local-ssd/tpch-data/sf1000/lineitem/lineitem.12.parquet:0..1472705663], ...]}, projection=[l_quantity, l_extendedprice, l_discount, l_shipdate], file_type=parquet, predicate=l_shipdate@3 >= 1994-01-01 AND l_shipdate@3 < 1995-01-01 AND l_discount@2 >= Some(3),15,2 AND l_discount@2 <= Some(5),15,2 AND l_quantity@0 < Some(2400),15,2, pruning_predicate=l_shipdate_null_count@1 != row_count@2 AND l_shipdate_max@0 >= 1994-01-01 AND l_shipdate_null_count@1 != row_count@2 AND l_shipdate_min@3 < 1995-01-01 AND l_discount_null_count@5 != row_count@2 AND l_discount_max@4 >= Some(3),15,2 AND l_discount_null_count@5 != row_count@2 AND l_discount_min@6 <= Some(5),15,2 AND l_quantity_null_count@8 != row_count@2 AND l_quantity_min@7 < Some(2400),15,2, required_guarantees=[], metrics=[output_rows=5999989709, elapsed_compute=32ns, batches_split=0, bytes_scanned=48638244729, file_open_errors=0, file_scan_errors=0, files_ranges_pruned_statistics=0, num_predicate_creation_errors=0, page_index_rows_matched=5999989709, page_index_rows_pruned=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_matched_bloom_filter=0, row_groups_matched_statistics=3860, row_groups_pruned_bloom_filter=0, row_groups_pruned_statistics=0, bloom_filter_eval_time=95.616619ms, metadata_load_time=5.551666359s, page_index_eval_time=168.252321ms, row_pushdown_eval_time=102ns, statistics_eval_time=4.724441ms, time_elapsed_opening=3.86090639s, time_elapsed_processing=138.110454433s, time_elapsed_scanning_total=524.686360309s, time_elapsed_scanning_until_data=3.947571354s]\n"}]
+[{"plan_type":"Plan with Metrics","plan":"ProjectionExec: expr=[sum(lineitem.l_extendedprice * lineitem.l_discount)@0 as revenue], metrics=[output_rows=1, elapsed_compute=1.124µs]\n  AggregateExec: mode=Final, gby=[], aggr=[sum(lineitem.l_extendedprice * lineitem.l_discount)], metrics=[output_rows=1, elapsed_compute=88.08µs]\n    CoalescePartitionsExec, metrics=[output_rows=32, elapsed_compute=58.116µs]\n      AggregateExec: mode=Partial, gby=[], aggr=[sum(lineitem.l_extendedprice * lineitem.l_discount)], metrics=[output_rows=32, elapsed_compute=1.860625793s]\n        CoalesceBatchesExec: target_batch_size=8192, metrics=[output_rows=114205230, elapsed_compute=1.745850302s]\n          FilterExec: l_shipdate@3 >= 1994-01-01 AND l_shipdate@3 < 1995-01-01 AND l_discount@2 >= Some(3),15,2 AND l_discount@2 <= Some(5),15,2 AND l_quantity@0 < Some(2400),15,2, projection=[l_extendedprice@1, l_discount@2], metrics=[output_rows=114205230, elapsed_compute=114.775942926s]\n            DataSourceExec: file_groups={32 groups: [[tpch/1000_partitioned/lineitem/lineitem.1.parquet:0..7367375164], [tpch/1000_partitioned/lineitem/lineitem.1.parquet:7367375164..11788105644, tpch/1000_partitioned/lineitem/lineitem.10.parquet:0..2946644684], [tpch/1000_partitioned/lineitem/lineitem.10.parquet:2946644684..10314019848], [tpch/1000_partitioned/lineitem/lineitem.10.parquet:10314019848..11787843635, tpch/1000_partitioned/lineitem/lineitem.11.parquet:0..5893551377], [tpch/1000_partitioned/lineitem/lineitem.11.parquet:5893551377..11788220878, tpch/1000_partitioned/lineitem/lineitem.12.parquet:0..1472705663], ...]}, projection=[l_quantity, l_extendedprice, l_discount, l_shipdate], file_type=parquet, predicate=l_shipdate@3 >= 1994-01-01 AND l_shipdate@3 < 1995-01-01 AND l_discount@2 >= Some(3),15,2 AND l_discount@2 <= Some(5),15,2 AND l_quantity@0 < Some(2400),15,2, pruning_predicate=l_shipdate_null_count@1 != row_count@2 AND l_shipdate_max@0 >= 1994-01-01 AND l_shipdate_null_count@1 != row_count@2 AND l_shipdate_min@3 < 1995-01-01 AND l_discount_null_count@5 != row_count@2 AND l_discount_max@4 >= Some(3),15,2 AND l_discount_null_count@5 != row_count@2 AND l_discount_min@6 <= Some(5),15,2 AND l_quantity_null_count@8 != row_count@2 AND l_quantity_min@7 < Some(2400),15,2, required_guarantees=[], metrics=[output_rows=5999989709, elapsed_compute=32ns, batches_split=0, bytes_scanned=48638244729, file_open_errors=0, file_scan_errors=0, files_ranges_pruned_statistics=0, num_predicate_creation_errors=0, page_index_rows_matched=5999989709, page_index_rows_pruned=0, predicate_evaluation_errors=0, pushdown_rows_matched=0, pushdown_rows_pruned=0, row_groups_matched_bloom_filter=0, row_groups_matched_statistics=3860, row_groups_pruned_bloom_filter=0, row_groups_pruned_statistics=0, bloom_filter_eval_time=96.727513ms, metadata_load_time=13.240143922s, page_index_eval_time=164.741981ms, row_pushdown_eval_time=102ns, statistics_eval_time=3.627027ms, time_elapsed_opening=8.065993982s, time_elapsed_processing=179.278004314s, time_elapsed_scanning_total=835.696202494s, time_elapsed_scanning_until_data=10.297246564s]\n"}]
 1 row(s) fetched. 
-Elapsed 18.228 seconds.
+Elapsed 28.865 seconds.
 
 
 ================================================================================
