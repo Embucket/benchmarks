@@ -176,23 +176,15 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
         explain_output = result.stdout  # Capture the full EXPLAIN ANALYZE output
 
         if result.stdout:
-            # Debug: print first 500 chars of output
-            print(f"  Output preview (first 500 chars):")
-            print(f"  {result.stdout[:500]}")
-
-            # Look for execution time in EXPLAIN ANALYZE output
-            # Pattern: "total_time=XXXms" or "Execution Time: XXX ms"
-            time_patterns = [
-                r'total_time=(\d+(?:\.\d+)?)ms',
-                r'(?:Total )?Execution Time:\s+([\d.]+)\s*ms',
-            ]
-
             # Find all elapsed times in the output
             elapsed_matches = re.findall(r'Elapsed ([\d.]+) seconds\.', result.stdout)
-
-            # Use the last occurrence as the total query time
-            execution_time = float(elapsed_matches[-1])
-            print(f"  Parsed execution time from EXPLAIN ANALYZE: {execution_time:.2f}s")
+            if elapsed_matches:
+                # Pick the largest elapsed time
+                execution_time = max(float(et) for et in elapsed_matches)
+                print(f"  Parsed execution time from EXPLAIN ANALYZE: {execution_time:.2f}s")
+            else:
+                print("Could not find elapsed time in EXPLAIN ANALYZE output")
+                execution_time = None
 
         return execution_time, True, None, explain_output
 
