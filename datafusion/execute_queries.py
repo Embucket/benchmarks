@@ -183,8 +183,8 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
                 execution_time = max(float(et) for et in elapsed_matches)
                 print(f"  Parsed execution time from EXPLAIN ANALYZE: {execution_time:.2f}s")
             else:
+                print("Could not find elapsed time in EXPLAIN ANALYZE output")
                 execution_time = None
-            print(f"  Parsed execution time from EXPLAIN ANALYZE: {execution_time:.2f}s")
 
         return execution_time, True, None, explain_output
 
