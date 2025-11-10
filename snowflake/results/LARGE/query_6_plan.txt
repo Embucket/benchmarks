@@ -61,7 +61,7 @@ RAW RESULT:
     ]
   },
   "plan_text": "GlobalStats:\n\tbytesAssigned=26018068992\n\tpartitionsAssigned=1571\n\tpartitionsTotal=10336\nOperations:\n1:0     ->Result  SUM(LINEITEM.L_EXTENDEDPRICE * (LINEITEM.L_DISCOUNT))  \n1:1          ->Aggregate  aggExprs: [SUM(LINEITEM.L_EXTENDEDPRICE * (LINEITEM.L_DISCOUNT))]  \n1:2               ->Filter  (LINEITEM.L_SHIPDATE >= '1994-01-01') AND (LINEITEM.L_SHIPDATE < '1995-01-01') AND (LINEITEM.L_DISCOUNT >= 0.05) AND (LINEITEM.L_DISCOUNT <= 0.07) AND (LINEITEM.L_QUANTITY < 24)  \n1:3                    ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM  L_QUANTITY, L_EXTENDEDPRICE, L_DISCOUNT, L_SHIPDATE  {partitionsTotal=10336, partitionsAssigned=1571, bytesAssigned=26018068992}\n",
-  "query_id": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+  "query_id": "01c04bcf-0003-da04-0004-d66e035ee04a",
   "stats": [
     {
       "EXECUTION_TIME_BREAKDOWN": {
@@ -77,13 +77,14 @@ RAW RESULT:
         "input_rows": 1
       },
       "OPERATOR_TYPE": "Result",
-      "QUERY_ID": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+      "QUERY_ID": "01c04bcf-0003-da04-0004-d66e035ee04a",
       "STEP_ID": 1
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "overall_percentage": 4.301075268817205e-02,
-        "processing": 4.301075268817205e-02
+        "overall_percentage": 9.441233140655106e-02,
+        "processing": 8.863198458574181e-02,
+        "synchronization": 5.780346820809249e-03
       },
       "OPERATOR_ATTRIBUTES": {
         "functions": [
@@ -102,14 +103,13 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         0
       ],
-      "QUERY_ID": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+      "QUERY_ID": "01c04bcf-0003-da04-0004-d66e035ee04a",
       "STEP_ID": 1
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "overall_percentage": 3.763440860215054e-02,
-        "processing": 3.225806451612904e-02,
-        "synchronization": 5.376344086021506e-03
+        "overall_percentage": 3.082851637764933e-02,
+        "processing": 3.082851637764933e-02
       },
       "OPERATOR_ATTRIBUTES": {
         "filter_condition": "(LINEITEM.L_SHIPDATE >= '1994-01-01') AND (LINEITEM.L_SHIPDATE < '1995-01-01') AND (LINEITEM.L_DISCOUNT >= 0.05) AND (LINEITEM.L_DISCOUNT <= 0.07) AND (LINEITEM.L_QUANTITY < 24)"
@@ -126,16 +126,16 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         1
       ],
-      "QUERY_ID": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+      "QUERY_ID": "01c04bcf-0003-da04-0004-d66e035ee04a",
       "STEP_ID": 1
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "local_disk_io": 2.258064516129032e-01,
-        "overall_percentage": 8.790322580645161e-01,
-        "processing": 5.376344086021505e-01,
-        "remote_disk_io": 8.333333333333333e-02,
-        "synchronization": 3.225806451612903e-02
+        "local_disk_io": 1.156069364161850e-02,
+        "overall_percentage": 8.554913294797688e-01,
+        "processing": 4.990366088631984e-01,
+        "remote_disk_io": 3.294797687861272e-01,
+        "synchronization": 1.541425818882466e-02
       },
       "OPERATOR_ATTRIBUTES": {
         "columns": [
@@ -149,12 +149,12 @@ RAW RESULT:
       "OPERATOR_ID": 3,
       "OPERATOR_STATISTICS": {
         "io": {
-          "bytes_scanned": 4010077248,
-          "percentage_scanned_from_cache": 0.9908,
+          "bytes_scanned": 4020392496,
+          "percentage_scanned_from_cache": 0.7903,
           "scan_progress": 1
         },
         "network": {
-          "network_bytes": 1132181
+          "network_bytes": 946299
         },
         "output_rows": 114213142,
         "pruning": {
@@ -166,21 +166,21 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         2
       ],
-      "QUERY_ID": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+      "QUERY_ID": "01c04bcf-0003-da04-0004-d66e035ee04a",
       "STEP_ID": 1
     }
   ],
   "summary": {
-    "AUTHN_EVENT_ID": 1361667844038174,
+    "AUTHN_EVENT_ID": 1361667844256278,
     "BYTES_SCANNED": 0,
     "BYTES_WRITTEN_TO_RESULT": 41,
     "CLUSTER_NUMBER": 1,
-    "COMPILATION_TIME": 781,
-    "CREDITS_USED_CLOUD_SERVICES": 0.000122,
+    "COMPILATION_TIME": 486,
+    "CREDITS_USED_CLOUD_SERVICES": 0.000076,
     "DATABASE_NAME": "SNOWFLAKE_SAMPLE_DATA",
-    "END_TIME": "2025-10-22 07:37:23.539 -0700",
+    "END_TIME": "2025-11-10 02:55:54.749 -0800",
     "EXECUTION_STATUS": "SUCCESS",
-    "EXECUTION_TIME": 694,
+    "EXECUTION_TIME": 667,
     "EXTERNAL_FUNCTION_TOTAL_INVOCATIONS": 0,
     "EXTERNAL_FUNCTION_TOTAL_RECEIVED_BYTES": 0,
     "EXTERNAL_FUNCTION_TOTAL_RECEIVED_ROWS": 0,
@@ -196,7 +196,7 @@ RAW RESULT:
     "QUERY_ACCELERATION_UPPER_LIMIT_SCALE_FACTOR": 0,
     "QUERY_HASH": "1a896a63f044f934c407b5efc86c0676",
     "QUERY_HASH_VERSION": 2,
-    "QUERY_ID": "01bfe1cd-0003-b60d-0004-d66e0337193e",
+    "QUERY_ID": "01c04bcf-0003-da04-0004-d66e035ee04a",
     "QUERY_PARAMETERIZED_HASH": "14d08f64dae963a90a7322e1e6fd5f11",
     "QUERY_PARAMETERIZED_HASH_VERSION": 1,
     "QUERY_RETRY_TIME": 0,
@@ -206,15 +206,15 @@ RAW RESULT:
     "QUEUED_OVERLOAD_TIME": 0,
     "QUEUED_PROVISIONING_TIME": 0,
     "QUEUED_REPAIR_TIME": 0,
-    "RELEASE_VERSION": "9.33.1",
+    "RELEASE_VERSION": "9.35.2",
     "ROLE_NAME": "ACCOUNTADMIN",
     "ROWS_INSERTED": 0,
     "ROWS_PRODUCED": 1,
     "ROWS_WRITTEN_TO_RESULT": 1,
     "SCHEMA_NAME": "TPCH_SF1000",
-    "SESSION_ID": 1361667858898986,
-    "START_TIME": "2025-10-22 07:37:22.064 -0700",
-    "TOTAL_ELAPSED_TIME": 1475,
+    "SESSION_ID": 1361667860500502,
+    "START_TIME": "2025-11-10 02:55:53.596 -0800",
+    "TOTAL_ELAPSED_TIME": 1153,
     "TRANSACTION_BLOCKED_TIME": 0,
     "TRANSACTION_ID": 0,
     "USER_NAME": "YNIESTIEROV",
