@@ -273,6 +273,13 @@ def main(queries_dir, iterations, output_file, queries_to_run, timestamp, tpch_s
             # For other queries, save the full query plan
             save_query_plan(sf_cursor, query_num, query, output_dir, user_db, user_schema)
 
+        warehouse_name = os.environ.get("SNOWFLAKE_WAREHOUSE")
+        # Suspend and resume warehouse to clear cache for first iteration (cold run)
+        print('Suspending and resuming warehouse to clear cache...')
+        sf_cursor.execute(f"ALTER WAREHOUSE {warehouse_name} SUSPEND;")
+        sf_cursor.execute("SELECT SYSTEM$WAIT(3);")
+        sf_cursor.execute(f"ALTER WAREHOUSE {warehouse_name} RESUME;")
+
         # Run iterations for this query
         for i in range(iterations):
             print(f"  Iteration {i + 1}/{iterations}...", end=' ', flush=True)
