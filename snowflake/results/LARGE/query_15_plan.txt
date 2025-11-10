@@ -184,7 +184,7 @@ RAW RESULT:
     ]
   },
   "plan_text": "GlobalStats:\n\tbytesAssigned=13660660736\n\tpartitionsAssigned=844\n\tpartitionsTotal=20736\nOperations:\n1:0     ->Result  MAX(SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)))  \n1:1          ->Aggregate  aggExprs: [MAX(SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT)))]  \n1:2               ->Aggregate  aggExprs: [SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT))], groupKeys: [LINEITEM.L_SUPPKEY]  \n1:3                    ->Filter  (LINEITEM.L_SHIPDATE >= '1996-01-01') AND (LINEITEM.L_SHIPDATE < '1996-04-01')  \n1:4                         ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM  L_SUPPKEY, L_EXTENDEDPRICE, L_DISCOUNT, L_SHIPDATE  {partitionsTotal=10336, partitionsAssigned=390, bytesAssigned=6484795904}\n2:0     ->Result  SUPPLIER.S_SUPPKEY, SUPPLIER.S_NAME, SUPPLIER.S_ADDRESS, SUPPLIER.S_PHONE, SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT))  \n2:1          ->Sort  SUPPLIER.S_SUPPKEY ASC NULLS LAST  \n2:2               ->InnerJoin  joinKey: (LINEITEM.L_SUPPKEY = SUPPLIER.S_SUPPKEY)  \n2:3                    ->Filter  (SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT))) = Subquery(Step1)  \n2:4                         ->Aggregate  aggExprs: [SUM(LINEITEM.L_EXTENDEDPRICE * (1 - LINEITEM.L_DISCOUNT))], groupKeys: [LINEITEM.L_SUPPKEY]  \n2:5                              ->Filter  (LINEITEM.L_SHIPDATE >= '1996-01-01') AND (LINEITEM.L_SHIPDATE < '1996-04-01')  \n2:6                                   ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM  L_SUPPKEY, L_EXTENDEDPRICE, L_DISCOUNT, L_SHIPDATE  {partitionsTotal=10336, partitionsAssigned=390, bytesAssigned=6484795904}\n2:7                    ->JoinFilter  joinKey: (LINEITEM.L_SUPPKEY = SUPPLIER.S_SUPPKEY)  \n2:8                         ->TableScan  SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.SUPPLIER  S_SUPPKEY, S_NAME, S_ADDRESS, S_PHONE  {partitionsTotal=64, partitionsAssigned=64, bytesAssigned=691068928}\n",
-  "query_id": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+  "query_id": "01c04bd8-0003-d905-0004-d66e035ec44e",
   "stats": [
     {
       "EXECUTION_TIME_BREAKDOWN": {
@@ -200,13 +200,12 @@ RAW RESULT:
         "input_rows": 1
       },
       "OPERATOR_TYPE": "Result",
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 1
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "overall_percentage": 1.105527638190955e-02,
-        "processing": 1.105527638190955e-02
+        "overall_percentage": 0.000000000000000e+00
       },
       "OPERATOR_ATTRIBUTES": {
         "functions": [
@@ -225,15 +224,15 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         0
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 1
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "network_communication": 3.386934673366834e-01,
-        "overall_percentage": 8.030150753768844e-01,
-        "processing": 4.572864321608040e-01,
-        "synchronization": 7.035175879396985e-03
+        "network_communication": 1.343579573624194e-01,
+        "overall_percentage": 4.357957362419435e-01,
+        "processing": 2.930094199305900e-01,
+        "synchronization": 8.428358948934060e-03
       },
       "OPERATOR_ATTRIBUTES": {
         "functions": [
@@ -247,7 +246,7 @@ RAW RESULT:
       "OPERATOR_STATISTICS": {
         "input_rows": 226915737,
         "network": {
-          "network_bytes": 2482684
+          "network_bytes": 2483656
         },
         "output_rows": 10000000
       },
@@ -255,13 +254,13 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         1
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 1
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "overall_percentage": 1.005025125628141e-03,
-        "processing": 1.005025125628141e-03
+        "overall_percentage": 4.957858205255330e-03,
+        "processing": 4.957858205255330e-03
       },
       "OPERATOR_ATTRIBUTES": {
         "filter_condition": "(LINEITEM.L_SHIPDATE >= '1996-01-01') AND (LINEITEM.L_SHIPDATE < '1996-04-01')"
@@ -278,16 +277,16 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         2
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 1
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "local_disk_io": 1.407035175879397e-02,
-        "overall_percentage": 8.442211055276382e-02,
-        "processing": 2.512562814070352e-02,
-        "remote_disk_io": 4.422110552763819e-02,
-        "synchronization": 1.005025125628141e-03
+        "local_disk_io": 2.974714923153198e-03,
+        "overall_percentage": 5.195835399107586e-01,
+        "processing": 5.899851264253843e-02,
+        "remote_disk_io": 4.566187407040159e-01,
+        "synchronization": 9.915716410510659e-04
       },
       "OPERATOR_ATTRIBUTES": {
         "columns": [
@@ -301,12 +300,12 @@ RAW RESULT:
       "OPERATOR_ID": 4,
       "OPERATOR_STATISTICS": {
         "io": {
-          "bytes_scanned": 1511430192,
-          "percentage_scanned_from_cache": 0.934,
+          "bytes_scanned": 1548283392,
+          "percentage_scanned_from_cache": 0,
           "scan_progress": 1
         },
         "network": {
-          "network_bytes": 846367
+          "network_bytes": 898785
         },
         "output_rows": 226915737,
         "pruning": {
@@ -318,7 +317,7 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         3
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 1
     },
     {
@@ -342,7 +341,7 @@ RAW RESULT:
         }
       },
       "OPERATOR_TYPE": "Result",
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 2
     },
     {
@@ -366,13 +365,12 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         0
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 2
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "overall_percentage": 7.804878048780488e-03,
-        "processing": 7.804878048780488e-03
+        "overall_percentage": 0.000000000000000e+00
       },
       "OPERATOR_ATTRIBUTES": {
         "equality_join_condition": "(LINEITEM.L_SUPPKEY = SUPPLIER.S_SUPPKEY)",
@@ -390,7 +388,7 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         1
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 2
     },
     {
@@ -412,15 +410,15 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         2
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 2
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "network_communication": 3.590243902439025e-01,
-        "overall_percentage": 8.039024390243903e-01,
-        "processing": 4.302439024390244e-01,
-        "synchronization": 1.463414634146342e-02
+        "network_communication": 2.135021097046414e-01,
+        "overall_percentage": 6.624472573839663e-01,
+        "processing": 4.430379746835443e-01,
+        "synchronization": 5.907172995780591e-03
       },
       "OPERATOR_ATTRIBUTES": {
         "functions": [
@@ -434,7 +432,7 @@ RAW RESULT:
       "OPERATOR_STATISTICS": {
         "input_rows": 226915737,
         "network": {
-          "network_bytes": 2482684
+          "network_bytes": 2484304
         },
         "output_rows": 10000000
       },
@@ -442,13 +440,13 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         3
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 2
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "overall_percentage": 3.902439024390244e-03,
-        "processing": 3.902439024390244e-03
+        "overall_percentage": 6.751054852320675e-03,
+        "processing": 6.751054852320675e-03
       },
       "OPERATOR_ATTRIBUTES": {
         "filter_condition": "(LINEITEM.L_SHIPDATE >= '1996-01-01') AND (LINEITEM.L_SHIPDATE < '1996-04-01')"
@@ -465,16 +463,16 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         4
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 2
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "local_disk_io": 8.780487804878048e-03,
-        "network_communication": 1.951219512195122e-03,
-        "overall_percentage": 4.682926829268293e-02,
-        "processing": 3.414634146341463e-02,
-        "synchronization": 1.951219512195122e-03
+        "local_disk_io": 2.531645569620253e-03,
+        "overall_percentage": 2.362869198312236e-02,
+        "processing": 1.772151898734177e-02,
+        "remote_disk_io": 1.687763713080169e-03,
+        "synchronization": 1.687763713080169e-03
       },
       "OPERATOR_ATTRIBUTES": {
         "columns": [
@@ -488,12 +486,12 @@ RAW RESULT:
       "OPERATOR_ID": 6,
       "OPERATOR_STATISTICS": {
         "io": {
-          "bytes_scanned": 1509101568,
-          "percentage_scanned_from_cache": 1,
+          "bytes_scanned": 1509265568,
+          "percentage_scanned_from_cache": 0.9947,
           "scan_progress": 1
         },
         "network": {
-          "network_bytes": 848027
+          "network_bytes": 917709
         },
         "output_rows": 226915737,
         "pruning": {
@@ -505,12 +503,13 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         5
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 2
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "overall_percentage": 0.000000000000000e+00
+        "overall_percentage": 2.531645569620253e-03,
+        "processing": 2.531645569620253e-03
       },
       "OPERATOR_ATTRIBUTES": {
         "join_id": "2"
@@ -527,14 +526,15 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         2
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 2
     },
     {
       "EXECUTION_TIME_BREAKDOWN": {
-        "overall_percentage": 2.536585365853659e-02,
-        "processing": 1.170731707317073e-02,
-        "synchronization": 1.365853658536586e-02
+        "overall_percentage": 2.050632911392405e-01,
+        "processing": 8.438818565400844e-04,
+        "remote_disk_io": 5.232067510548524e-02,
+        "synchronization": 1.518987341772152e-01
       },
       "OPERATOR_ATTRIBUTES": {
         "columns": [
@@ -548,12 +548,12 @@ RAW RESULT:
       "OPERATOR_ID": 8,
       "OPERATOR_STATISTICS": {
         "io": {
-          "bytes_scanned": 34633408,
-          "percentage_scanned_from_cache": 1,
+          "bytes_scanned": 119808736,
+          "percentage_scanned_from_cache": 0,
           "scan_progress": 1
         },
         "network": {
-          "network_bytes": 962924
+          "network_bytes": 881584
         },
         "output_rows": 1,
         "pruning": {
@@ -565,21 +565,21 @@ RAW RESULT:
       "PARENT_OPERATORS": [
         7
       ],
-      "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+      "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
       "STEP_ID": 2
     }
   ],
   "summary": {
-    "AUTHN_EVENT_ID": 1361667844038174,
-    "BYTES_SCANNED": 13663221131,
+    "AUTHN_EVENT_ID": 1361667844256278,
+    "BYTES_SCANNED": 13659264688,
     "BYTES_WRITTEN_TO_RESULT": 89,
     "CLUSTER_NUMBER": 1,
-    "COMPILATION_TIME": 396,
-    "CREDITS_USED_CLOUD_SERVICES": 0.000064,
+    "COMPILATION_TIME": 1193,
+    "CREDITS_USED_CLOUD_SERVICES": 0.000186,
     "DATABASE_NAME": "BENCHMARK_DB_TPCDS_10",
-    "END_TIME": "2025-10-22 07:43:32.016 -0700",
+    "END_TIME": "2025-11-10 03:04:10.815 -0800",
     "EXECUTION_STATUS": "SUCCESS",
-    "EXECUTION_TIME": 2537,
+    "EXECUTION_TIME": 3560,
     "EXTERNAL_FUNCTION_TOTAL_INVOCATIONS": 0,
     "EXTERNAL_FUNCTION_TOTAL_RECEIVED_BYTES": 0,
     "EXTERNAL_FUNCTION_TOTAL_RECEIVED_ROWS": 0,
@@ -595,7 +595,7 @@ RAW RESULT:
     "QUERY_ACCELERATION_UPPER_LIMIT_SCALE_FACTOR": 0,
     "QUERY_HASH": "c50039868f49cfa72c6f959d5c35ae25",
     "QUERY_HASH_VERSION": 2,
-    "QUERY_ID": "01bfe1d3-0003-b606-0004-d66e0337a1c2",
+    "QUERY_ID": "01c04bd8-0003-d905-0004-d66e035ec44e",
     "QUERY_PARAMETERIZED_HASH": "c50039868f49cfa72c6f959d5c35ae25",
     "QUERY_PARAMETERIZED_HASH_VERSION": 1,
     "QUERY_RETRY_TIME": 0,
@@ -605,15 +605,15 @@ RAW RESULT:
     "QUEUED_OVERLOAD_TIME": 0,
     "QUEUED_PROVISIONING_TIME": 0,
     "QUEUED_REPAIR_TIME": 0,
-    "RELEASE_VERSION": "9.33.1",
+    "RELEASE_VERSION": "9.35.2",
     "ROLE_NAME": "ACCOUNTADMIN",
     "ROWS_INSERTED": 0,
     "ROWS_PRODUCED": 2,
     "ROWS_WRITTEN_TO_RESULT": 1,
     "SCHEMA_NAME": "BENCHMARK_SHEMA_10",
-    "SESSION_ID": 1361667858898986,
-    "START_TIME": "2025-10-22 07:43:29.083 -0700",
-    "TOTAL_ELAPSED_TIME": 2933,
+    "SESSION_ID": 1361667860500502,
+    "START_TIME": "2025-11-10 03:04:06.062 -0800",
+    "TOTAL_ELAPSED_TIME": 4753,
     "TRANSACTION_BLOCKED_TIME": 0,
     "TRANSACTION_ID": 0,
     "USER_NAME": "YNIESTIEROV",
