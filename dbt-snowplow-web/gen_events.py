@@ -13,6 +13,19 @@ import json
 import os
 import sys
 
+CONSENT_VERSION_CONFIG = {
+    '1.0': {
+        'allow_all_scopes': ['necessary', 'preferences', 'statistics', 'marketing'],
+        'consent_url': 'https://www.example.com/consent-v1',
+        'domains_applied': ['https://www.example.com/'],
+    },
+    '2.0': {
+        'allow_all_scopes': ['necessary', 'preferences', 'statistics', 'marketing'],
+        'consent_url': 'https://www.example.com/consent-v2',
+        'domains_applied': ['https://www.example.com/'],
+    },
+}
+
 def generate_event_data(target_date, num_events=1000, mobile_percentage=50, time_offset_hours=0, consent_version_preference=None):
     """Generate sample Snowplow event data for a specific date.
 
@@ -540,35 +553,36 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50, time
             ])
             consent_event_type = random.choice(['allow_all', 'allow_selected', 'deny_all'])
             
-            # Randomly choose consent version based on preference
+            # Randomly choose consent version, skewing toward preference while keeping a mix
             if consent_version_preference == '1.0':
-                # Always use 1.0 for yesterday's data to avoid duplicates
-                consent_version = '1.0'
+                consent_version = random.choices(['1.0', '2.0'], weights=[0.75, 0.25])[0]
             elif consent_version_preference == '2.0':
-                # Always use 2.0 for today's data to avoid duplicates
-                consent_version = '2.0'
+                consent_version = random.choices(['1.0', '2.0'], weights=[0.25, 0.75])[0]
             else:
-                # Default: more likely to be 2.0
-                consent_version = random.choice(['1.0', '2.0', '2.0', '2.0'])
+                consent_version = random.choices(['1.0', '2.0'], weights=[0.25, 0.75])[0]
             
             # Extract base domain from page_url for domains_applied
             parsed_url = urlparse(page_url)
             base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}/"
-            
-            # Add version suffix to consent_url to ensure uniqueness across runs
-            # This prevents duplicate combinations when same consent_version appears
-            if consent_version_preference == '2.0':
-                # For today's events, add version suffix to make URL unique
-                consent_url = f"{page_url}?v={consent_version}"
-            else:
-                consent_url = page_url
+
+            consent_config = CONSENT_VERSION_CONFIG.get(consent_version, {})
+
+            # Default values before applying configuration overrides
+            consent_url = consent_config.get('consent_url', page_url)
+            domains_applied = consent_config.get('domains_applied', [base_domain])
+
+            # Keep allow_all events aligned with the configured CMP definition so the version table stays unique
+            if consent_event_type == 'allow_all':
+                consent_scopes = consent_config.get('allow_all_scopes', consent_scopes)
+                consent_url = consent_config.get('consent_url', consent_url)
+                domains_applied = consent_config.get('domains_applied', domains_applied)
             
             consent_preferences = {
                 'basisForProcessing': 'consent',
                 'consentScopes': consent_scopes,
                 'consentUrl': consent_url,
                 'consentVersion': consent_version,
-                'domainsApplied': [base_domain],
+                'domainsApplied': domains_applied,
                 'eventType': consent_event_type,
                 'gdprApplies': random.choice([True, False])
             }
