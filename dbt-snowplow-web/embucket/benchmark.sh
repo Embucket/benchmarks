@@ -116,6 +116,7 @@ source .env
 set +a
 # Use virtual environment's Python which has snowflake-connector-python
 env/bin/python3 ../enrich_run_results.py \
+  --provider embucket \
   --manifest dbt-snowplow-web/target/manifest.json \
   --run-results run_results_first_run.json \
   --output run_results_first_run_enriched.json

@@ -8,11 +8,25 @@ import csv
 import uuid
 import random
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 import json
 import os
 import sys
 
-def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
+CONSENT_VERSION_CONFIG = {
+    '1.0': {
+        'allow_all_scopes': ['necessary', 'preferences', 'statistics', 'marketing'],
+        'consent_url': 'https://www.example.com/consent-v1',
+        'domains_applied': ['https://www.example.com/'],
+    },
+    '2.0': {
+        'allow_all_scopes': ['necessary', 'preferences', 'statistics', 'marketing'],
+        'consent_url': 'https://www.example.com/consent-v2',
+        'domains_applied': ['https://www.example.com/'],
+    },
+}
+
+def generate_event_data(target_date, num_events=1000, mobile_percentage=50, time_offset_hours=0, consent_version_preference=None):
     """Generate sample Snowplow event data for a specific date.
 
     For each page view, generates:
@@ -23,6 +37,8 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
         target_date: Date for the events
         num_events: Number of page views to generate
         mobile_percentage: Percentage of events that should be mobile (0-100)
+        time_offset_hours: Hours to add to all timestamps (useful for ensuring today's events are after yesterday's)
+        consent_version_preference: If '1.0' or '2.0', use that version more often. If None, use random distribution.
     """
 
     # Sample data for variety
@@ -64,6 +80,9 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
         base_time = datetime.combine(target_date, datetime.min.time().replace(hour=hour, minute=minute, second=second))
         # Add milliseconds for compatibility with dbt models
         base_time = base_time.replace(microsecond=random.randint(0, 999999))
+        # Add time offset if specified (ensures today's events have later timestamps)
+        if time_offset_hours > 0:
+            base_time = base_time + timedelta(hours=time_offset_hours)
 
         # Generate event data
         user_id = str(uuid.uuid4())
@@ -97,17 +116,124 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
         # Use the same page_view_id for all events related to this page view
         web_page_context = [{'id': page_view_id}]
         iab_context = [{'category': 'BROWSER', 'spiderOrRobot': False}]
-        yauaa_context = [{'agentClass': 'Browser', 'deviceClass': 'Phone' if 'Mobile' in user_agent else 'Desktop'}]
         
-        # Generate web vitals
+        # Generate rich YAUAA context based on user agent
+        is_mobile_device = 'Mobile' in user_agent or 'iPhone' in user_agent or 'Android' in user_agent
+        is_chrome = 'Chrome' in user_agent
+        is_safari = 'Safari' in user_agent and 'Chrome' not in user_agent
+        is_firefox = 'Firefox' in user_agent
+        
+        # Determine browser name and version
+        if is_chrome:
+            browser_name = 'Chrome'
+            browser_version = random.choice(['109', '110', '111', '112', '113', '114', '115'])
+        elif is_safari:
+            browser_name = 'Safari'
+            browser_version = random.choice(['14', '15', '16', '17'])
+        elif is_firefox:
+            browser_name = 'Firefox'
+            browser_version = random.choice(['89', '90', '91', '92'])
+        else:
+            browser_name = 'Chrome'
+            browser_version = '109'
+        
+        # Determine device and OS information
+        if 'iPhone' in user_agent:
+            device_brand = 'Apple'
+            device_name = 'iPhone'
+            device_class = 'Phone'
+            os_name = 'iOS'
+            os_version = random.choice(['14.6', '15.0', '15.1', '16.0'])
+            os_version_major = os_version.split('.')[0]
+            device_cpu = 'ARM'
+        elif 'Android' in user_agent:
+            device_brand = random.choice(['Samsung', 'Google', 'Huawei', 'Xiaomi'])
+            device_name = random.choice(['Galaxy S21', 'Pixel 6', 'Nexus 6', 'Mi 11'])
+            device_class = 'Phone'
+            os_name = 'Android'
+            os_version = random.choice(['11', '12', '13'])
+            os_version_major = os_version
+            device_cpu = 'ARM'
+        elif 'Macintosh' in user_agent:
+            device_brand = 'Apple'
+            device_name = 'AppleMacintosh'
+            device_class = 'Desktop'
+            os_name = 'MacOS'
+            os_version = random.choice(['10.15.7', '11.0', '12.0', '13.0'])
+            os_version_major = os_version.split('.')[0] if '.' in os_version else os_version
+            device_cpu = 'Intel'
+        elif 'Windows' in user_agent:
+            device_brand = random.choice(['Dell', 'HP', 'Lenovo', 'Microsoft'])
+            device_name = 'WindowsPC'
+            device_class = 'Desktop'
+            os_name = 'Windows'
+            os_version = random.choice(['10', '11'])
+            os_version_major = os_version
+            device_cpu = 'Intel'
+        else:
+            device_brand = 'Unknown'
+            device_name = 'Unknown'
+            device_class = 'Desktop' if not is_mobile_device else 'Phone'
+            os_name = 'Unknown'
+            os_version = '??'
+            os_version_major = '??'
+            device_cpu = 'Unknown'
+        
+        # Layout engine (Blink for Chrome, WebKit for Safari)
+        if is_chrome or is_firefox:
+            layout_engine = 'Blink'
+            layout_engine_version = browser_version
+        elif is_safari:
+            layout_engine = 'WebKit'
+            layout_engine_version = browser_version
+        else:
+            layout_engine = 'Blink'
+            layout_engine_version = browser_version
+        
+        # Build YAUAA context with all fields
+        yauaa_context = [{
+            'agentClass': 'Browser',
+            'agentInformationEmail': 'Unknown',
+            'agentName': browser_name,
+            'agentNameVersion': f'{browser_name}{browser_version}',
+            'agentNameVersionMajor': f'{browser_name}{browser_version}',
+            'agentVersion': browser_version,
+            'agentVersionMajor': browser_version,
+            'deviceBrand': device_brand,
+            'deviceClass': device_class,
+            'deviceCpu': device_cpu,
+            'deviceCpuBits': '64' if device_class == 'Desktop' else '32',
+            'deviceName': device_name,
+            'deviceVersion': 'Demo',
+            'layoutEngineClass': 'Browser',
+            'layoutEngineName': layout_engine,
+            'layoutEngineNameVersion': f'{layout_engine}{layout_engine_version}',
+            'layoutEngineNameVersionMajor': f'{layout_engine}{layout_engine_version}',
+            'layoutEngineVersion': layout_engine_version,
+            'layoutEngineVersionMajor': layout_engine_version,
+            'networkType': 'Unknown',
+            'operatingSystemClass': device_class,
+            'operatingSystemName': os_name,
+            'operatingSystemNameVersion': f'{os_name}>={os_version}' if os_name != 'Unknown' else '??',
+            'operatingSystemNameVersionMajor': f'{os_name}>={os_version_major}' if os_name != 'Unknown' else '??',
+            'operatingSystemVersion': f'>={os_version}' if os_name != 'Unknown' else '??',
+            'operatingSystemVersionBuild': '??',
+            'operatingSystemVersionMajor': f'>={os_version_major}' if os_name != 'Unknown' else '??',
+            'webviewAppName': 'Unknown',
+            'webviewAppNameVersionMajor': '??',
+            'webviewAppVersion': '??',
+            'webviewAppVersionMajor': '??'
+        }]
+        
+        # Generate web vitals (following SNOWPLOW_DATA_GUIDE.md)
         web_vitals = [{
-            'cls': round(random.uniform(0.01, 0.1), 3),
-            'fcp': random.randint(100, 500),
-            'fid': random.randint(10, 100),
-            'inp': random.randint(10, 100),
-            'lcp': random.randint(1000, 3000),
-            'navigation_type': 'navigate',
-            'ttfb': random.randint(50, 300)
+            'cls': round(random.uniform(0.0, 0.25), 3),  # Cumulative Layout Shift (0-1, typically 0-0.25 for good pages)
+            'fcp': random.randint(500, 3000),  # First Contentful Paint (ms)
+            'fid': random.randint(1, 300),  # First Input Delay (ms)
+            'inp': random.randint(1, 300),  # Interaction to Next Paint (ms)
+            'lcp': random.randint(1000, 4000),  # Largest Contentful Paint (ms)
+            'navigation_type': 'navigate',  # Navigation type
+            'ttfb': random.randint(50, 500)  # Time to First Byte (ms)
         }]
 
         # Create page_view event
@@ -240,8 +366,508 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
             '1-0-0',  # event_version
             str(uuid.uuid4()),  # event_fingerprint
             '',  # true_tstamp
-            '',  # load_tstamp
+            etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # load_tstamp
             json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1
+            '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
+            '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
+            json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
+            json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
+            json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
+            ''  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1 (web_vitals is a separate event)
+        ]
+
+        events.append(page_view_event)
+
+        # Generate cmp_visible event for some sessions (typically early in session, before consent)
+        # CMP visible events occur 35% of the time, right after page_view
+        if random.randint(1, 100) <= 35:
+            cmp_delay_ms = random.randint(50, 300)  # CMP banner appears shortly after page_view
+            cmp_time = base_time + timedelta(microseconds=cmp_delay_ms * 1000)
+            cmp_collector_tstamp = cmp_time
+            cmp_dvce_created_tstamp = cmp_time - timedelta(microseconds=random.randint(1, 20) * 1000)
+            cmp_etl_tstamp = cmp_time + timedelta(microseconds=random.randint(1, 20) * 1000)
+            cmp_event_id = str(uuid.uuid4())
+            
+            # Generate CMP visible data (simple structure with elapsedTime as float)
+            cmp_visible = {
+                'elapsedTime': round(random.uniform(0.5, 3.0), 1)
+            }
+            
+            cmp_event = [
+                'default',  # app_id
+                'web',      # platform
+                cmp_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # etl_tstamp
+                cmp_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # collector_tstamp
+                cmp_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_created_tstamp
+                'unstruct',  # event - unstruct for cmp_visible
+                cmp_event_id,  # event_id
+                '',  # txn_id
+                'eng.gcp-dev1',  # name_tracker
+                'js-2.17.2',  # v_tracker
+                'ssc-2.1.2-googlepubsub',  # v_collector
+                'beam-enrich-1.4.2-rc1-common-1.4.2-rc1',  # v_etl
+                user_id,  # user_id (same as page_view)
+                '',  # user_ipaddress
+                str(uuid.uuid4()),  # user_fingerprint
+                domain_userid,  # domain_userid (same as page_view)
+                '1',  # domain_sessionidx
+                network_userid,  # network_userid (same as page_view)
+                country,  # geo_country
+                '',  # geo_region
+                city,  # geo_city
+                '',  # geo_zipcode
+                str(random.uniform(-90, 90)),  # geo_latitude
+                str(random.uniform(-180, 180)),  # geo_longitude
+                '',  # geo_region_name
+                '',  # ip_isp
+                '',  # ip_organization
+                '',  # ip_domain
+                '',  # ip_netspeed
+                page_url,  # page_url (same as page_view)
+                'Sample Page',  # page_title
+                'https://www.google.com/',  # page_referrer
+                'https',  # page_urlscheme
+                'example.com',  # page_urlhost
+                '443',  # page_urlport
+                '/',  # page_urlpath
+                '',  # page_urlquery
+                '',  # page_urlfragment
+                'https',  # refr_urlscheme
+                'www.google.com',  # refr_urlhost
+                '443',  # refr_urlport
+                '/',  # refr_urlpath
+                '',  # refr_urlquery
+                '',  # refr_urllfragment
+                'search',  # refr_medium
+                'Google',  # refr_source
+                '',  # refr_term
+                '',  # mkt_medium
+                '',  # mkt_source
+                '',  # mkt_term
+                '',  # mkt_content
+                '',  # mkt_campaign
+                '',  # se_category
+                '',  # se_action
+                '',  # se_label
+                '',  # se_property
+                '',  # se_value
+                '',  # tr_orderid
+                '',  # tr_affiliation
+                '',  # tr_total
+                '',  # tr_tax
+                '',  # tr_shipping
+                '',  # tr_city
+                '',  # tr_state
+                '',  # tr_country
+                '',  # ti_orderid
+                '',  # ti_sku
+                '',  # ti_name
+                '',  # ti_category
+                '',  # ti_price
+                '',  # ti_quantity
+                '',  # pp_xoffset_min
+                '',  # pp_xoffset_max
+                '',  # pp_yoffset_min
+                '',  # pp_yoffset_max
+                user_agent,  # useragent
+                '',  # br_name
+                '',  # br_family
+                '',  # br_version
+                '',  # br_type
+                '',  # br_renderengine
+                'en-US',  # br_lang
+                '',  # br_features_pdf
+                '',  # br_features_flash
+                '',  # br_features_java
+                '',  # br_features_director
+                '',  # br_features_quicktime
+                '',  # br_features_realplayer
+                '',  # br_features_windowsmedia
+                '',  # br_features_gears
+                '',  # br_features_silverlight
+                'TRUE',  # br_cookies
+                '24',  # br_colordepth
+                str(random.randint(800, 1920)),  # br_viewwidth
+                str(random.randint(600, 1080)),  # br_viewheight
+                '',  # os_name
+                '',  # os_family
+                '',  # os_manufacturer
+                'America/New_York',  # os_timezone
+                '',  # dvce_type
+                'TRUE' if 'Mobile' in user_agent else 'FALSE',  # dvce_ismobile
+                str(random.randint(320, 1920)),  # dvce_screenwidth
+                str(random.randint(568, 1080)),  # dvce_screenheight
+                'UTF-8',  # doc_charset
+                str(random.randint(800, 1920)),  # doc_width
+                str(random.randint(600, 1080)),  # doc_height
+                '',  # tr_currency
+                '',  # tr_total_base
+                '',  # tr_tax_base
+                '',  # tr_shipping_base
+                '',  # ti_currency
+                '',  # ti_price_base
+                '',  # base_currency
+                'America/New_York',  # geo_timezone
+                '',  # mkt_clickid
+                '',  # mkt_network
+                '',  # etl_tags
+                cmp_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_sent_tstamp
+                '',  # refr_domain_userid
+                '',  # refr_dvce_tstamp
+                domain_sessionid,  # domain_sessionid (same as page_view)
+                cmp_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # derived_tstamp
+                'com.snowplowanalytics.snowplow',  # event_vendor
+                'cmp_visible',  # event_name - cmp_visible for unstruct event
+                'jsonschema',  # event_format
+                '1-0-0',  # event_version
+                str(uuid.uuid4()),  # event_fingerprint
+                '',  # true_tstamp
+                cmp_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # load_tstamp
+                json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
+                '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
+                json.dumps(cmp_visible),  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
+                json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
+                json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
+                json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
+                ''  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1
+            ]
+            
+            events.append(cmp_event)
+
+        # Generate consent_preferences event for some sessions (typically early in session)
+        # Consent events occur 30% of the time, right after page_view
+        if random.randint(1, 100) <= 30:
+            consent_delay_ms = random.randint(100, 500)  # Consent happens shortly after page_view
+            consent_time = base_time + timedelta(microseconds=consent_delay_ms * 1000)
+            consent_collector_tstamp = consent_time
+            consent_dvce_created_tstamp = consent_time - timedelta(microseconds=random.randint(1, 20) * 1000)
+            consent_etl_tstamp = consent_time + timedelta(microseconds=random.randint(1, 20) * 1000)
+            consent_event_id = str(uuid.uuid4())
+            
+            # Generate consent preferences data
+            consent_scopes = random.choice([
+                ['necessary'],
+                ['necessary', 'preferences'],
+                ['necessary', 'preferences', 'statistics'],
+                ['necessary', 'preferences', 'statistics', 'marketing']
+            ])
+            consent_event_type = random.choice(['allow_all', 'allow_selected', 'deny_all'])
+            
+            # Randomly choose consent version, skewing toward preference while keeping a mix
+            if consent_version_preference == '1.0':
+                consent_version = random.choices(['1.0', '2.0'], weights=[0.75, 0.25])[0]
+            elif consent_version_preference == '2.0':
+                consent_version = random.choices(['1.0', '2.0'], weights=[0.25, 0.75])[0]
+            else:
+                consent_version = random.choices(['1.0', '2.0'], weights=[0.25, 0.75])[0]
+            
+            # Extract base domain from page_url for domains_applied
+            parsed_url = urlparse(page_url)
+            base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}/"
+
+            consent_config = CONSENT_VERSION_CONFIG.get(consent_version, {})
+
+            # Default values before applying configuration overrides
+            consent_url = consent_config.get('consent_url', page_url)
+            domains_applied = consent_config.get('domains_applied', [base_domain])
+
+            # Keep allow_all events aligned with the configured CMP definition so the version table stays unique
+            if consent_event_type == 'allow_all':
+                consent_scopes = consent_config.get('allow_all_scopes', consent_scopes)
+                consent_url = consent_config.get('consent_url', consent_url)
+                domains_applied = consent_config.get('domains_applied', domains_applied)
+            
+            consent_preferences = {
+                'basisForProcessing': 'consent',
+                'consentScopes': consent_scopes,
+                'consentUrl': consent_url,
+                'consentVersion': consent_version,
+                'domainsApplied': domains_applied,
+                'eventType': consent_event_type,
+                'gdprApplies': random.choice([True, False])
+            }
+            
+            consent_event = [
+                'default',  # app_id
+                'web',      # platform
+                consent_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # etl_tstamp
+                consent_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # collector_tstamp
+                consent_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_created_tstamp
+                'unstruct',  # event - unstruct for consent_preferences
+                consent_event_id,  # event_id
+                '',  # txn_id
+                'eng.gcp-dev1',  # name_tracker
+                'js-2.17.2',  # v_tracker
+                'ssc-2.1.2-googlepubsub',  # v_collector
+                'beam-enrich-1.4.2-rc1-common-1.4.2-rc1',  # v_etl
+                user_id,  # user_id (same as page_view)
+                '',  # user_ipaddress
+                str(uuid.uuid4()),  # user_fingerprint
+                domain_userid,  # domain_userid (same as page_view)
+                '1',  # domain_sessionidx
+                network_userid,  # network_userid (same as page_view)
+                country,  # geo_country
+                '',  # geo_region
+                city,  # geo_city
+                '',  # geo_zipcode
+                str(random.uniform(-90, 90)),  # geo_latitude
+                str(random.uniform(-180, 180)),  # geo_longitude
+                '',  # geo_region_name
+                '',  # ip_isp
+                '',  # ip_organization
+                '',  # ip_domain
+                '',  # ip_netspeed
+                page_url,  # page_url (same as page_view)
+                'Sample Page',  # page_title
+                'https://www.google.com/',  # page_referrer
+                'https',  # page_urlscheme
+                'example.com',  # page_urlhost
+                '443',  # page_urlport
+                '/',  # page_urlpath
+                '',  # page_urlquery
+                '',  # page_urlfragment
+                'https',  # refr_urlscheme
+                'www.google.com',  # refr_urlhost
+                '443',  # refr_urlport
+                '/',  # refr_urlpath
+                '',  # refr_urlquery
+                '',  # refr_urllfragment
+                'search',  # refr_medium
+                'Google',  # refr_source
+                '',  # refr_term
+                '',  # mkt_medium
+                '',  # mkt_source
+                '',  # mkt_term
+                '',  # mkt_content
+                '',  # mkt_campaign
+                '',  # se_category
+                '',  # se_action
+                '',  # se_label
+                '',  # se_property
+                '',  # se_value
+                '',  # tr_orderid
+                '',  # tr_affiliation
+                '',  # tr_total
+                '',  # tr_tax
+                '',  # tr_shipping
+                '',  # tr_city
+                '',  # tr_state
+                '',  # tr_country
+                '',  # ti_orderid
+                '',  # ti_sku
+                '',  # ti_name
+                '',  # ti_category
+                '',  # ti_price
+                '',  # ti_quantity
+                '',  # pp_xoffset_min
+                '',  # pp_xoffset_max
+                '',  # pp_yoffset_min
+                '',  # pp_yoffset_max
+                user_agent,  # useragent
+                '',  # br_name
+                '',  # br_family
+                '',  # br_version
+                '',  # br_type
+                '',  # br_renderengine
+                'en-US',  # br_lang
+                '',  # br_features_pdf
+                '',  # br_features_flash
+                '',  # br_features_java
+                '',  # br_features_director
+                '',  # br_features_quicktime
+                '',  # br_features_realplayer
+                '',  # br_features_windowsmedia
+                '',  # br_features_gears
+                '',  # br_features_silverlight
+                'TRUE',  # br_cookies
+                '24',  # br_colordepth
+                str(random.randint(800, 1920)),  # br_viewwidth
+                str(random.randint(600, 1080)),  # br_viewheight
+                '',  # os_name
+                '',  # os_family
+                '',  # os_manufacturer
+                'America/New_York',  # os_timezone
+                '',  # dvce_type
+                'TRUE' if 'Mobile' in user_agent else 'FALSE',  # dvce_ismobile
+                str(random.randint(320, 1920)),  # dvce_screenwidth
+                str(random.randint(568, 1080)),  # dvce_screenheight
+                'UTF-8',  # doc_charset
+                str(random.randint(800, 1920)),  # doc_width
+                str(random.randint(600, 1080)),  # doc_height
+                '',  # tr_currency
+                '',  # tr_total_base
+                '',  # tr_tax_base
+                '',  # tr_shipping_base
+                '',  # ti_currency
+                '',  # ti_price_base
+                '',  # base_currency
+                'America/New_York',  # geo_timezone
+                '',  # mkt_clickid
+                '',  # mkt_network
+                '',  # etl_tags
+                consent_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_sent_tstamp
+                '',  # refr_domain_userid
+                '',  # refr_dvce_tstamp
+                domain_sessionid,  # domain_sessionid (same as page_view)
+                consent_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # derived_tstamp
+                'com.snowplowanalytics.snowplow',  # event_vendor
+                'consent_preferences',  # event_name - consent_preferences for unstruct event
+                'jsonschema',  # event_format
+                '1-0-0',  # event_version
+                str(uuid.uuid4()),  # event_fingerprint
+                '',  # true_tstamp
+                consent_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # load_tstamp
+                json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
+                json.dumps(consent_preferences),  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
+                '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
+                json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
+                json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
+                json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
+                ''  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1
+            ]
+            
+            events.append(consent_event)
+
+        # Generate web_vitals event as separate unstruct event
+        # Web vitals occur 100-2000ms after page_view (measures page load performance)
+        vitals_delay_ms = random.randint(100, 2000)
+        vitals_time = base_time + timedelta(microseconds=vitals_delay_ms * 1000)
+        vitals_collector_tstamp = vitals_time
+        vitals_dvce_created_tstamp = vitals_time - timedelta(microseconds=random.randint(1, 50) * 1000)
+        vitals_etl_tstamp = vitals_time + timedelta(microseconds=random.randint(1, 50) * 1000)
+        vitals_event_id = str(uuid.uuid4())
+
+        web_vitals_event = [
+            'default',  # app_id
+            'web',      # platform
+            vitals_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # etl_tstamp
+            vitals_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # collector_tstamp
+            vitals_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_created_tstamp
+            'unstruct',  # event - unstruct for web_vitals
+            vitals_event_id,  # event_id
+            '',  # txn_id
+            'eng.gcp-dev1',  # name_tracker
+            'js-2.17.2',  # v_tracker
+            'ssc-2.1.2-googlepubsub',  # v_collector
+            'beam-enrich-1.4.2-rc1-common-1.4.2-rc1',  # v_etl
+            user_id,  # user_id (same as page_view)
+            '',  # user_ipaddress
+            str(uuid.uuid4()),  # user_fingerprint
+            domain_userid,  # domain_userid (same as page_view)
+            '1',  # domain_sessionidx
+            network_userid,  # network_userid (same as page_view)
+            country,  # geo_country
+            '',  # geo_region
+            city,  # geo_city
+            '',  # geo_zipcode
+            str(random.uniform(-90, 90)),  # geo_latitude
+            str(random.uniform(-180, 180)),  # geo_longitude
+            '',  # geo_region_name
+            '',  # ip_isp
+            '',  # ip_organization
+            '',  # ip_domain
+            '',  # ip_netspeed
+            page_url,  # page_url (same as page_view)
+            'Sample Page',  # page_title
+            'https://www.google.com/',  # page_referrer
+            'https',  # page_urlscheme
+            'example.com',  # page_urlhost
+            '443',  # page_urlport
+            '/',  # page_urlpath
+            '',  # page_urlquery
+            '',  # page_urlfragment
+            'https',  # refr_urlscheme
+            'www.google.com',  # refr_urlhost
+            '443',  # refr_urlport
+            '/',  # refr_urlpath
+            '',  # refr_urlquery
+            '',  # refr_urllfragment
+            'search',  # refr_medium
+            'Google',  # refr_source
+            '',  # refr_term
+            '',  # mkt_medium
+            '',  # mkt_source
+            '',  # mkt_term
+            '',  # mkt_content
+            '',  # mkt_campaign
+            '',  # se_category
+            '',  # se_action
+            '',  # se_label
+            '',  # se_property
+            '',  # se_value
+            '',  # tr_orderid
+            '',  # tr_affiliation
+            '',  # tr_total
+            '',  # tr_tax
+            '',  # tr_shipping
+            '',  # tr_city
+            '',  # tr_state
+            '',  # tr_country
+            '',  # ti_orderid
+            '',  # ti_sku
+            '',  # ti_name
+            '',  # ti_category
+            '',  # ti_price
+            '',  # ti_quantity
+            '',  # pp_xoffset_min
+            '',  # pp_xoffset_max
+            '',  # pp_yoffset_min
+            '',  # pp_yoffset_max
+            user_agent,  # useragent
+            '',  # br_name
+            '',  # br_family
+            '',  # br_version
+            '',  # br_type
+            '',  # br_renderengine
+            'en-US',  # br_lang
+            '',  # br_features_pdf
+            '',  # br_features_flash
+            '',  # br_features_java
+            '',  # br_features_director
+            '',  # br_features_quicktime
+            '',  # br_features_realplayer
+            '',  # br_features_windowsmedia
+            '',  # br_features_gears
+            '',  # br_features_silverlight
+            'TRUE',  # br_cookies
+            '24',  # br_colordepth
+            str(random.randint(800, 1920)),  # br_viewwidth
+            str(random.randint(600, 1080)),  # br_viewheight
+            '',  # os_name
+            '',  # os_family
+            '',  # os_manufacturer
+            'America/New_York',  # os_timezone
+            '',  # dvce_type
+            'TRUE' if 'Mobile' in user_agent else 'FALSE',  # dvce_ismobile
+            str(random.randint(320, 1920)),  # dvce_screenwidth
+            str(random.randint(568, 1080)),  # dvce_screenheight
+            'UTF-8',  # doc_charset
+            str(random.randint(800, 1920)),  # doc_width
+            str(random.randint(600, 1080)),  # doc_height
+            '',  # tr_currency
+            '',  # tr_total_base
+            '',  # tr_tax_base
+            '',  # tr_shipping_base
+            '',  # ti_currency
+            '',  # ti_price_base
+            '',  # base_currency
+            'America/New_York',  # geo_timezone
+            '',  # mkt_clickid
+            '',  # mkt_network
+            '',  # etl_tags
+            vitals_dvce_created_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # dvce_sent_tstamp
+            '',  # refr_domain_userid
+            '',  # refr_dvce_tstamp
+            domain_sessionid,  # domain_sessionid (same as page_view)
+            vitals_collector_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # derived_tstamp
+            'com.snowplowanalytics.snowplow',  # event_vendor
+            'web_vitals',  # event_name - web_vitals for unstruct event
+            'jsonschema',  # event_format
+            '1-0-0',  # event_version
+                str(uuid.uuid4()),  # event_fingerprint
+                '',  # true_tstamp
+                vitals_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # load_tstamp
+            json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
             '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
             '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
             json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
@@ -250,7 +876,7 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
             json.dumps(web_vitals)  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1
         ]
 
-        events.append(page_view_event)
+        events.append(web_vitals_event)
 
         # Generate page_ping events for engagement tracking
         # Snowplow sends page_ping every 10 seconds by default (heartbeat)
@@ -392,16 +1018,16 @@ def generate_event_data(target_date, num_events=1000, mobile_percentage=50):
                 'page_ping',  # event_name - page_ping for engagement
                 'jsonschema',  # event_format
                 '1-0-0',  # event_version
-                str(uuid.uuid4()),  # event_fingerprint
-                '',  # true_tstamp
-                '',  # load_tstamp
-                json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
-                '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
-                '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
-                json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
-                json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
-                json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
-                ''  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1 (no web vitals for pings)
+            str(uuid.uuid4()),  # event_fingerprint
+            '',  # true_tstamp
+            ping_etl_tstamp.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3],  # load_tstamp
+            json.dumps(web_page_context),  # contexts_com_snowplowanalytics_snowplow_web_page_1 (SAME page_view_id!)
+            '',  # unstruct_event_com_snowplowanalytics_snowplow_consent_preferences_1
+            '',  # unstruct_event_com_snowplowanalytics_snowplow_cmp_visible_1
+            json.dumps(iab_context),  # contexts_com_iab_snowplow_spiders_and_robots_1
+            json.dumps(ua_context),  # contexts_com_snowplowanalytics_snowplow_ua_parser_context_1
+            json.dumps(yauaa_context),  # contexts_nl_basjes_yauaa_context_1
+            ''  # unstruct_event_com_snowplowanalytics_snowplow_web_vitals_1 (no web vitals for pings)
             ]
 
             events.append(page_ping_event)
@@ -441,7 +1067,7 @@ def write_events_csv(filename, events):
     file_size = os.path.getsize(filename) / (1024 * 1024)  # Size in MB
     print(f"Generated {len(events)} events in {filename} ({file_size:.2f} MB)")
 
-def generate_events_by_size(filename, target_date, target_size_gb, mobile_percentage=50):
+def generate_events_by_size(filename, target_date, target_size_gb, mobile_percentage=50, time_offset_hours=0, consent_version_preference=None):
     """
     Generate events to reach a target file size in GB.
 
@@ -450,6 +1076,7 @@ def generate_events_by_size(filename, target_date, target_size_gb, mobile_percen
         target_date: Date for the events
         target_size_gb: Target file size in GB
         mobile_percentage: Percentage of events that should be mobile (0-100)
+        time_offset_hours: Hours to add to all timestamps (useful for ensuring today's events are after yesterday's)
 
     Returns:
         List of generated events
@@ -459,7 +1086,7 @@ def generate_events_by_size(filename, target_date, target_size_gb, mobile_percen
 
     # Generate a small sample to estimate row size
     # Note: generate_event_data returns ALL events (page_view + page_pings)
-    sample_events = generate_event_data(target_date, num_events=100, mobile_percentage=mobile_percentage)
+    sample_events = generate_event_data(target_date, num_events=100, mobile_percentage=mobile_percentage, time_offset_hours=time_offset_hours, consent_version_preference=consent_version_preference)
 
     # Write sample to temp file to measure size
     temp_file = f"{filename}.tmp"
@@ -506,7 +1133,7 @@ def generate_events_by_size(filename, target_date, target_size_gb, mobile_percen
             remaining = estimated_page_views - page_views_generated
             current_batch_size = min(batch_size, remaining)
 
-            batch_events = generate_event_data(target_date, num_events=current_batch_size, mobile_percentage=mobile_percentage)
+            batch_events = generate_event_data(target_date, num_events=current_batch_size, mobile_percentage=mobile_percentage, time_offset_hours=time_offset_hours, consent_version_preference=consent_version_preference)
             writer.writerows(batch_events)
             all_events.extend(batch_events)
 
@@ -600,14 +1227,14 @@ def main():
         print(f"  - events_today.csv: {scale_factor_gb/2} GB (50% mobile)")
         print()
 
-        # Generate events_yesterday.csv (half of total size, 66% mobile)
+        # Generate events_yesterday.csv (half of total size, 66% mobile) - prefer version 1.0
         print(f"Generating events_yesterday.csv ({scale_factor_gb/2} GB, 66% mobile)...")
-        yesterday_events = generate_events_by_size('events_yesterday.csv', yesterday, scale_factor_gb/2, mobile_percentage=66)
+        yesterday_events = generate_events_by_size('events_yesterday.csv', yesterday, scale_factor_gb/2, mobile_percentage=66, consent_version_preference='1.0')
 
         print()
-        # Generate events_today.csv (half of total size, 50% mobile)
+        # Generate events_today.csv (half of total size, 50% mobile) with 24-hour offset and version 2.0 to avoid duplicates
         print(f"Generating events_today.csv ({scale_factor_gb/2} GB, 50% mobile)...")
-        today_events = generate_events_by_size('events_today.csv', today, scale_factor_gb/2, mobile_percentage=50)
+        today_events = generate_events_by_size('events_today.csv', today, scale_factor_gb/2, mobile_percentage=50, time_offset_hours=24, consent_version_preference='2.0')
         
     else:
         print(f"Mode: Row-based generation")
@@ -617,13 +1244,13 @@ def main():
         print(f"  Today: {today} (50% mobile)")
         print()
 
-        # Generate events for yesterday (66% mobile)
+        # Generate events for yesterday (66% mobile) - prefer version 1.0
         print(f"Generating yesterday's events ({num_events:,} page views, 66% mobile)...")
-        yesterday_events = generate_event_data(yesterday, num_events=num_events, mobile_percentage=66)
+        yesterday_events = generate_event_data(yesterday, num_events=num_events, mobile_percentage=66, consent_version_preference='1.0')
 
-        # Generate events for today (50% mobile)
+        # Generate events for today (50% mobile) with 24-hour offset and version 2.0 to avoid duplicates
         print(f"Generating today's events ({num_events:,} page views, 50% mobile)...")
-        today_events = generate_event_data(today, num_events=num_events, mobile_percentage=50)
+        today_events = generate_event_data(today, num_events=num_events, mobile_percentage=50, time_offset_hours=24, consent_version_preference='2.0')
 
         # Create the two required files
         print(f"Creating events_yesterday.csv ({len(yesterday_events):,} total events)...")
