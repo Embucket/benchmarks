@@ -35,7 +35,52 @@ from typing import Dict, Iterator, List, Optional, Sequence, Tuple
 
 import pandas as pd
 import snowflake.connector
+import sys
+import warnings
 
+# Silence noisy pandas DBAPI warning when using Snowflake connector directly
+warnings.filterwarnings(
+    "ignore",
+    message=r"^pandas only supports SQLAlchemy connectable",
+    category=UserWarning,
+)
+
+
+# Predefined Snowplow tables to compare (schema.table; database inferred from env)
+DEFAULT_SNOWPLOW_TABLES: List[str] = [
+    # manifest
+    "public_snowplow_manifest.snowplow_web_base_quarantined_sessions",
+    "public_snowplow_manifest.snowplow_web_incremental_manifest",
+    "public_snowplow_manifest.snowplow_web_base_sessions_lifecycle_manifest",
+    # scratch
+    "public_scratch.snowplow_web_base_new_event_limits",
+    "public_scratch.snowplow_web_base_sessions_this_run",
+    "public_scratch.snowplow_web_base_events_this_run",
+    "public_scratch.snowplow_web_consent_events_this_run",
+    "public_scratch.snowplow_web_pv_engaged_time",
+    "public_scratch.snowplow_web_pv_scroll_depth",
+    "public_scratch.snowplow_web_sessions_this_run",
+    "public_scratch.snowplow_web_vital_events_this_run",
+    "public_scratch.snowplow_web_page_views_this_run",
+    "public_scratch.snowplow_web_vitals_this_run",
+    "public_scratch.snowplow_web_users_sessions_this_run",
+    "public_scratch.snowplow_web_users_aggs",
+    "public_scratch.snowplow_web_users_lasts",
+    "public_scratch.snowplow_web_users_this_run",
+    # derived
+    "public_derived.snowplow_web_user_mapping",
+    "public_derived.snowplow_web_consent_log",
+    "public_derived.snowplow_web_consent_cmp_stats",
+    "public_derived.snowplow_web_consent_versions",
+    "public_derived.snowplow_web_sessions",
+    "public_derived.snowplow_web_page_views",
+    "public_derived.snowplow_web_consent_users",
+    "public_derived.snowplow_web_vitals",
+    "public_derived.snowplow_web_consent_scope_status",
+    "public_derived.snowplow_web_consent_totals",
+    "public_derived.snowplow_web_vital_measurements",
+    "public_derived.snowplow_web_users",
+]
 
 @dataclass
 class ConnectionConfig:
@@ -516,7 +561,8 @@ def no_key_hash_compare(
     only_summary: bool,
     show_examples: bool = False,
     examples_limit: int = 3,
-) -> None:
+    return_row: bool = False,
+) -> Optional[Tuple[List[str], List[str], List[Tuple[str, List[Tuple[str, int, int]]]]]]:
     # Column sets for summary
     snowflake_columns = get_table_columns(snowflake_conn, snowflake_table)
     try:
@@ -631,43 +677,46 @@ def no_key_hash_compare(
         str(extra_eb),
     ]
 
-    fmt = summary_format or "markdown"
-    if not only_summary:
-        print("\nSummary:")
-    if fmt == "csv":
-        print(",".join(headers))
-        print(",".join(row))
-    elif fmt == "tsv":
-        print("\t".join(headers))
-        print("\t".join(row))
-    elif fmt == "box":
-        widths = [max(len(h), len(r)) for h, r in zip(headers, row)]
-        def line(sep_left="+", sep_mid="+", sep_right="+", fill="-"):
-            return sep_left + sep_mid.join(fill * (w + 2) for w in widths) + sep_right
-        def render(values, is_header=False):
-            cells = []
-            for i, (v, w) in enumerate(zip(values, widths)):
-                cell = " " + (v.ljust(w) if i == 0 or is_header else v.rjust(w)) + " "
-                cells.append(cell)
-            return "|" + "|".join(cells) + "|"
-        print(line())
-        print(render(headers, is_header=True))
-        print(line("+", "+", "+", "-"))
-        print(render(row))
-        print(line())
-    elif fmt == "plain":
-        widths = [max(len(h), len(r)) for h, r in zip(headers, row)]
-        def pad(values):
-            out = []
-            for i, (v, w) in enumerate(zip(values, widths)):
-                out.append(v.ljust(w) if i == 0 else v.rjust(w))
-            return "  ".join(out)
-        print(pad(headers))
-        print(pad(row))
+    if return_row:
+        return headers, row, column_examples
     else:
-        print(" | ".join(headers))
-        print(" | ".join(["---"] + ["---:" for _ in headers[1:]]))
-        print(" | ".join(row))
+        fmt = summary_format or "markdown"
+        if not only_summary:
+            print("\nSummary:")
+        if fmt == "csv":
+            print(",".join(headers))
+            print(",".join(row))
+        elif fmt == "tsv":
+            print("\t".join(headers))
+            print("\t".join(row))
+        elif fmt == "box":
+            widths = [max(len(h), len(r)) for h, r in zip(headers, row)]
+            def line(sep_left="+", sep_mid="+", sep_right="+", fill="-"):
+                return sep_left + sep_mid.join(fill * (w + 2) for w in widths) + sep_right
+            def render(values, is_header=False):
+                cells = []
+                for i, (v, w) in enumerate(zip(values, widths)):
+                    cell = " " + (v.ljust(w) if i == 0 or is_header else v.rjust(w)) + " "
+                    cells.append(cell)
+                return "|" + "|".join(cells) + "|"
+            print(line())
+            print(render(headers, is_header=True))
+            print(line("+", "+", "+", "-"))
+            print(render(row))
+            print(line())
+        elif fmt == "plain":
+            widths = [max(len(h), len(r)) for h, r in zip(headers, row)]
+            def pad(values):
+                out = []
+                for i, (v, w) in enumerate(zip(values, widths)):
+                    out.append(v.ljust(w) if i == 0 else v.rjust(w))
+                return "  ".join(out)
+            print(pad(headers))
+            print(pad(row))
+        else:
+            print(" | ".join(headers))
+            print(" | ".join(["---"] + ["---:" for _ in headers[1:]]))
+            print(" | ".join(row))
 
     # Optional: print example mismatches
     if show_examples and col_mismatch > 0:
@@ -676,6 +725,7 @@ def no_key_hash_compare(
             print(f"- {col}:")
             for v, a, b in samples[:examples_limit]:
                 print(f"    value={v!r}  snowflake={a}  embucket={b}")
+    return None
 
 
 def write_chunk_csv(path: Path, df: pd.DataFrame, header_written: bool) -> bool:
@@ -1145,13 +1195,33 @@ def parse_arguments() -> argparse.Namespace:
 
     parser.add_argument(
         "--snowflake-table",
-        required=True,
+        required=False,
         help="Fully-qualified Snowflake table name (e.g. DATABASE.SCHEMA.TABLE).",
     )
     parser.add_argument(
         "--embucket-table",
-        required=True,
+        required=False,
         help="Fully-qualified Embucket table name (e.g. DATABASE.SCHEMA.TABLE).",
+    )
+    parser.add_argument(
+        "--compare-default-tables",
+        action="store_true",
+        help="Compare a built-in list of Snowplow tables in batch (database inferred from env).",
+    )
+    parser.add_argument(
+        "--batch-summary-format",
+        choices=["csv", "tsv", "markdown", "plain", "box"],
+        default="csv",
+        help="Output format for --compare-default-tables (default: csv).",
+    )
+    parser.add_argument(
+        "--batch-print-examples",
+        action="store_true",
+        help="After the consolidated table, print mismatch examples for each table (no-key mode).",
+    )
+    parser.add_argument(
+        "--exclude-tables",
+        help="Comma-separated list of schema.table to exclude in --compare-default-tables mode.",
     )
     parser.add_argument(
         "--key-columns",
@@ -1249,8 +1319,8 @@ def main() -> None:
 
     # Align with load_events.py behavior: rely on process environment first.
     # We still parse .env files if provided, but they do NOT override process env.
-    snowflake_env_values: Dict[str, str] = {}
-    embucket_env_values: Dict[str, str] = {}
+    snowflake_env_values: Dict[str, str] = load_env_file(Path(args.snowflake_env_file)) if args.snowflake_env_file else {}
+    embucket_env_values: Dict[str, str] = load_env_file(Path(args.embucket_env_file)) if args.embucket_env_file else {}
 
     snowflake_config = build_connection_config(args, "snowflake", snowflake_env_values)
     embucket_config = build_connection_config(args, "embucket", embucket_env_values)
@@ -1262,21 +1332,150 @@ def main() -> None:
     hash_columns = parse_hash_columns(args.hash_columns)
     chunksize = args.chunksize if args.chunksize and args.chunksize > 0 else None
 
-    print("Snowflake connection parameters:")
-    print(
-        {
-            "account": snowflake_config.account,
-            "user": snowflake_config.user,
-            "warehouse": snowflake_config.warehouse,
-            "database": snowflake_config.database,
-            "schema": snowflake_config.schema,
-            "role": snowflake_config.role,
-        }
-    )
+    if not args.only_summary and not args.compare_default_tables:
+        print("Snowflake connection parameters:")
+        print(
+            {
+                "account": snowflake_config.account,
+                "user": snowflake_config.user,
+                "warehouse": snowflake_config.warehouse,
+                "database": snowflake_config.database,
+                "schema": snowflake_config.schema,
+                "role": snowflake_config.role,
+            }
+        )
 
     with create_connection(snowflake_config) as sf_conn, create_connection(
         embucket_config
     ) as emb_conn:
+        # Batch mode: compare predefined Snowplow tables
+        if args.compare_default_tables:
+            fmt = args.batch_summary_format or "csv"
+            # Collect rows for a single consolidated output
+            collected_rows: List[List[str]] = []
+            headers: Optional[List[str]] = None
+            examples_by_table: List[Tuple[str, List[Tuple[str, List[Tuple[str, int, int]]]]]] = []
+            # Build exclusion set (normalized to lowercase)
+            exclude_set: set = set()
+            if getattr(args, "exclude_tables", None):
+                exclude_set = {t.strip().lower() for t in args.exclude_tables.split(",") if t.strip()}
+            for rel in DEFAULT_SNOWPLOW_TABLES:
+                if rel.lower() in exclude_set:
+                    continue
+                # Qualify using env database + provided schema.table
+                snowflake_table_qualified = qualify_table_name(
+                    rel, snowflake_config.database, None
+                )
+                embucket_table_qualified = qualify_table_name(
+                    rel, embucket_config.database, None
+                )
+                # Progress indicator to stderr so it won't break consolidated stdout table
+                try:
+                    sys.stderr.write(f"Processing {snowflake_table_qualified} ...\n")
+                    sys.stderr.flush()
+                except Exception:
+                    pass
+                if args.no_key_hash_compare or not args.key_columns:
+                    result = no_key_hash_compare(
+                        sf_conn,
+                        emb_conn,
+                        snowflake_table_qualified,
+                        embucket_table_qualified,
+                        parse_hash_columns(args.hash_columns),
+                        args.hash_algorithm,
+                        args.chunksize if args.chunksize and args.chunksize > 0 else None,
+                        None,
+                        None,
+                        args.export_include_full_row,
+                        args.null_placeholder,
+                        fmt,
+                        True,
+                        args.batch_print_examples,  # compute examples only if we plan to print later
+                        args.col_mismatch_examples_limit if hasattr(args, "col_mismatch_examples_limit") else 3,
+                        True,  # return_row
+                    )
+                    if result:
+                        headers, row, examples = result
+                        collected_rows.append(row)
+                        if args.batch_print_examples and examples:
+                            # Use the table_name from the row (first column)
+                            examples_by_table.append((row[0], examples))
+                else:
+                    # Row-hash mode requires keys
+                    # Fallback to printing individually (not consolidated) for key mode
+                    hash_based_compare(
+                        sf_conn,
+                        emb_conn,
+                        snowflake_table_qualified,
+                        embucket_table_qualified,
+                        parse_key_columns(args.key_columns),
+                        parse_hash_columns(args.hash_columns),
+                        args.hash_algorithm,
+                        args.chunksize if args.chunksize and args.chunksize > 0 else None,
+                        None,
+                        None,
+                        args.export_include_full_row,
+                        args.null_placeholder,
+                        "box" if fmt == "box" else fmt,
+                        True,
+                    )
+            # Render one consolidated table
+            if headers is None:
+                return
+            if fmt == "csv":
+                print(",".join(headers))
+                for row in collected_rows:
+                    print(",".join(row))
+            elif fmt == "tsv":
+                print("\t".join(headers))
+                for row in collected_rows:
+                    print("\t".join(row))
+            elif fmt == "box":
+                # Compute widths across all rows
+                widths = [len(h) for h in headers]
+                for row in collected_rows:
+                    widths = [max(w, len(v)) for w, v in zip(widths, row)]
+                def line(sep_left="+", sep_mid="+", sep_right="+", fill="-"):
+                    return sep_left + sep_mid.join(fill * (w + 2) for w in widths) + sep_right
+                def render(values, is_header=False):
+                    cells = []
+                    for i, (v, w) in enumerate(zip(values, widths)):
+                        cells.append(" " + (v.ljust(w) if i == 0 or is_header else v.rjust(w)) + " ")
+                    return "|" + "|".join(cells) + "|"
+                print(line())
+                print(render(headers, is_header=True))
+                print(line("+", "+", "+", "-"))
+                for row in collected_rows:
+                    print(render(row))
+                print(line())
+            elif fmt == "plain":
+                widths = [len(h) for h in headers]
+                for row in collected_rows:
+                    widths = [max(w, len(v)) for w, v in zip(widths, row)]
+                def pad(values):
+                    out = []
+                    for i, (v, w) in enumerate(zip(values, widths)):
+                        out.append(v.ljust(w) if i == 0 else v.rjust(w))
+                    return "  ".join(out)
+                print(pad(headers))
+                for row in collected_rows:
+                    print(pad(row))
+            else:  # markdown
+                print(" | ".join(headers))
+                print(" | ".join(["---"] + ["---:" for _ in headers[1:]]))
+                for row in collected_rows:
+                    print(" | ".join(row))
+            return
+            # Print examples after consolidated table, if requested
+            if args.batch_print_examples and examples_by_table:
+                print("\nExamples:")
+                for table_name, examples in examples_by_table:
+                    print(f"- {table_name}:")
+                    for col, samples in examples[: (args.col_mismatch_examples_limit or 3)]:
+                        print(f"  {col}:")
+                        for v, a, b in samples[: (args.col_mismatch_examples_limit or 3)]:
+                            print(f"    value={v!r}  snowflake={a}  embucket={b}")
+            return
         # Auto-qualify table identifiers using env-derived defaults if needed
         snowflake_table_qualified = qualify_table_name(
             args.snowflake_table, snowflake_config.database, snowflake_config.schema

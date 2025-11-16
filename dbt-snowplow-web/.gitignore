@@ -23,3 +23,4 @@ __pycache__/
 
 # Generated via data_dif.py
 exports/
+summary.csv
