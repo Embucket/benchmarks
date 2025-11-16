@@ -22,23 +22,6 @@ Example (hash export + comparison):
         --export-dir ./exports \
         --hash-columns ID,EVENT_TIMESTAMP,COL_A,COL_B
 
-Connection credentials can be passed as CLI arguments or via environment
-variables. For example, to use environment variables:
-    export SNOWFLAKE_USER=...
-    export SNOWFLAKE_PASSWORD=...
-    export SNOWFLAKE_ACCOUNT=...
-    export SNOWFLAKE_WAREHOUSE=...
-    export SNOWFLAKE_DATABASE=...
-    export SNOWFLAKE_SCHEMA=...
-    export SNOWFLAKE_ROLE=...          # optional
-
-    export EMBUCKET_USER=...
-    export EMBUCKET_PASSWORD=...
-    export EMBUCKET_ACCOUNT=...
-    export EMBUCKET_WAREHOUSE=...
-    export EMBUCKET_DATABASE=...
-    export EMBUCKET_SCHEMA=...
-    export EMBUCKET_ROLE=...           # optional
 """
 from __future__ import annotations
 
@@ -275,6 +258,15 @@ def get_table_columns(connection, table_identifier: str) -> List[str]:
     return [row[0] for row in rows]
 
 
+def get_table_columns_via_select(connection, table_identifier: str) -> List[str]:
+    """
+    Retrieve column names by selecting zero rows (works for systems without information_schema).
+    """
+    probe_sql = f"SELECT * FROM {table_identifier} LIMIT 0"
+    df = pd.read_sql(probe_sql, connection)
+    return list(df.columns)
+
+
 def iterate_table_chunks(
     connection,
     table_identifier: str,
@@ -303,6 +295,22 @@ def normalize_columns(df1: pd.DataFrame, df2: pd.DataFrame) -> Tuple[pd.DataFram
     df1_aligned = df1.reindex(columns=all_columns)
     df2_aligned = df2.reindex(columns=all_columns)
     return df1_aligned, df2_aligned
+
+
+def normalize_key_series(series: pd.Series) -> pd.Series:
+    """Normalize key values for robust joins: string-cast, strip whitespace, lowercase."""
+    return series.astype(str).str.strip().str.lower()
+
+
+def normalize_key_index(index: pd.Index) -> pd.Index:
+    """Normalize Index or MultiIndex by applying normalize_key_series to each level."""
+    if isinstance(index, pd.MultiIndex):
+        normalized_levels = [
+            normalize_key_series(index.get_level_values(i)) for i in range(index.nlevels)
+        ]
+        return pd.MultiIndex.from_arrays(normalized_levels, names=index.names)
+    # Regular Index
+    return normalize_key_series(pd.Index(index))
 
 
 def compare_tables(
@@ -349,8 +357,17 @@ def compare_tables(
         "Key columns",
     )
 
+    # Normalize key columns on both sides before indexing
+    for key_col in resolved_key_columns:
+        snowflake_df[key_col] = normalize_key_series(snowflake_df[key_col])
+        embucket_df[key_col] = normalize_key_series(embucket_df[key_col])
+
     snowflake_df.set_index(list(resolved_key_columns), inplace=True)
     embucket_df.set_index(list(resolved_key_columns), inplace=True)
+
+    # Normalize resulting indexes too (covers any upstream oddities)
+    snowflake_df.index = normalize_key_index(snowflake_df.index)
+    embucket_df.index = normalize_key_index(embucket_df.index)
 
     snowflake_df.sort_index(inplace=True)
     embucket_df.sort_index(inplace=True)
@@ -361,8 +378,9 @@ def compare_tables(
 
     # Align indexes to capture missing rows on either side.
     unified_index = snowflake_df.index.union(embucket_df.index)
-    snowflake_aligned = snowflake_df.loc[unified_index, non_key_columns]
-    embucket_aligned = embucket_df.loc[unified_index, non_key_columns]
+    # Use reindex to allow labels missing on either side without raising KeyError
+    snowflake_aligned = snowflake_df.reindex(unified_index)[non_key_columns]
+    embucket_aligned = embucket_df.reindex(unified_index)[non_key_columns]
 
     differences = snowflake_aligned.compare(embucket_aligned, align_axis=0)
 
@@ -403,6 +421,261 @@ def compute_row_hashes(
         return hasher.hexdigest()
 
     return concatenated.map(digest)
+
+
+def count_row_hashes_for_table(
+    connection,
+    table_identifier: str,
+    hash_columns: Optional[Sequence[str]],
+    algorithm: str,
+    chunksize: Optional[int],
+    null_placeholder: str = "<NULL>",
+) -> Tuple[Dict[str, int], int, Sequence[str]]:
+    """
+    Stream a table and return:
+      - hash -> count mapping for rows (multiset counts)
+      - total rows processed
+      - resolved hash columns used
+    """
+    # If columns not specified, fetch all via a zero-row select
+    if not hash_columns:
+        try:
+            all_cols = get_table_columns(connection, table_identifier)
+        except Exception:
+            all_cols = get_table_columns_via_select(connection, table_identifier)
+        resolved_hash_columns = list(all_cols)
+    else:
+        try:
+            all_cols = get_table_columns(connection, table_identifier)
+        except Exception:
+            all_cols = get_table_columns_via_select(connection, table_identifier)
+        resolved_hash_columns = resolve_columns_case_insensitive(
+            hash_columns, all_cols, f"table {table_identifier}", "Hash columns"
+        )
+
+    selected_columns_order = list(resolved_hash_columns)
+    counts: Dict[str, int] = {}
+    total_rows = 0
+
+    for chunk in iterate_table_chunks(connection, table_identifier, selected_columns_order, chunksize):
+        chunk = chunk.reset_index(drop=True)
+        chunk.columns = [str(c) for c in chunk.columns]
+        # Ensure all required columns exist
+        _ = resolve_columns_case_insensitive(
+            resolved_hash_columns, chunk.columns, f"table {table_identifier}", "Hash columns"
+        )
+        row_hash = compute_row_hashes(chunk, resolved_hash_columns, algorithm, null_placeholder)
+        vc = row_hash.value_counts()
+        for h, c in vc.items():
+            counts[h] = counts.get(h, 0) + int(c)
+        total_rows += int(len(chunk))
+
+    return counts, total_rows, resolved_hash_columns
+
+
+def _value_counts_for_column(
+    connection,
+    table_identifier: str,
+    column: str,
+    chunksize: Optional[int],
+    null_placeholder: str = "<NULL>",
+) -> Dict[str, int]:
+    """Stream a single column and accumulate value counts as strings (trimmed).
+
+    Resolves the requested column name case-insensitively against the table's columns.
+    """
+    counts: Dict[str, int] = {}
+    # Resolve actual column name using a zero-row select to get columns list
+    try:
+        available_columns = get_table_columns_via_select(connection, table_identifier)
+    except Exception:
+        available_columns = get_table_columns(connection, table_identifier)
+    resolved = resolve_columns_case_insensitive([column], available_columns, f"table {table_identifier}", "Column")[0]
+
+    for chunk in iterate_table_chunks(connection, table_identifier, [resolved], chunksize):
+        series = chunk[resolved].fillna(null_placeholder).astype(str).str.strip()
+        vc = series.value_counts()
+        for v, c in vc.items():
+            counts[str(v)] = counts.get(str(v), 0) + int(c)
+    return counts
+
+
+def no_key_hash_compare(
+    snowflake_conn,
+    embucket_conn,
+    snowflake_table: str,
+    embucket_table: str,
+    hash_columns: Optional[Sequence[str]],
+    algorithm: str,
+    chunksize: Optional[int],
+    export_format: Optional[str],
+    export_dir: Optional[Path],
+    include_full_row: bool,
+    null_placeholder: str,
+    summary_format: str,
+    only_summary: bool,
+    show_examples: bool = False,
+    examples_limit: int = 3,
+) -> None:
+    # Column sets for summary
+    snowflake_columns = get_table_columns(snowflake_conn, snowflake_table)
+    try:
+        embucket_columns = get_table_columns_via_select(embucket_conn, embucket_table)
+    except Exception:
+        embucket_columns = []
+
+    if not only_summary:
+        print("\n=== Hash-Based Comparison (no key) ===")
+        print(f"Hash algorithm: {algorithm.upper()}")
+        if hash_columns:
+            print(f"Hash columns (requested): {', '.join(hash_columns)}")
+        else:
+            print("Hash columns: ALL columns")
+
+    sf_counts, sf_total, resolved_hash_cols = count_row_hashes_for_table(
+        snowflake_conn,
+        snowflake_table,
+        hash_columns,
+        algorithm,
+        chunksize,
+        null_placeholder,
+    )
+    eb_counts, eb_total, _ = count_row_hashes_for_table(
+        embucket_conn,
+        embucket_table,
+        hash_columns if hash_columns else resolved_hash_cols,
+        algorithm,
+        chunksize,
+        null_placeholder,
+    )
+
+    all_hashes = set(sf_counts.keys()).union(eb_counts.keys())
+    extra_sf = 0
+    extra_eb = 0
+    for h in all_hashes:
+        a = sf_counts.get(h, 0)
+        b = eb_counts.get(h, 0)
+        if a > b:
+            extra_sf += (a - b)
+        elif b > a:
+            extra_eb += (b - a)
+
+    # Per-column mismatch count (data-level, order-agnostic)
+    columns_to_check = resolved_hash_cols
+    col_mismatch = 0
+    mismatching_columns: List[str] = []
+    column_examples: List[Tuple[str, List[Tuple[str, int, int]]]] = []
+    for col in columns_to_check:
+        try:
+            sf_vc = _value_counts_for_column(snowflake_conn, snowflake_table, col, chunksize, null_placeholder)
+            eb_vc = _value_counts_for_column(embucket_conn, embucket_table, col, chunksize, null_placeholder)
+            if sf_vc != eb_vc:
+                col_mismatch += 1
+                if show_examples and len(mismatching_columns) < max(1, examples_limit):
+                    mismatching_columns.append(col)
+                    # build sample deltas
+                    sample: List[Tuple[str, int, int]] = []
+                    keys = set(sf_vc.keys()) | set(eb_vc.keys())
+                    for v in keys:
+                        a = sf_vc.get(v, 0)
+                        b = eb_vc.get(v, 0)
+                        if a != b:
+                            sample.append((str(v), int(a), int(b)))
+                            if len(sample) >= examples_limit:
+                                break
+                    column_examples.append((col, sample))
+        except Exception:
+            # If either side fails to read column, count as mismatch
+            col_mismatch += 1
+            if show_examples and len(mismatching_columns) < max(1, examples_limit):
+                mismatching_columns.append(col)
+
+    # Summary metrics
+    try:
+        total_columns = len(snowflake_columns)
+        snow_cols_lower = {c.lower() for c in snowflake_columns}
+        emb_cols_lower = {c.lower() for c in embucket_columns}
+        total_columns_match = len(snow_cols_lower.intersection(emb_cols_lower))
+        total_columns_not_match = max(total_columns - total_columns_match, 0)
+    except Exception:
+        total_columns = 0
+        total_columns_match = 0
+        total_columns_not_match = 0
+
+    # total_rows as max for visibility
+    total_rows_union = max(sf_total, eb_total)
+
+    # Render summary table
+    headers = [
+        "table_name",
+        "total_rows",
+        "rows_missmatch",
+        "total_column",
+        "col_mismatch",
+        "extra_in_sf",
+        "extra_in_em",
+    ]
+    try:
+        _, _, table_only = split_table_identifier(snowflake_table)
+    except Exception:
+        table_only = snowflake_table
+    # rows_missmatch defined as absolute difference in total rows
+    rows_missmatch = abs(int(sf_total) - int(eb_total))
+    row = [
+        table_only,
+        str(total_rows_union),
+        str(rows_missmatch),
+        str(total_columns),
+        str(col_mismatch),
+        str(extra_sf),
+        str(extra_eb),
+    ]
+
+    fmt = summary_format or "markdown"
+    if not only_summary:
+        print("\nSummary:")
+    if fmt == "csv":
+        print(",".join(headers))
+        print(",".join(row))
+    elif fmt == "tsv":
+        print("\t".join(headers))
+        print("\t".join(row))
+    elif fmt == "box":
+        widths = [max(len(h), len(r)) for h, r in zip(headers, row)]
+        def line(sep_left="+", sep_mid="+", sep_right="+", fill="-"):
+            return sep_left + sep_mid.join(fill * (w + 2) for w in widths) + sep_right
+        def render(values, is_header=False):
+            cells = []
+            for i, (v, w) in enumerate(zip(values, widths)):
+                cell = " " + (v.ljust(w) if i == 0 or is_header else v.rjust(w)) + " "
+                cells.append(cell)
+            return "|" + "|".join(cells) + "|"
+        print(line())
+        print(render(headers, is_header=True))
+        print(line("+", "+", "+", "-"))
+        print(render(row))
+        print(line())
+    elif fmt == "plain":
+        widths = [max(len(h), len(r)) for h, r in zip(headers, row)]
+        def pad(values):
+            out = []
+            for i, (v, w) in enumerate(zip(values, widths)):
+                out.append(v.ljust(w) if i == 0 else v.rjust(w))
+            return "  ".join(out)
+        print(pad(headers))
+        print(pad(row))
+    else:
+        print(" | ".join(headers))
+        print(" | ".join(["---"] + ["---:" for _ in headers[1:]]))
+        print(" | ".join(row))
+
+    # Optional: print example mismatches
+    if show_examples and col_mismatch > 0:
+        print("\nColumn mismatches (examples):")
+        for col, samples in column_examples[:examples_limit]:
+            print(f"- {col}:")
+            for v, a, b in samples[:examples_limit]:
+                print(f"    value={v!r}  snowflake={a}  embucket={b}")
 
 
 def write_chunk_csv(path: Path, df: pd.DataFrame, header_written: bool) -> bool:
@@ -471,6 +744,11 @@ def export_hash_dataset(
             "Key columns",
         )
 
+        # Normalize key columns in the chunk for robust alignment
+        for key_col in chunk_key_columns:
+            if key_col in chunk.columns:
+                chunk[key_col] = normalize_key_series(chunk[key_col])
+
         if resolved_hash_columns is None:
             resolved_hash_columns = [
                 col for col in chunk.columns if col not in chunk_key_columns
@@ -503,6 +781,8 @@ def export_hash_dataset(
 
         hash_frame = chunk[list(chunk_key_columns) + ["ROW_HASH"]].copy()
         hash_frame.set_index(list(chunk_key_columns), inplace=True)
+        # Normalize index to ensure consistent key representation
+        hash_frame.index = normalize_key_index(hash_frame.index)
         hash_frames.append(hash_frame)
 
     if export_format == "parquet":
@@ -530,11 +810,17 @@ def hash_based_compare(
     export_dir: Optional[Path],
     include_full_row: bool,
     null_placeholder: str = "<NULL>",
+    summary_format: str = "markdown",
+    only_summary: bool = False,
 ) -> None:
     if not key_columns:
         raise ValueError("Key columns are required for hash-based comparison.")
 
     snowflake_columns = get_table_columns(snowflake_conn, snowflake_table)
+    try:
+        embucket_columns = get_table_columns_via_select(embucket_conn, embucket_table)
+    except Exception:
+        embucket_columns = []
 
     resolved_key_columns = resolve_columns_case_insensitive(
         key_columns,
@@ -571,9 +857,10 @@ def hash_based_compare(
         filename = f"{label.replace('.', '_').replace(' ', '_')}_hash.{suffix}"
         return export_dir_path / filename
 
-    print("\n=== Hash-Based Comparison ===")
-    print(f"Hash algorithm: {algorithm.upper()}")
-    print("Hash columns derived from Snowflake information_schema.")
+    if not only_summary:
+        print("\n=== Hash-Based Comparison ===")
+        print(f"Hash algorithm: {algorithm.upper()}")
+        print("Hash columns derived from Snowflake information_schema.")
 
     snowflake_hashes, resolved_hash_columns = export_hash_dataset(
         snowflake_conn,
@@ -607,12 +894,16 @@ def hash_based_compare(
             f"Snowflake columns: {resolved_hash_columns}, Embucket columns: {embucket_hash_columns}"
         )
 
+    # Extra safety: normalize indexes (covers any external calls passing frames)
+    snowflake_hashes.index = normalize_key_index(snowflake_hashes.index)
+    embucket_hashes.index = normalize_key_index(embucket_hashes.index)
+
     if resolved_hash_columns:
         print(f"Hash columns: {', '.join(resolved_hash_columns)}")
     else:
         print("Hash columns: (none)")
 
-    if export_format and export_dir_path:
+    if export_format and export_dir_path and not only_summary:
         print(f"Exported hashed data to {export_dir_path} as {export_format.upper()}")
         if include_full_row:
             print("Exports include full row data alongside hashes.")
@@ -627,27 +918,112 @@ def hash_based_compare(
     embucket_common = embucket_hashes.loc[common_index]
     mismatched = snowflake_common["ROW_HASH"] != embucket_common["ROW_HASH"]
 
-    print(f"Rows missing in Embucket: {len(missing_in_embucket):,}")
-    print(f"Rows missing in Snowflake: {len(missing_in_snowflake):,}")
-    print(f"Rows with differing hashes: {int(mismatched.sum()):,}")
+    if not only_summary:
+        print(f"Rows missing in Embucket: {len(missing_in_embucket):,}")
+        print(f"Rows missing in Snowflake: {len(missing_in_snowflake):,}")
+        print(f"Rows with differing hashes: {int(mismatched.sum()):,}")
 
-    if len(missing_in_embucket) > 0:
+    if len(missing_in_embucket) > 0 and not only_summary:
         print("Sample keys missing in Embucket:")
         for key in list(missing_in_embucket)[:10]:
             print(f"  {key}")
-    if len(missing_in_snowflake) > 0:
+    if len(missing_in_snowflake) > 0 and not only_summary:
         print("Sample keys missing in Snowflake:")
         for key in list(missing_in_snowflake)[:10]:
             print(f"  {key}")
-    if mismatched.any():
+    if mismatched.any() and not only_summary:
         sample_keys = list(common_index[mismatched])[:10]
         print("Sample keys with differing hashes:")
         for key in sample_keys:
             print(f"  {key}")
         print("Use the exported files or rerun without --hash-compare to inspect full row differences.")
     else:
-        if missing_in_embucket.empty and missing_in_snowflake.empty:
+        if missing_in_embucket.empty and missing_in_snowflake.empty and not only_summary:
             print("All shared rows have matching hashes.")
+
+    # Summary table line
+    try:
+        sf_count = get_row_count(snowflake_conn, snowflake_table)
+    except Exception:
+        sf_count = None
+    try:
+        em_count = get_row_count(embucket_conn, embucket_table)
+    except Exception:
+        em_count = None
+
+    union_keys = snowflake_hashes.index.union(embucket_hashes.index)
+    total_rows_union = union_keys.size
+
+    # Column set comparison (case-insensitive)
+    snow_cols_lower = {c.lower() for c in snowflake_columns}
+    emb_cols_lower = {c.lower() for c in embucket_columns}
+    total_columns = len(snowflake_columns)
+    total_columns_match = len(snow_cols_lower.intersection(emb_cols_lower))
+    total_columns_not_match = max(total_columns - total_columns_match, 0)
+
+    # Summary line(s) with multiple format options
+    headers = [
+        "table_name",
+        "total_rows",
+        "rows_missmatch",
+        "total_column",
+    ]
+    # Display just the table name (no database/schema) in the summary
+    try:
+        _, _, table_only = split_table_identifier(snowflake_table)
+    except Exception:
+        table_only = snowflake_table
+    # rows_missmatch defined as absolute difference in total rows
+    if sf_count is not None and em_count is not None:
+        rows_missmatch = abs(int(sf_count) - int(em_count))
+    else:
+        rows_missmatch = "-"
+    row = [
+        table_only,
+        str(total_rows_union),
+        str(rows_missmatch),
+        str(total_columns),
+    ]
+    fmt = summary_format or "markdown"
+    if not only_summary:
+        print("\nSummary:")
+    if fmt == "csv":
+        print(",".join(headers))
+        print(",".join(row))
+    elif fmt == "tsv":
+        print("\t".join(headers))
+        print("\t".join(row))
+    elif fmt == "box":
+        widths = [max(len(h), len(r)) for h, r in zip(headers, row)]
+        def line(sep_left="+", sep_mid="+", sep_right="+", fill="-"):
+            return sep_left + sep_mid.join(fill * (w + 2) for w in widths) + sep_right
+        def render(values, is_header=False):
+            cells = []
+            for i, (v, w) in enumerate(zip(values, widths)):
+                if i == 0 or is_header:
+                    cell = " " + v.ljust(w) + " "
+                else:
+                    cell = " " + v.rjust(w) + " "
+                cells.append(cell)
+            return "|" + "|".join(cells) + "|"
+        print(line())
+        print(render(headers, is_header=True))
+        print(line("+", "+", "+", "-"))
+        print(render(row))
+        print(line())
+    elif fmt == "plain":
+        widths = [max(len(h), len(r)) for h, r in zip(headers, row)]
+        def pad(values):
+            out = []
+            for i, (v, w) in enumerate(zip(values, widths)):
+                out.append(v.ljust(w) if i == 0 else v.rjust(w))
+            return "  ".join(out)
+        print(pad(headers))
+        print(pad(row))
+    else:  # markdown
+        print(" | ".join(headers))
+        print(" | ".join(["---"] + ["---:" for _ in headers[1:]]))
+        print(" | ".join(row))
 
 
 def parse_key_columns(raw: Optional[str]) -> List[str]:
@@ -779,13 +1155,18 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--key-columns",
-        required=True,
+        required=False,
         help="Comma-separated list of columns that uniquely identify rows (e.g. id,date).",
     )
     parser.add_argument(
         "--hash-compare",
         action="store_true",
         help="Enable hash-based comparison (generates row hashes and compares them).",
+    )
+    parser.add_argument(
+        "--no-key-hash-compare",
+        action="store_true",
+        help="Compare row-hash multisets without aligning on keys (order-agnostic, no primary key required).",
     )
     parser.add_argument(
         "--hash-columns",
@@ -825,6 +1206,28 @@ def parse_arguments() -> argparse.Namespace:
         "--null-placeholder",
         default="<NULL>",
         help="Placeholder string used when hashing NULL values (default: <NULL>).",
+    )
+    parser.add_argument(
+        "--summary-format",
+        choices=["markdown", "plain", "csv", "tsv", "box"],
+        default="markdown",
+        help="Summary output format (default: markdown).",
+    )
+    parser.add_argument(
+        "--only-summary",
+        action="store_true",
+        help="Print only the summary table (suppresses other logs).",
+    )
+    parser.add_argument(
+        "--show-col-mismatch-examples",
+        action="store_true",
+        help="In no-key compare, print first mismatching column names and sample value deltas.",
+    )
+    parser.add_argument(
+        "--col-mismatch-examples-limit",
+        type=int,
+        default=3,
+        help="Max number of mismatching columns and example values to print (default: 3).",
     )
     parser.add_argument(
         "--snowflake-env-file",
@@ -882,7 +1285,7 @@ def main() -> None:
             args.embucket_table, embucket_config.database, embucket_config.schema
         )
 
-        if not args.skip_row_compare:
+        if not args.skip_row_compare and not args.no_key_hash_compare:
             compare_tables(
                 sf_conn,
                 emb_conn,
@@ -891,7 +1294,25 @@ def main() -> None:
                 key_columns,
             )
 
-        if args.hash_compare:
+        if args.no_key_hash_compare:
+            no_key_hash_compare(
+                sf_conn,
+                emb_conn,
+                snowflake_table_qualified,
+                embucket_table_qualified,
+                hash_columns,
+                args.hash_algorithm,
+                chunksize,
+                args.export_format,
+                Path(args.export_dir) if args.export_dir else None,
+                args.export_include_full_row,
+                args.null_placeholder,
+                args.summary_format,
+                args.only_summary,
+                args.show_col_mismatch_examples,
+                args.col_mismatch_examples_limit,
+            )
+        elif args.hash_compare:
             hash_based_compare(
                 sf_conn,
                 emb_conn,
@@ -905,6 +1326,8 @@ def main() -> None:
                 Path(args.export_dir) if args.export_dir else None,
                 args.export_include_full_row,
                 args.null_placeholder,
+                args.summary_format,
+                args.only_summary,
             )
 
 
