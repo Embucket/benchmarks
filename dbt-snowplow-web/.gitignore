@@ -3,6 +3,7 @@
 
 # Python virtual environment
 env/
+.venv/
 
 # Logs
 logs/
@@ -19,3 +20,6 @@ __pycache__/
 *.pyc
 *.pyo
 =3.0.0
+
+# Generated via data_dif.py
+exports/
