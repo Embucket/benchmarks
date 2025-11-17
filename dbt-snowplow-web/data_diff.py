@@ -1465,7 +1465,6 @@ def main() -> None:
                 print(" | ".join(["---"] + ["---:" for _ in headers[1:]]))
                 for row in collected_rows:
                     print(" | ".join(row))
-            return
             # Print examples after consolidated table, if requested
             if args.batch_print_examples and examples_by_table:
                 print("\nExamples:")
