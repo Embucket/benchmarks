@@ -119,48 +119,12 @@ if [[ -z "${MODE}" ]]; then
   usage
 fi
 
-# Fetch EC2 instance type for directory organization
-echo ">>> Detecting EC2 instance type..."
-EC2_INSTANCE_TYPE=$(python3 -c "
-import urllib.request
-import urllib.error
-
-try:
-    # IMDSv2 requires a token
-    token_url = 'http://169.254.169.254/latest/api/token'
-    token_request = urllib.request.Request(
-        token_url,
-        headers={'X-aws-ec2-metadata-token-ttl-seconds': '21600'},
-        method='PUT'
-    )
-
-    with urllib.request.urlopen(token_request, timeout=2) as response:
-        token = response.read().decode('utf-8')
-
-    # Use token to get instance type
-    metadata_url = 'http://169.254.169.254/latest/meta-data/instance-type'
-    metadata_request = urllib.request.Request(
-        metadata_url,
-        headers={'X-aws-ec2-metadata-token': token}
-    )
-
-    with urllib.request.urlopen(metadata_request, timeout=2) as response:
-        instance_type = response.read().decode('utf-8').strip()
-
-    print(instance_type)
-except:
-    print('unknown')
-" 2>/dev/null || echo "unknown")
-
 if [[ "${EC2_INSTANCE_TYPE}" == "unknown" ]]; then
   echo "⚠ Warning: Could not detect EC2 instance type. Using 'unknown' as directory name."
   echo "  Results will be saved to: results-${MODE}/unknown/"
 else
   echo "✓ Detected EC2 instance type: ${EC2_INSTANCE_TYPE}"
 fi
-
-# Create results directory with mode and EC2 instance type
-RESULTS_DIR="$(pwd)/results-${MODE}/${EC2_INSTANCE_TYPE}"
 
 # If results directory exists and has files, delete them
 if [[ -d "${RESULTS_DIR}" ]]; then
@@ -417,17 +381,4 @@ echo ">>> Benchmark complete!"
 echo ">>> Results directory: ${RESULTS_DIR}"
 echo ">>> Results file: ${OUTPUT_FILE}"
 
-# Add EC2 metadata to results
-echo
-echo ">>> Adding EC2 metadata to results..."
-EC2_METADATA_SCRIPT="${SCRIPT_DIR}/../add_ec2_metadata.py"
-
-if [[ -f "${EC2_METADATA_SCRIPT}" ]]; then
-  # Run from /tmp to avoid duckdb import conflicts
-  (cd /tmp && python3 "${EC2_METADATA_SCRIPT}" "${OUTPUT_FILE}")
-else
-  echo "⚠ Warning: EC2 metadata script not found: ${EC2_METADATA_SCRIPT}"
-  echo "  Skipping EC2 metadata collection"
-  echo "  Please add 'ec2_instance_type' and 'usd_per_hour' manually to the result file"
-fi
-
+echo ">>> Done! Results saved to ${OUTPUT_FILE}"

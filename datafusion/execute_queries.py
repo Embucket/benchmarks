@@ -7,14 +7,16 @@ to avoid memory issues with certain queries (especially query 21).
 """
 
 import argparse
-import json
 import os
 import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime
-from pathlib import Path
+
+# --- Add path to bench_infra ---
+current_dir = os.path.dirname(os.path.abspath(__file__))
+lib_dir = os.path.abspath(os.path.join(current_dir, '../bench_infra'))
+sys.path.append(lib_dir)
 
 
 def get_datafusion_version():
@@ -200,13 +202,12 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
             pass
 
 
-def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
+def run_benchmark(data_dir, queries_dir, iterations, output_file,
                   queries_to_run=None, prefer_hash_join=False, mode='parquet'):
     """
     Run the TPC-H benchmark using datafusion-cli.
 
     Args:
-        benchmark: 'tpch' or 'tpcds'
         data_dir: Path to data directory
         queries_dir: Path to query files directory
         iterations: Number of iterations to run
@@ -219,19 +220,9 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
     datafusion_version = get_datafusion_version()
     print(f"DataFusion CLI version: {datafusion_version}")
     print()
-    
-    # Define table names based on benchmark
-    if benchmark == "tpch":
-        num_queries = 22
-        table_names = ["customer", "lineitem", "nation", "orders", "part", "partsupp", "region", "supplier"]
-    elif benchmark == "tpcds":
-        num_queries = 99
-        table_names = ["call_center", "catalog_page", "catalog_returns", "catalog_sales", "customer",
-                      "customer_address", "customer_demographics", "date_dim", "time_dim", "household_demographics",
-                      "income_band", "inventory", "item", "promotion", "reason", "ship_mode", "store", "store_returns",
-                      "store_sales", "warehouse", "web_page", "web_returns", "web_sales", "web_site"]
-    else:
-        raise ValueError(f"Invalid benchmark: {benchmark}")
+
+    num_queries = 22
+    table_names = ["customer", "lineitem", "nation", "orders", "part", "partsupp", "region", "supplier"]
 
     # Create setup SQL (table registration + configuration)
     print("Creating table registration script...")
@@ -249,7 +240,6 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
     results = {
         'engine': 'datafusion-cli',
         'datafusion-version': datafusion_version,
-        'benchmark': benchmark,
         'data_path': data_dir,
         'query_path': queries_dir,
         'iterations': iterations,
@@ -274,14 +264,7 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
         print(f"{'='*80}\n")
 
         for query_num in queries_list:
-            print('Flushing disk buffers and dropping OS caches for cold-start query execution...')
-            subprocess.run(["sudo", "sync"], check=True)
-            subprocess.run(
-                ["sudo", "tee", "/proc/sys/vm/drop_caches"],
-                input="3\n", text=True, check=True
-            )
-            print('Waiting 3 seconds for the system to finalize cache drop...')
-            time.sleep(3)
+            common.drop_os_caches()
             # Check if this is query 21 and use replacement query if available
             if query_num == 21:
                 replacement_path = os.path.join(os.path.dirname(__file__), "21_query_replacement.sql")
@@ -366,8 +349,7 @@ def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
     
     # Write results to file
     print(f"\nWriting results to {output_file}")
-    with open(output_file, 'w') as f:
-        json.dump(results, f, indent=4)
+    common.save_results(results, output_file)
     
     print("Done!")
 
@@ -376,8 +358,6 @@ def main():
     parser = argparse.ArgumentParser(
         description="DataFusion TPC-H/TPC-DS benchmark using datafusion-cli"
     )
-    parser.add_argument("--benchmark", required=True, choices=["tpch", "tpcds"],
-                       help="Benchmark to run")
     parser.add_argument("--data-dir", required=True,
                        help="Path to data directory (local path or S3 path)")
     parser.add_argument("--queries-dir", required=True,
@@ -404,7 +384,6 @@ def main():
         sys.exit(1)
 
     run_benchmark(
-        benchmark=args.benchmark,
         data_dir=args.data_dir,
         queries_dir=args.queries_dir,
         iterations=args.iterations,
