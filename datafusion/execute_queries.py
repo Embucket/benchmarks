@@ -7,14 +7,18 @@ to avoid memory issues with certain queries (especially query 21).
 """
 
 import argparse
-import json
 import os
 import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime
-from pathlib import Path
+
+# --- Add path to bench_infra ---
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.abspath(os.path.join(current_dir, '..'))
+sys.path.append(root_dir)
+
+from bench_infra import common
 
 
 def get_datafusion_version():
@@ -200,175 +204,99 @@ def execute_query_with_cli(query_sql, setup_sql, timeout=3600):
             pass
 
 
-def run_benchmark(benchmark, data_dir, queries_dir, iterations, output_file,
+def run_benchmark(data_dir, queries_dir, iterations, output_file,
                   queries_to_run=None, prefer_hash_join=False, mode='parquet'):
-    """
-    Run the TPC-H benchmark using datafusion-cli.
-
-    Args:
-        benchmark: 'tpch' or 'tpcds'
-        data_dir: Path to data directory
-        queries_dir: Path to query files directory
-        iterations: Number of iterations to run
-        output_file: Path to output JSON file
-        queries_to_run: List of specific query numbers to run (None = all)
-        prefer_hash_join: Whether to prefer hash joins
-        mode: 'parquet' or 'parquet-s3'
-    """
-    # Get DataFusion version
     datafusion_version = get_datafusion_version()
     print(f"DataFusion CLI version: {datafusion_version}")
+    print(f"Data Dir: {data_dir}")
+    print(f"Mode: {mode}")
     print()
-    
-    # Define table names based on benchmark
-    if benchmark == "tpch":
-        num_queries = 22
-        table_names = ["customer", "lineitem", "nation", "orders", "part", "partsupp", "region", "supplier"]
-    elif benchmark == "tpcds":
-        num_queries = 99
-        table_names = ["call_center", "catalog_page", "catalog_returns", "catalog_sales", "customer",
-                      "customer_address", "customer_demographics", "date_dim", "time_dim", "household_demographics",
-                      "income_band", "inventory", "item", "promotion", "reason", "ship_mode", "store", "store_returns",
-                      "store_sales", "warehouse", "web_page", "web_returns", "web_sales", "web_site"]
-    else:
-        raise ValueError(f"Invalid benchmark: {benchmark}")
 
-    # Create setup SQL (table registration + configuration)
-    print("Creating table registration script...")
+    num_queries = 22
+    table_names = ["customer", "lineitem", "nation", "orders", "part", "partsupp", "region", "supplier"]
+
+    # Create setup SQL
     table_registration_sql = create_table_registration_script(data_dir, mode, table_names)
     config_sql = create_config_script(prefer_hash_join)
     setup_sql = config_sql + "\n\n" + table_registration_sql
 
-    print("Configuration:")
-    print(f"  Mode: {mode}")
-    print(f"  Data directory: {data_dir}")
-    print(f"  Prefer hash join: {prefer_hash_join}")
-    print()
-    
-    # Initialize results
     results = {
         'engine': 'datafusion-cli',
-        'datafusion-version': datafusion_version,
-        'benchmark': benchmark,
+        'version': datafusion_version,
         'data_path': data_dir,
         'query_path': queries_dir,
         'iterations': iterations,
-        'prefer_hash_join': prefer_hash_join,
-        'mode': mode
+        'mode': mode,
+        'queries': {}
     }
-    
-    # Determine which queries to run
+
     if queries_to_run:
         queries_list = queries_to_run
-        print(f"Running specific queries: {queries_list}")
     else:
         queries_list = list(range(1, num_queries + 1))
-        print(f"Running all {num_queries} queries")
-    
-    print()
-    
-    # Run multiple iterations
-    for iteration in range(iterations):
-        print(f"\n{'='*80}")
-        print(f"Iteration {iteration + 1}/{iterations}")
-        print(f"{'='*80}\n")
 
-        for query_num in queries_list:
-            print('Flushing disk buffers and dropping OS caches for cold-start query execution...')
-            subprocess.run(["sudo", "sync"], check=True)
-            subprocess.run(
-                ["sudo", "tee", "/proc/sys/vm/drop_caches"],
-                input="3\n", text=True, check=True
-            )
-            print('Waiting 3 seconds for the system to finalize cache drop...')
-            time.sleep(3)
-            # Check if this is query 21 and use replacement query if available
-            if query_num == 21:
-                replacement_path = os.path.join(os.path.dirname(__file__), "21_query_replacement.sql")
-                if os.path.exists(replacement_path):
-                    query_file = replacement_path
-                    print(f"{'='*80}")
-                    print(f"⚠️  USING OPTIMIZED REPLACEMENT QUERY FOR Q21")
-                    print(f"   Original query uses too much memory")
-                    print(f"   Using replacement query from: {replacement_path}")
-                    print(f"{'='*80}")
-                else:
-                    query_file = os.path.join(queries_dir, f"q{query_num}.sql")
-            # Check if this is query 18 and use replacement query if available
-            elif query_num == 18:
-                replacement_path = os.path.join(os.path.dirname(__file__), "18_query_replacement.sql")
-                if os.path.exists(replacement_path):
-                    query_file = replacement_path
-                    print(f"{'='*80}")
-                    print(f"⚠️  USING OPTIMIZED REPLACEMENT QUERY FOR Q18")
-                    print(f"   Using replacement query from: {replacement_path}")
-                    print(f"{'='*80}")
-                else:
-                    query_file = os.path.join(queries_dir, f"q{query_num}.sql")
-            else:
-                query_file = os.path.join(queries_dir, f"q{query_num}.sql")
+    # 1. Outer loop: Queries
+    for query_num in queries_list:
+        print(f"\n{'=' * 60}")
+        print(f"Running Query {query_num}")
+        print(f"{'=' * 60}")
 
-            if not os.path.exists(query_file):
-                print(f"⚠️  Warning: Query file not found: {query_file}")
-                continue
+        # 2. Drop Cache ONCE before the set of iterations for this query
+        common.drop_os_caches()
 
-            print(f"Running query {query_num}...")
+        # Prepare result list
+        results['queries'][query_num] = []
 
-            # Read query SQL
-            with open(query_file, 'r') as f:
-                query_sql = f.read()
+        # Logic for replacement queries (Q18, Q21)
+        query_file = os.path.join(queries_dir, f"q{query_num}.sql")
 
-            # Execute query
+        # Check for replacements
+        if query_num == 21:
+            rep_path = os.path.join(os.path.dirname(__file__), "21_query_replacement.sql")
+            if os.path.exists(rep_path):
+                query_file = rep_path
+                print(f"ℹ️  Using replacement for Q21")
+        elif query_num == 18:
+            rep_path = os.path.join(os.path.dirname(__file__), "18_query_replacement.sql")
+            if os.path.exists(rep_path):
+                query_file = rep_path
+                print(f"ℹ️  Using replacement for Q18")
+
+        if not os.path.exists(query_file):
+            print(f"⚠️  Warning: Query file not found: {query_file}")
+            continue
+
+        with open(query_file, 'r') as f:
+            query_sql = f.read()
+
+        # 3. Inner loop: Iterations
+        for i in range(iterations):
+            print(f"  Iteration {i + 1}/{iterations}...", end=' ', flush=True)
+
             execution_time, success, error_msg, explain_output = execute_query_with_cli(query_sql, setup_sql)
 
             if success:
-                print(f"✓ Query {query_num} completed in {execution_time:.2f} seconds")
+                print(f"✓ {execution_time:.2f}s")
+                results['queries'][query_num].append(execution_time)
 
-                # Save EXPLAIN ANALYZE output to file (only on first iteration)
-                if iteration == 0 and explain_output:
-                    output_dir = os.path.dirname(output_file) if output_file else "."
-                    plan_file = os.path.join(output_dir, f"query_{query_num}_plan.txt")
-                    with open(plan_file, 'w') as f:
-                        f.write(f"DataFusion EXPLAIN ANALYZE - Query {query_num}\n")
-                        f.write("=" * 80 + "\n\n")
+                # Save plan only for first iteration
+                if i == 0 and explain_output:
+                    out_dir = os.path.dirname(output_file) if output_file else "."
+                    with open(os.path.join(out_dir, f"plan_q{query_num}.txt"), 'w') as f:
                         f.write(explain_output)
-                        f.write("\n" + "=" * 80 + "\n")
-                    print(f"  ✓ Query plan saved to: {plan_file}")
-
-                # Store timing
-                if query_num not in results:
-                    results[query_num] = []
-                results[query_num].append(execution_time)
             else:
-                print(f"✗ Query {query_num} failed: {error_msg}")
-                # Store failure
-                if query_num not in results:
-                    results[query_num] = []
-                results[query_num].append(None)
+                print(f"✗ Failed")
+                results['queries'][query_num].append(None)
 
-            print()
-    
-    # Calculate statistics
-    print(f"\n{'='*80}")
-    print("Summary")
-    print(f"{'='*80}\n")
-    
-    for query_num in queries_list:
-        if query_num in results and results[query_num]:
-            timings = [t for t in results[query_num] if t is not None]
-            if timings:
-                avg_time = sum(timings) / len(timings)
-                min_time = min(timings)
-                max_time = max(timings)
-                print(f"Query {query_num:2d}: avg={avg_time:6.2f}s, min={min_time:6.2f}s, max={max_time:6.2f}s")
-            else:
-                print(f"Query {query_num:2d}: FAILED")
-    
-    # Write results to file
+        # Print stats for this query
+        timings = [t for t in results['queries'][query_num] if t is not None]
+        if timings:
+            avg = sum(timings) / len(timings)
+            print(f"  -> Avg: {avg:.2f}s (Min: {min(timings):.2f}s, Max: {max(timings):.2f}s)")
+
+    # Write results
     print(f"\nWriting results to {output_file}")
-    with open(output_file, 'w') as f:
-        json.dump(results, f, indent=4)
-    
+    common.save_results(results, output_file)
     print("Done!")
 
 
@@ -376,8 +304,6 @@ def main():
     parser = argparse.ArgumentParser(
         description="DataFusion TPC-H/TPC-DS benchmark using datafusion-cli"
     )
-    parser.add_argument("--benchmark", required=True, choices=["tpch", "tpcds"],
-                       help="Benchmark to run")
     parser.add_argument("--data-dir", required=True,
                        help="Path to data directory (local path or S3 path)")
     parser.add_argument("--queries-dir", required=True,
@@ -404,7 +330,6 @@ def main():
         sys.exit(1)
 
     run_benchmark(
-        benchmark=args.benchmark,
         data_dir=args.data_dir,
         queries_dir=args.queries_dir,
         iterations=args.iterations,
