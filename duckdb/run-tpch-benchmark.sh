@@ -378,7 +378,6 @@ fi
 
 echo
 echo ">>> Benchmark complete!"
-echo ">>> Results directory: ${RESULTS_DIR}"
 echo ">>> Results file: ${OUTPUT_FILE}"
 
 echo ">>> Done! Results saved to ${OUTPUT_FILE}"

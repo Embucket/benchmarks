@@ -106,15 +106,6 @@ if [[ "${MODE}" != "parquet" && "${MODE}" != "parquet-s3" ]]; then
   usage
 fi
 
-# Set default output file to results directory if not specified
-if [[ -z "${OUTPUT_FILE}" ]]; then
-  OUTPUT_FILE="${RESULTS_DIR}/tpch-sf${SCALE_FACTOR}-${MODE}-results.json"
-else
-  # If user specified output file, move it to results directory but keep the filename
-  OUTPUT_BASENAME=$(basename "${OUTPUT_FILE}")
-  OUTPUT_FILE="${RESULTS_DIR}/${OUTPUT_BASENAME}"
-fi
-
 echo "=== DataFusion TPC-H Benchmark ==="
 echo "Scale Factor: ${SCALE_FACTOR}"
 echo "Mode: ${MODE}"
