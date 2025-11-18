@@ -3,114 +3,99 @@ set -euo pipefail
 
 # Source shared environment variables
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../env.sh"
+# Check for env.sh existence
+if [[ -f "${SCRIPT_DIR}/../env.sh" ]]; then
+  source "${SCRIPT_DIR}/../env.sh"
+else
+  MOUNT_POINT="${MOUNT_POINT:-/mnt/data}"
+fi
 
 # Ensure cargo bin directory is in PATH
 export PATH="$HOME/.cargo/bin:$PATH"
+
+# --- DETECT INSTANCE TYPE (Using bench_infra) ---
+ROOT_DIR="$(dirname "${SCRIPT_DIR}")"
+export PYTHONPATH="${SCRIPT_DIR}/.."
+INSTANCE_TYPE=$(python3 -c "import sys sys.path.append('${ROOT_DIR}') try: from bench_infra import common; print(common.get_ec2_instance_type()); except: print('unknown')" 2>/dev/null || echo "unknown")
 
 # Usage function
 usage() {
   cat <<EOF
 Usage: $0 <scale_factor> --mode <MODE> [options]
 
-Run DataFusion TPC-H benchmark on generated data using datafusion-cli.
-
-Note: This script uses datafusion-cli instead of the Python datafusion library
-      to avoid memory issues with certain queries (especially query 21).
+Run DataFusion TPC-H benchmark using datafusion-cli.
 
 Arguments:
-  scale_factor    The TPC-H scale factor to benchmark (must match generated data)
+  scale_factor    The TPC-H scale factor to benchmark
 
 Required Options:
-  --mode MODE              Data source mode: 'parquet' (local files) or 'parquet-s3' (S3)
+  --mode MODE     Data source mode: 'parquet' or 'parquet-s3'
 
 Optional Arguments:
-  --iterations N           Number of iterations to run (default: 3)
-  --output FILE            Output JSON file for results (default: tpch-sf<scale_factor>-<mode>-results.json)
-  --query N                Run only specific query number (can be specified multiple times)
+  --iterations N  Number of iterations (default: 3)
+  --output FILE   Output JSON file
+  --query N       Run specific query
 
 Examples:
-  $0 1 --mode parquet                         # Run all queries on SF1 local data
-  $0 1 --mode parquet-s3                      # Run all queries on SF1 data from S3
-  $0 100 --mode parquet --iterations 5        # Run all queries on SF100 data with 5 iterations
-  $0 10 --mode parquet --output my-results.json      # Run all queries and save to custom file
-  $0 1 --mode parquet --query 18              # Run only query 18 on SF1 data
-  $0 1 --mode parquet --query 1 --query 18    # Run only queries 1 and 18 on SF1 data
-
-For local mode (parquet):
-  The script expects data to be at: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
-
-For S3 mode (parquet-s3):
-  The script uses data from: s3://embucket-testdata/tpch/<scale_factor>/
+  $0 1 --mode parquet
+  $0 100 --mode parquet-s3
 EOF
   exit 1
 }
 
-# Check if scale factor argument is provided
+# Check arguments
 if [[ $# -lt 1 ]]; then
   echo "Error: Scale factor argument is required"
-  echo
   usage
 fi
 
 SCALE_FACTOR="$1"
 shift
 
-# Validate scale factor is a positive number
 if ! [[ "${SCALE_FACTOR}" =~ ^[0-9]+$ ]] || [[ "${SCALE_FACTOR}" -le 0 ]]; then
   echo "Error: Scale factor must be a positive integer"
-  echo
   usage
 fi
 
-# Parse optional arguments
-MODE=""  # Required - no default
+MODE=""
 ITERATIONS=3
-OUTPUT_FILE=""  # Will be set to absolute path later
-QUERY_ARGS=()  # Array to store --query arguments
+OUTPUT_FILE=""
+QUERY_ARGS=()
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --mode)
-      MODE="$2"
-      shift 2
-      ;;
-    --iterations)
-      ITERATIONS="$2"
-      shift 2
-      ;;
-    --output)
-      OUTPUT_FILE="$(realpath "$2")"  # Convert to absolute path
-      shift 2
-      ;;
-    --query)
-      QUERY_ARGS+=("--query" "$2")
-      shift 2
-      ;;
-    *)
-      echo "Error: Unknown option $1"
-      usage
-      ;;
+    --mode) MODE="$2"; shift 2 ;;
+    --iterations) ITERATIONS="$2"; shift 2 ;;
+    --output) OUTPUT_FILE="$(realpath "$2")"; shift 2 ;;
+    --query) QUERY_ARGS+=("--query" "$2"); shift 2 ;;
+    *) echo "Error: Unknown option $1"; usage ;;
   esac
 done
 
-# Validate mode is provided
 if [[ -z "${MODE}" ]]; then
   echo "Error: --mode is required"
   usage
 fi
 
-# Validate mode value
 if [[ "${MODE}" != "parquet" && "${MODE}" != "parquet-s3" ]]; then
-  echo "Error: Invalid mode '${MODE}'. Must be 'parquet' or 'parquet-s3'"
+  echo "Error: Invalid mode '${MODE}'"
   usage
 fi
+
+# --- PATH GENERATION (UNIFIED) ---
+if [[ -z "${OUTPUT_FILE}" ]]; then
+  # Matches DuckDB structure: results/datafusion/
+  DEFAULT_OUTPUT_DIR="${SCRIPT_DIR}/results-${MODE}"
+  mkdir -p "${DEFAULT_OUTPUT_DIR}"
+  OUTPUT_FILE="${DEFAULT_OUTPUT_DIR}/${INSTANCE_TYPE}/tpch-sf${SCALE_FACTOR}_${MODE}-results.json"
+fi
+
+RESULTS_DIR="$(dirname "${OUTPUT_FILE}")"
+mkdir -p "${RESULTS_DIR}"
 
 echo "=== DataFusion TPC-H Benchmark ==="
 echo "Scale Factor: ${SCALE_FACTOR}"
 echo "Mode: ${MODE}"
-echo "Iterations: ${ITERATIONS}"
-echo "Results Directory: ${RESULTS_DIR}"
 echo "Output File: ${OUTPUT_FILE}"
 echo
 
@@ -122,85 +107,76 @@ if [[ "${MODE}" == "parquet-s3" ]]; then
   echo ">>> S3 data path: ${DATA_DIR}"
 else
   DATA_DIR="${MOUNT_POINT}/tpch-data/sf${SCALE_FACTOR}"
-
-  # Check if data directory exists for local mode
   if [[ ! -d "${DATA_DIR}" ]]; then
     echo "Error: Data directory not found: ${DATA_DIR}"
-    echo "Please run generate-tpch-data.sh first to generate the data."
+    echo "Please run generate-tpch-data.sh first."
     exit 1
   fi
-
   echo ">>> Data directory: ${DATA_DIR}"
-  echo ">>> Benchmark repository: ${BENCHMARK_REPO_DIR}"
 fi
 
 echo
 
-# Check if datafusion-cli is installed
+# --- AUTO-INSTALL LOGIC ---
+echo ">>> Checking for datafusion-cli..."
+
 if ! command -v datafusion-cli &> /dev/null; then
-  echo "Error: datafusion-cli is not installed"
-  echo "Please install it with: cargo install datafusion-cli"
-  exit 1
-fi
+  echo ">>> datafusion-cli not found. Checking prerequisites..."
 
-echo ">>> Checking datafusion-cli version..."
-datafusion-cli --version
+  # Check for Cargo/Rust
+  if ! command -v cargo &> /dev/null; then
+    echo ">>> Cargo (Rust) not found. Installing Rust..."
+    # Install Rust non-interactively
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    source "$HOME/.cargo/env"
+    export PATH="$HOME/.cargo/bin:$PATH"
+  fi
+
+  echo ">>> Installing datafusion-cli via cargo (this may take a few minutes)..."
+  # Install datafusion-cli
+  cargo install datafusion-cli
+else
+  echo ">>> datafusion-cli is installed: $(datafusion-cli --version)"
+fi
 
 echo
 
-# Clone or update DataFusion benchmarks repository (for query files)
+# Clone DataFusion benchmarks repo
 if [[ -d "${BENCHMARK_REPO_DIR}" ]]; then
-  echo ">>> DataFusion benchmarks repository already exists"
-  echo ">>> Updating repository..."
+  echo ">>> Updating DataFusion benchmarks repo..."
   cd "${BENCHMARK_REPO_DIR}"
   git pull
 else
-  echo ">>> Cloning DataFusion benchmarks repository..."
+  echo ">>> Cloning DataFusion benchmarks repo..."
   mkdir -p "$(dirname "${BENCHMARK_REPO_DIR}")"
   git clone https://github.com/apache/datafusion-benchmarks.git "${BENCHMARK_REPO_DIR}"
   cd "${BENCHMARK_REPO_DIR}"
 fi
 
-echo
+echo ">>> Running Benchmark..."
 
-# Run the benchmark
-echo ">>> Running TPC-H benchmark..."
-echo ">>> This may take a while depending on the scale factor and number of iterations..."
-echo
+# Define the python runner path (handles rename)
+if [[ -f "${SCRIPT_DIR}/run_benchmark.py" ]]; then
+  RUNNER="${SCRIPT_DIR}/run_benchmark.py"
+else
+  RUNNER="${SCRIPT_DIR}/execute_queries.py"
+fi
 
-# Build the command with optional parameters
 CMD_ARGS=(
   --data-dir "${DATA_DIR}"
   --queries-dir "${BENCHMARK_REPO_DIR}/tpch/queries"
   --iterations "${ITERATIONS}"
   --output "${OUTPUT_FILE}"
+  --mode "${MODE}"
 )
 
-# Add query arguments if specified
 if [[ ${#QUERY_ARGS[@]} -gt 0 ]]; then
   CMD_ARGS+=("${QUERY_ARGS[@]}")
 fi
 
-# Add mode parameter
-CMD_ARGS+=(--mode "${MODE}")
-
-# Run the benchmark with our execute_queries.py script
-python3 "${SCRIPT_DIR}/execute_queries.py" "${CMD_ARGS[@]}"
+# Run Python
+python3 "${RUNNER}" "${CMD_ARGS[@]}"
 
 echo
 echo ">>> Benchmark complete!"
 echo ">>> Results saved to: ${OUTPUT_FILE}"
-echo ">>> Full path: $(realpath "${OUTPUT_FILE}" 2>/dev/null || echo "${OUTPUT_FILE}")"
-echo
-
-# Display summary if jq is available
-if command -v jq &> /dev/null; then
-  echo ">>> Summary of results:"
-  jq '.' "${OUTPUT_FILE}" || cat "${OUTPUT_FILE}"
-else
-  echo ">>> Install 'jq' to see formatted results"
-  echo ">>> Raw results:"
-  cat "${OUTPUT_FILE}"
-fi
-
-echo ">>> Done! Results saved to ${OUTPUT_FILE}"

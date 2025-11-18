@@ -3,7 +3,15 @@ set -euo pipefail
 
 # Source shared environment variables
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../env.sh"
+if [[ -f "${SCRIPT_DIR}/../env.sh" ]]; then
+  source "${SCRIPT_DIR}/../env.sh"
+else
+  MOUNT_POINT="${MOUNT_POINT:-/mnt/data}"
+fi
+
+# --- DETECT INSTANCE TYPE (Using bench_infra) ---
+export PYTHONPATH="${SCRIPT_DIR}/.."
+INSTANCE_TYPE=$(python3 -c "try: import bench_infra; print(bench_infra.get_ec2_instance_type()); except: print('unknown')" 2>/dev/null || echo "unknown")
 
 # Usage function
 usage() {
@@ -17,35 +25,18 @@ Arguments:
 
 Required Options:
   --mode MODE              Benchmark mode: 'parquet', 'parquet-s3', or 'internal'
-                           - parquet: Use parquet files from ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
-                           - parquet-s3: Use parquet files from S3 (s3://embucket-testdata/tpch/<scale_factor>)
-                           - internal: Use DuckDB database file from ${MOUNT_POINT}/duckdb/tpch-sf<scale_factor>.db
 
 Optional Arguments:
   --iterations N           Number of iterations to run (default: 3)
-  --output FILE            Output JSON file name (will be saved in results-<mode>/ directory)
+  --output FILE            Output JSON file name (default: auto-generated in ../results/duckdb/)
   --query N                Run only specific query number (can be specified multiple times)
-  --memory-limit MB        Memory limit in MB (e.g., --memory-limit 10240 for 10GB)
-  --threads N              Number of threads to use (default: all available cores)
-
-Results:
-  All results are saved to: results-<mode>/
-  - Existing files in the directory are deleted before each run
-  - Results JSON includes timestamp of the benchmark run
-  - Query execution plans are saved alongside results
+  --memory-limit MB        Memory limit in MB
+  --threads N              Number of threads to use
 
 Examples:
-  $0 1 --mode parquet                     # Run all queries on SF1 parquet data
-  $0 10 --mode parquet --iterations 5     # Run 5 iterations on SF10 parquet data
-  $0 100 --mode parquet --query 1 --query 6  # Run only queries 1 and 6 on SF100 parquet data
-  $0 1000 --mode internal                 # Run on SF1000 using internal database file
-  $0 1000 --mode parquet --memory-limit 190000  # Run on SF1000 parquet with 190GB memory limit
-  $0 1 --mode parquet-s3                  # Run all queries on SF1 parquet data from S3
-
-Parquet mode uses data from: ${MOUNT_POINT}/tpch-data/sf<scale_factor>/
-Parquet-S3 mode uses data from: s3://embucket-testdata/tpch/<scale_factor>
-Internal mode uses database from: ${MOUNT_POINT}/duckdb/tpch-sf<scale_factor>.db
-Temp files will be written to: ${MOUNT_POINT}/duckdb/temp/
+  $0 1 --mode parquet
+  $0 10 --mode parquet --iterations 5
+  $0 100 --mode parquet --query 1 --query 6
 EOF
   exit 1
 }
@@ -60,7 +51,7 @@ fi
 SCALE_FACTOR="$1"
 shift
 
-# Validate scale factor is a positive number
+# Validate scale factor
 if ! [[ "${SCALE_FACTOR}" =~ ^[0-9]+$ ]] || [[ "${SCALE_FACTOR}" -le 0 ]]; then
   echo "Error: Scale factor must be a positive integer"
   echo
@@ -68,21 +59,17 @@ if ! [[ "${SCALE_FACTOR}" =~ ^[0-9]+$ ]] || [[ "${SCALE_FACTOR}" -le 0 ]]; then
 fi
 
 # Parse optional arguments
-MODE=""  # Mode is now required
+MODE=""
 ITERATIONS=3
-OUTPUT_FILE=""  # Will be set to absolute path later
-QUERY_ARGS=()  # Array to store query numbers
-MEMORY_LIMIT=""  # Memory limit in MB
-THREADS=""  # Number of threads
+OUTPUT_FILE=""
+QUERY_ARGS=()
+MEMORY_LIMIT=""
+THREADS=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     --mode)
       MODE="$2"
-      if [[ "${MODE}" != "parquet" && "${MODE}" != "parquet-s3" && "${MODE}" != "internal" ]]; then
-        echo "Error: Invalid mode '${MODE}'. Must be 'parquet', 'parquet-s3', or 'internal'"
-        usage
-      fi
       shift 2
       ;;
     --iterations)
@@ -90,7 +77,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --output)
-      OUTPUT_FILE="$(realpath "$2")"  # Convert to absolute path
+      OUTPUT_FILE="$(realpath "$2")"
       shift 2
       ;;
     --query)
@@ -112,244 +99,142 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Validate that mode is specified
+# Validate mode
 if [[ -z "${MODE}" ]]; then
   echo "Error: --mode argument is required"
   echo
   usage
 fi
-
-if [[ "${EC2_INSTANCE_TYPE}" == "unknown" ]]; then
-  echo "⚠ Warning: Could not detect EC2 instance type. Using 'unknown' as directory name."
-  echo "  Results will be saved to: results-${MODE}/unknown/"
-else
-  echo "✓ Detected EC2 instance type: ${EC2_INSTANCE_TYPE}"
+if [[ "${MODE}" != "parquet" && "${MODE}" != "parquet-s3" && "${MODE}" != "internal" ]]; then
+  echo "Error: Invalid mode '${MODE}'. Must be 'parquet', 'parquet-s3', or 'internal'"
+  usage
 fi
 
-# If results directory exists and has files, delete them
-if [[ -d "${RESULTS_DIR}" ]]; then
-  FILE_COUNT=$(find "${RESULTS_DIR}" -type f | wc -l)
-  if [[ ${FILE_COUNT} -gt 0 ]]; then
-    echo ">>> Cleaning existing results directory: ${RESULTS_DIR}"
-    echo ">>> Removing ${FILE_COUNT} existing file(s)..."
-    rm -f "${RESULTS_DIR}"/*
-  fi
-fi
-
-# Create results directory
-mkdir -p "${RESULTS_DIR}"
-
-# Generate timestamp for results
-TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
-
-# Set default output file if not specified
+# --- PATH LOGIC ---
 if [[ -z "${OUTPUT_FILE}" ]]; then
-  OUTPUT_FILE="${RESULTS_DIR}/tpch-sf${SCALE_FACTOR}-${MODE}-results.json"
-else
-  # If user specified output file, move it to results directory but keep the filename
-  OUTPUT_BASENAME=$(basename "${OUTPUT_FILE}")
-  OUTPUT_FILE="${RESULTS_DIR}/${OUTPUT_BASENAME}"
+  DEFAULT_RESULTS_DIR="${SCRIPT_DIR}/results-${MODE}"
+  mkdir -p "${DEFAULT_RESULTS_DIR}"
+  OUTPUT_FILE="${DEFAULT_RESULTS_DIR}/${INSTANCE_TYPE}/tpch-sf${SCALE_FACTOR}_${MODE}-results.json"
 fi
+
+RESULTS_DIR="$(dirname "${OUTPUT_FILE}")"
+mkdir -p "${RESULTS_DIR}"
 
 echo "=== DuckDB TPC-H Benchmark ==="
 echo "Scale Factor: ${SCALE_FACTOR}"
 echo "Mode: ${MODE}"
-echo "Iterations: ${ITERATIONS}"
-echo "Results Directory: ${RESULTS_DIR}"
 echo "Output File: ${OUTPUT_FILE}"
 echo
 
 # Set paths based on mode
 TEMP_DIR="${MOUNT_POINT}/duckdb/temp"
+mkdir -p "${TEMP_DIR}"
 
 if [[ "${MODE}" == "parquet" ]]; then
   DATA_DIR="${MOUNT_POINT}/tpch-data/sf${SCALE_FACTOR}"
   DB_FILE=""
-
-  # Check if data directory exists
   if [[ ! -d "${DATA_DIR}" ]]; then
     echo "Error: Data directory not found: ${DATA_DIR}"
-    echo "Please run generate-tpch-data.sh first to generate the data."
+    echo "Please run generate-tpch-data.sh first."
     exit 1
   fi
-
   echo ">>> Data directory: ${DATA_DIR}"
-  echo ">>> Temp directory (for spill): ${TEMP_DIR}"
-  echo
+
 elif [[ "${MODE}" == "parquet-s3" ]]; then
   DATA_DIR="s3://embucket-testdata/tpch/${SCALE_FACTOR}_partitioned"
   DB_FILE=""
-
   echo ">>> S3 data path: ${DATA_DIR}"
-  echo ">>> Temp directory (for spill): ${TEMP_DIR}"
-  echo
+
 else  # internal mode
   DATA_DIR=""
   DB_FILE="${MOUNT_POINT}/duckdb/tpch-sf${SCALE_FACTOR}.db"
-
-  # Check if database file exists
   if [[ ! -f "${DB_FILE}" ]]; then
     echo "Error: Database file not found: ${DB_FILE}"
-    echo "Please run download-tpch-db.sh first to download the database file."
+    echo "Please run download-tpch-db.sh first."
     exit 1
   fi
-
   echo ">>> Database file: ${DB_FILE}"
-  echo ">>> Database size: $(du -h "${DB_FILE}" | cut -f1)"
-  echo ">>> Temp directory (for spill): ${TEMP_DIR}"
-  echo
 fi
 
-# Create temp directory if it doesn't exist
-mkdir -p "${TEMP_DIR}"
+echo ">>> Temp directory (for spill): ${TEMP_DIR}"
+echo
 
-# Install DuckDB if needed
-echo ">>> Checking for DuckDB installation..."
+# --- INSTALLATION CHECK (DUCKDB CLI) ---
+echo ">>> Checking for DuckDB CLI..."
 if ! command -v duckdb &> /dev/null; then
-  echo ">>> DuckDB not found. Installing..."
-
-  # Detect OS
+  echo ">>> DuckDB CLI not found. Installing..."
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Linux
-    # Check for unzip utility
     if ! command -v unzip &> /dev/null; then
-      echo ">>> unzip not found. Installing unzip..."
-      sudo apt-get update -qq
-      sudo apt-get install -y unzip
+      sudo apt-get update -qq && sudo apt-get install -y unzip
     fi
-
-    # Detect architecture
     ARCH=$(uname -m)
-    if [[ "$ARCH" == "x86_64" ]]; then
-      DUCKDB_ARCH="amd64"
-    elif [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
-      DUCKDB_ARCH="arm64"
-    else
-      echo "Error: Unsupported architecture: $ARCH"
-      exit 1
-    fi
+    if [[ "$ARCH" == "x86_64" ]]; then DUCKDB_ARCH="amd64";
+    elif [[ "$ARCH" == "aarch64" ]]; then DUCKDB_ARCH="arm64";
+    else echo "Error: Unsupported architecture: $ARCH"; exit 1; fi
 
-    echo ">>> Downloading DuckDB for Linux ($ARCH)..."
     DUCKDB_URL="https://github.com/duckdb/duckdb/releases/latest/download/duckdb_cli-linux-${DUCKDB_ARCH}.zip"
-    if ! wget --show-progress -q "$DUCKDB_URL" -O /tmp/duckdb.zip; then
-      echo "Error: Failed to download DuckDB from $DUCKDB_URL"
-      exit 1
-    fi
-
-    if ! unzip -q /tmp/duckdb.zip -d /tmp/; then
-      echo "Error: Failed to unzip DuckDB"
-      rm /tmp/duckdb.zip
-      exit 1
-    fi
-
+    wget --show-progress -q "$DUCKDB_URL" -O /tmp/duckdb.zip
+    unzip -q /tmp/duckdb.zip -d /tmp/
     sudo mv /tmp/duckdb /usr/local/bin/
     sudo chmod +x /usr/local/bin/duckdb
     rm /tmp/duckdb.zip
   elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
-    echo ">>> Installing DuckDB via Homebrew..."
     brew install duckdb
-  else
-    echo "Error: Unsupported OS: $OSTYPE"
-    exit 1
   fi
-
-  echo ">>> DuckDB installed successfully"
 else
-  echo ">>> DuckDB already installed: $(duckdb --version)"
+  echo ">>> DuckDB CLI already installed."
 fi
 
-echo
-
-# Check for Python DuckDB package
+# --- INSTALLATION CHECK (PYTHON LIB) ---
 echo ">>> Checking for Python DuckDB package..."
-set +e  # Temporarily disable exit on error for the check
-# Change to /tmp to avoid importing the local duckdb directory
+# Temporarily disable exit on error
+set +e
 (cd /tmp && python3 -c "import duckdb" 2>/dev/null)
 CHECK_RESULT=$?
-set -e  # Re-enable exit on error
+set -e
 
 if [[ ${CHECK_RESULT} -ne 0 ]]; then
   echo ">>> Python DuckDB package not found. Installing..."
-
-  # Check if pip is available
   if ! command -v pip3 &> /dev/null; then
-    echo ">>> pip3 not found. Installing pip..."
-    sudo apt-get update -qq
-    sudo apt-get install -y python3-pip
+    sudo apt-get update -qq && sudo apt-get install -y python3-pip
   fi
-
   pip3 install duckdb --break-system-packages
-
-  # Verify installation
-  set +e
-  VERIFY_OUTPUT=$(cd /tmp && python3 -c "import duckdb; print(duckdb.__version__)" 2>&1)
-  VERIFY_RESULT=$?
-  set -e
-
-  if [[ ${VERIFY_RESULT} -eq 0 ]]; then
-    echo ">>> Python DuckDB package installed successfully (version ${VERIFY_OUTPUT})"
-  else
-    echo "Error: Failed to install Python DuckDB package"
-    echo "Error output: ${VERIFY_OUTPUT}"
-    exit 1
-  fi
-else
-  set +e
-  DUCKDB_VERSION=$(cd /tmp && python3 -c "import duckdb; print(duckdb.__version__)" 2>/dev/null)
-  set -e
-  if [[ -z "${DUCKDB_VERSION}" ]]; then
-    DUCKDB_VERSION="unknown"
-  fi
-  echo ">>> Python DuckDB package already installed (version ${DUCKDB_VERSION})"
 fi
 
-echo
+# --- SYSTEM LIMITS ---
+echo ">>> Adjusting file limits..."
+ulimit -n 65536 2>/dev/null || echo "Warning: Could not set ulimit -n 65536"
 
-# Increase file descriptor limit for this session
-CURRENT_LIMIT=$(ulimit -n)
-if [[ ${CURRENT_LIMIT} -lt 65536 ]]; then
-  echo ">>> Increasing file descriptor limit from ${CURRENT_LIMIT} to 65536..."
-  ulimit -n 65536 2>/dev/null || {
-    echo "⚠ Warning: Could not increase file descriptor limit to 65536"
-    echo "  Current limit: $(ulimit -n)"
-    echo "  You may encounter 'Too many open files' errors with large datasets"
-    echo ""
-  }
-  echo "✓ File descriptor limit: $(ulimit -n)"
-else
-  echo "✓ File descriptor limit already sufficient: ${CURRENT_LIMIT}"
-fi
-echo
-
-# Clone or update TPC-H queries repository
+# --- FETCH QUERIES ---
 QUERIES_DIR="${MOUNT_POINT}/duckdb/tpch-queries"
 if [[ ! -d "${QUERIES_DIR}" ]]; then
   echo ">>> Cloning TPC-H queries..."
   mkdir -p "$(dirname "${QUERIES_DIR}")"
-  git clone https://github.com/duckdb/duckdb.git /tmp/duckdb-repo
+  git clone --depth 1 https://github.com/duckdb/duckdb.git /tmp/duckdb-repo
   mkdir -p "${QUERIES_DIR}"
   cp -r /tmp/duckdb-repo/extension/tpch/dbgen/queries/* "${QUERIES_DIR}/"
   rm -rf /tmp/duckdb-repo
-else
-  echo ">>> TPC-H queries already exist at: ${QUERIES_DIR}"
 fi
 
-echo
-
-# Use the Python benchmark script from the duckdb directory
-BENCHMARK_SCRIPT="${SCRIPT_DIR}/execute_queries.py"
-
-if [[ ! -f "${BENCHMARK_SCRIPT}" ]]; then
-  echo "Error: Benchmark script not found: ${BENCHMARK_SCRIPT}"
+# --- EXECUTION ---
+if [[ -f "${SCRIPT_DIR}/run_benchmark.py" ]]; then
+  BENCHMARK_SCRIPT="${SCRIPT_DIR}/run_benchmark.py"
+elif [[ -f "${SCRIPT_DIR}/execute_queries.py" ]]; then
+  BENCHMARK_SCRIPT="${SCRIPT_DIR}/execute_queries.py"
+else
+  echo "Error: Could not find Python benchmark script in ${SCRIPT_DIR}"
   exit 1
 fi
 
-echo ">>> Running benchmark..."
-echo
+echo ">>> Running Python benchmark script: $(basename "${BENCHMARK_SCRIPT}")"
 
-# Build Python command based on mode
-PYTHON_CMD="python3 ${BENCHMARK_SCRIPT} --queries-dir ${QUERIES_DIR} --temp-dir ${TEMP_DIR} --iterations ${ITERATIONS} --output ${OUTPUT_FILE} --mode ${MODE} --timestamp \"${TIMESTAMP}\""
+# Build command
+PYTHON_CMD="python3 ${BENCHMARK_SCRIPT} \
+  --queries-dir ${QUERIES_DIR} \
+  --temp-dir ${TEMP_DIR} \
+  --iterations ${ITERATIONS} \
+  --output ${OUTPUT_FILE} \
+  --mode ${MODE}"
 
 if [[ "${MODE}" == "parquet" || "${MODE}" == "parquet-s3" ]]; then
   PYTHON_CMD="${PYTHON_CMD} --data-dir ${DATA_DIR}"
@@ -357,27 +242,19 @@ else
   PYTHON_CMD="${PYTHON_CMD} --db-file ${DB_FILE}"
 fi
 
-# Add query arguments if specified
 for query in "${QUERY_ARGS[@]}"; do
   PYTHON_CMD="${PYTHON_CMD} --query ${query}"
 done
 
-# Add memory limit if specified
 if [[ -n "${MEMORY_LIMIT}" ]]; then
   PYTHON_CMD="${PYTHON_CMD} --memory-limit ${MEMORY_LIMIT}"
 fi
-
-# Add threads if specified
 if [[ -n "${THREADS}" ]]; then
   PYTHON_CMD="${PYTHON_CMD} --threads ${THREADS}"
 fi
 
-# Run the benchmark
-# Change to /tmp to avoid importing the local duckdb directory
 (cd /tmp && eval "${PYTHON_CMD}")
 
 echo
 echo ">>> Benchmark complete!"
-echo ">>> Results file: ${OUTPUT_FILE}"
-
-echo ">>> Done! Results saved to ${OUTPUT_FILE}"
+echo ">>> Results saved to: ${OUTPUT_FILE}"

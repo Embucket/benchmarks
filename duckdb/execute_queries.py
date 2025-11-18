@@ -8,8 +8,8 @@ import urllib.error
 
 # --- Add path to bench_infra ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
-lib_dir = os.path.abspath(os.path.join(current_dir, '../bench_infra'))
-sys.path.append(lib_dir)
+root_dir = os.path.abspath(os.path.join(current_dir, '..'))
+sys.path.append(root_dir)
 
 from bench_infra import common
 

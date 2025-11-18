@@ -38,7 +38,7 @@ def drop_os_caches():
 def save_results(results_dict, output_file):
     results_dict['system_info'] = {
         'ec2_instance': get_ec2_metadata(),
-        'timestamp': time.time()
+        'timestamp': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
     }
 
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
