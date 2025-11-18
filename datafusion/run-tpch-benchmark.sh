@@ -106,13 +106,6 @@ if [[ "${MODE}" != "parquet" && "${MODE}" != "parquet-s3" ]]; then
   usage
 fi
 
-if [[ "${EC2_INSTANCE_TYPE}" == "unknown" ]]; then
-  echo "⚠ Warning: Could not detect EC2 instance type. Using 'unknown' as directory name."
-  echo "  Results will be saved to: results/${EC2_INSTANCE_TYPE}/"
-else
-  echo "✓ Detected EC2 instance type: ${EC2_INSTANCE_TYPE}"
-fi
-
 # Set default output file to results directory if not specified
 if [[ -z "${OUTPUT_FILE}" ]]; then
   OUTPUT_FILE="${RESULTS_DIR}/tpch-sf${SCALE_FACTOR}-${MODE}-results.json"
