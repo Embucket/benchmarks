@@ -16,8 +16,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # --- DETECT INSTANCE TYPE (Using bench_infra) ---
 ROOT_DIR="$(dirname "${SCRIPT_DIR}")"
 export PYTHONPATH="${SCRIPT_DIR}/.."
-INSTANCE_TYPE=$(python3 -c "import sys sys.path.append('${ROOT_DIR}') try: from bench_infra import common; print(common.get_ec2_instance_type()); except: print('unknown')" 2>/dev/null || echo "unknown")
-
+INSTANCE_TYPE=$(python3 -c "import sys; sys.path.append('${ROOT_DIR}'); from bench_infra import common; print(common.get_ec2_metadata())" 2>/dev/null || echo "unknown")
 # Usage function
 usage() {
   cat <<EOF
