@@ -44,6 +44,17 @@ warnings.filterwarnings(
     message=r"^pandas only supports SQLAlchemy connectable",
     category=UserWarning,
 )
+# Silence boto3 Python deprecation warnings
+warnings.filterwarnings(
+    "ignore",
+    message=r".*Python.*deprecation.*",
+    category=DeprecationWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*Boto3 will no longer support.*",
+    category=DeprecationWarning,
+)
 
 
 # Predefined Snowplow tables to compare (schema.table; database inferred from env)

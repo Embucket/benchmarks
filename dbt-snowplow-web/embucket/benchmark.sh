@@ -40,6 +40,8 @@ source env/bin/activate
 pip install -U pip setuptools wheel
 pip install playwright
 python -m playwright install chromium
+# Install libraries for data_diff.py
+pip install pandas snowflake-connector-python pyarrow
 
 # Step 2: Generate test data
 echo ""
@@ -101,6 +103,8 @@ echo "Press ENTER to run dbt and build the models..."
 read -r
 
 echo "Running dbt to build models (first run)..."
+# Suppress boto3 Python deprecation warnings
+export PYTHONWARNINGS="ignore::DeprecationWarning:boto3.compat"
 dbt run --target embucket --full-refresh --vars '{snowplow__enable_consent: true, snowplow__enable_cwv: true, snowplow__enable_iab: true, snowplow__enable_ua: true, snowplow__enable_yauaa: true, snowplow__start_date: '2025-09-01', snowplow__backfill_limit_days: 100, snowplow__cwv_days_to_measure: 999}'
 
 # Save run results for first run (outside target/ to survive dbt clean)
@@ -157,6 +161,8 @@ python3 load_events.py --combined
 cd dbt-snowplow-web/
 
 echo "Running dbt (incremental run)..."
+# Suppress boto3 Python deprecation warnings
+export PYTHONWARNINGS="ignore::DeprecationWarning:boto3.compat"
 dbt debug --target embucket
 #dbt clean
 dbt deps --target embucket
